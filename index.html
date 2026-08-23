@@ -1173,10 +1173,52 @@
                                 "children": [{
                                     "name": "ASMININGSIH",
                                     "life": "1953 - ....",
-                                    "spouse": "",
+                                    "spouse": "SOLIHIN (ALM)",
                                     "spouse_life": "",
                                     "type": "gen5",
-                                    "children": []
+                                    "children": [{
+                                        "name": "UMI MASLACHAH",
+                                        "life": "1974 - ....",
+                                        "spouse": "YULIONO",
+                                        "spouse_life": "1969 - ....",
+                                        "type": "gen6",
+                                        "children": [{
+                                            "name": "MUHAMMAD ZIDAN MA'RUF",
+                                            "life": "2001 - ....",
+                                            "spouse": "",
+                                            "spouse_life": "",
+                                            "type": "gen7",
+                                            "children": []
+                                        }, {
+                                            "name": "CHOLIFATUN NAJWA RAMADINA",
+                                            "life": "2004 - ....",
+                                            "spouse": "",
+                                            "spouse_life": "",
+                                            "type": "gen7",
+                                            "children": []
+                                        }, {
+                                            "name": "NAYSILA LADY NAFISA",
+                                            "life": "2008 - ....",
+                                            "spouse": "",
+                                            "spouse_life": "",
+                                            "type": "gen7",
+                                            "children": []
+                                        }, {
+                                            "name": "AHMAD FIDYAN ZAKIAL FIKRI",
+                                            "life": "2014 - ....",
+                                            "spouse": "",
+                                            "spouse_life": "",
+                                            "type": "gen7",
+                                            "children": []
+                                        }]
+                                    }, {
+                                        "name": "AHMAD BAHA'UDIN",
+                                        "life": "",
+                                        "spouse": "",
+                                        "spouse_life": "",
+                                        "type": "gen6",
+                                        "children": []
+                                    }]
                                 }, {
                                     "name": "MACHRUS ARIFIN",
                                     "life": "1955 - ....",
@@ -2296,7 +2338,7 @@
         const founderCardHeight = 76;
         const rootCardWidth = 260;
         const rootCardHeight = 68;
-        const extraNameHeight = 18; // tinggi tambahan untuk extra name
+        const extraNameHeight = 18;
 
         let i = 0;
         const duration = 500;
@@ -2655,7 +2697,7 @@
                     autoFitText(d3.select(this), maxWidth, minFontSize, maxFontSize);
                 });
 
-            // ===== BARIS 2: Extra Name (untuk FATCHUL USMANTO) =====
+            // ===== BARIS 2: Extra Name =====
             nodeEnter.append('text')
                 .attr('class', 'extra-name')
                 .attr('x', TEXT_PAD_X)
@@ -2976,7 +3018,6 @@
         function selectSearchResult(name) {
             let target = findNodeByName(root, name);
             if (!target) {
-                // Coba cari di extraName
                 const allNodes = root.descendants();
                 for (const n of allNodes) {
                     if (n.data.extraName === name) {
