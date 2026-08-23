@@ -378,6 +378,12 @@
             pointer-events: none;
             font-weight: 600;
         }
+        .node text.extra-name {
+            font-size: 11px;
+            font-weight: 700;
+            fill: #0f172a;
+            pointer-events: none;
+        }
         .link {
             fill: none;
             stroke: #cbd5e1;
@@ -488,7 +494,7 @@
 
     <div id="chart-container"></div>
     <canvas id="cursor-fx"></canvas>
-    <div id="credit-tag">DIBUAT OLEH: MANNIXX-21</div>
+    <div id="credit-tag">DIBUAT OLEH: MANNIXS-21</div>
     <div id="gen-legend">
         <span class="gen-legend-title" onclick="toggleGenLegend()">GENERASI KE ATAS / BAWAH: <span id="gen-legend-toggle">▲</span></span>
         <ol>
@@ -1283,6 +1289,7 @@
                                 "spouse": "HJ. NOOR CHOSIJAH; ROFI'AH",
                                 "spouse_life": "1948 - 2018 (HJ. NOOR CHOSIJAH); 1960 - 2023 (ROFI'AH)",
                                 "type": "gen3",
+                                "extraName": "H. CHOIRUDDIN FATCHULILLAH",
                                 "children": [{
                                     "name": "HJ. NOOR CHOSIJAH",
                                     "life": "1948 - 2018",
@@ -1396,7 +1403,7 @@
                                             "children": []
                                         }]
                                     }, {
-                                        "name": "MA'RUF AKBAR / MANNIXX",
+                                        "name": "MA'RUF AKBAR / MANNIXS",
                                         "life": "1982 - ....",
                                         "spouse": "SAPUTRI FEBRINTA HIDAYATI",
                                         "spouse_life": "1989 - ....",
@@ -2289,6 +2296,7 @@
         const founderCardHeight = 76;
         const rootCardWidth = 260;
         const rootCardHeight = 68;
+        const extraNameHeight = 18; // tinggi tambahan untuk extra name
 
         let i = 0;
         const duration = 500;
@@ -2369,7 +2377,7 @@
 
         svg.call(zoom);
 
-        const tree = d3.tree().nodeSize([cardHeight + 25, cardWidth + 100]);
+        const tree = d3.tree().nodeSize([cardHeight + extraNameHeight + 25, cardWidth + 100]);
 
         root = d3.hierarchy(treeData, d => d.children);
         root.x0 = height / 2;
@@ -2428,7 +2436,7 @@
                 const w = (d.data.name === 'H. ABDUL MUKTI') ? founderCardWidth :
                     (d.data.name === 'MOH. SATHORI') ? rootCardWidth : cardWidth;
                 const h = (d.data.name === 'H. ABDUL MUKTI') ? founderCardHeight :
-                    (d.data.name === 'MOH. SATHORI') ? rootCardHeight : cardHeight;
+                    (d.data.name === 'MOH. SATHORI') ? rootCardHeight : cardHeight + (d.data.extraName ? extraNameHeight : 0);
                 minX = Math.min(minX, d.x - h / 2);
                 maxX = Math.max(maxX, d.x + h / 2);
                 minY = Math.min(minY, d.y);
@@ -2497,12 +2505,12 @@
             const nodes = treeMap.descendants();
             const links = treeMap.links();
 
-            nodes.forEach(d => { d.y = d.depth * (cardWidth + 80); });
+            nodes.forEach(d => { d.y = d.depth * (cardWidth + 100); });
 
             const rootNode = nodes.find(d => d.depth === 0);
             if (rootNode && rootNode.children) {
                 const wifeOffsetX = 60;
-                const wifeGapVert = cardHeight + 24;
+                const wifeGapVert = cardHeight + extraNameHeight + 24;
                 const wife1 = rootNode.children.find(c => c.data.name === 'ISTERI KE-1');
                 const wife2 = rootNode.children.find(c => c.data.name === 'ISTERI KE-2');
 
@@ -2564,9 +2572,9 @@
                 .append('rect')
                 .attr('class', 'glow-aura')
                 .attr('width', cardWidth)
-                .attr('height', cardHeight)
+                .attr('height', d => cardHeight + (d.data.extraName ? extraNameHeight : 0))
                 .attr('x', 0)
-                .attr('y', -cardHeight / 2)
+                .attr('y', d => -(cardHeight + (d.data.extraName ? extraNameHeight : 0)) / 2)
                 .attr('rx', 14)
                 .attr('ry', 14);
 
@@ -2579,13 +2587,13 @@
                 .attr('height', d => {
                     if (d.data.name === 'H. ABDUL MUKTI') return founderCardHeight;
                     if (d.data.name === 'MOH. SATHORI') return rootCardHeight;
-                    return cardHeight;
+                    return cardHeight + (d.data.extraName ? extraNameHeight : 0);
                 })
                 .attr('x', 0)
                 .attr('y', d => {
                     if (d.data.name === 'H. ABDUL MUKTI') return -founderCardHeight / 2;
                     if (d.data.name === 'MOH. SATHORI') return -rootCardHeight / 2;
-                    return -cardHeight / 2;
+                    return -(cardHeight + (d.data.extraName ? extraNameHeight : 0)) / 2;
                 })
                 .style("box-shadow", "0 4px 6px rgba(0,0,0,0.1)");
 
@@ -2615,7 +2623,9 @@
                     if (d.data.name === 'H. ABDUL MUKTI') return -founderCardHeight / 2 + 28;
                     if (d.data.name === 'MOH. SATHORI') return -rootCardHeight / 2 + 24;
                     const order = getSpouseOrderForWife(d);
-                    if (order) return -6;
+                    const hasExtra = d.data.extraName ? true : false;
+                    if (order) return hasExtra ? -6 - extraNameHeight/2 : -6;
+                    if (hasExtra) return -6 - extraNameHeight/2;
                     return hasSpouseLine(d) ? -6 : 2;
                 })
                 .attr('text-anchor', 'start')
@@ -2645,7 +2655,32 @@
                     autoFitText(d3.select(this), maxWidth, minFontSize, maxFontSize);
                 });
 
-            // ===== BARIS 2: Keterangan Urutan Pasangan =====
+            // ===== BARIS 2: Extra Name (untuk FATCHUL USMANTO) =====
+            nodeEnter.append('text')
+                .attr('class', 'extra-name')
+                .attr('x', TEXT_PAD_X)
+                .attr('y', d => {
+                    if (d.data.extraName) {
+                        const baseY = (d.data.name === 'H. ABDUL MUKTI') ? -founderCardHeight / 2 + 28 :
+                            (d.data.name === 'MOH. SATHORI') ? -rootCardHeight / 2 + 24 : 2;
+                        return baseY + 16;
+                    }
+                    return 0;
+                })
+                .attr('text-anchor', 'start')
+                .style('text-transform', 'uppercase')
+                .style('font-weight', '700')
+                .style('font-size', '13px')
+                .style('fill', '#0f172a')
+                .text(d => d.data.extraName || '')
+                .each(function(d) {
+                    if (d.data.extraName) {
+                        const maxWidth = cardWidth - TEXT_PAD_X * 2;
+                        autoFitText(d3.select(this), maxWidth, 9, 14);
+                    }
+                });
+
+            // ===== BARIS 3: Keterangan Urutan Pasangan =====
             nodeEnter.append('text')
                 .attr('class', 'partner-order')
                 .attr('x', TEXT_PAD_X)
@@ -2653,7 +2688,9 @@
                     if (d.data.name === 'H. ABDUL MUKTI') return -founderCardHeight / 2 + 46;
                     if (d.data.name === 'MOH. SATHORI') return -rootCardHeight / 2 + 42;
                     const order = getSpouseOrderForWife(d);
-                    if (order) return 12;
+                    const hasExtra = d.data.extraName ? true : false;
+                    if (order) return hasExtra ? 12 - extraNameHeight/2 : 12;
+                    if (hasExtra) return 10 - extraNameHeight/2;
                     return 10;
                 })
                 .attr('text-anchor', 'start')
@@ -2676,7 +2713,7 @@
                     return '';
                 });
 
-            // ===== BARIS 3: Nama Pasangan =====
+            // ===== BARIS 4: Nama Pasangan =====
             nodeEnter.append('text')
                 .attr('class', 'spouse-info')
                 .attr('x', TEXT_PAD_X)
@@ -2684,7 +2721,9 @@
                     if (d.data.name === 'H. ABDUL MUKTI') return -founderCardHeight / 2 + 62;
                     if (d.data.name === 'MOH. SATHORI') return -rootCardHeight / 2 + 58;
                     const wifeOrder = getSpouseOrderForWife(d);
-                    if (wifeOrder) return 24;
+                    const hasExtra = d.data.extraName ? true : false;
+                    if (wifeOrder) return hasExtra ? 24 - extraNameHeight/2 : 24;
+                    if (hasExtra) return 14 - extraNameHeight/2;
                     return 14;
                 })
                 .attr('text-anchor', 'start')
@@ -2799,6 +2838,7 @@
 
         function collectAllNames(node, list) {
             if (node.name) list.push(node.name);
+            if (node.extraName) list.push(node.extraName);
             if (Array.isArray(node.children)) {
                 node.children.forEach(c => collectAllNames(c, list));
             }
@@ -2934,7 +2974,17 @@
         }
 
         function selectSearchResult(name) {
-            const target = findNodeByName(root, name);
+            let target = findNodeByName(root, name);
+            if (!target) {
+                // Coba cari di extraName
+                const allNodes = root.descendants();
+                for (const n of allNodes) {
+                    if (n.data.extraName === name) {
+                        target = n;
+                        break;
+                    }
+                }
+            }
             closeSearchResults();
             searchInputEl.value = '';
             if (!target) return;
