@@ -519,39 +519,8 @@
 
     <script>
         // =====================================================================
-        // DATA SILSILAH BANI MUKTI - DARI EXCEL
+        // DATA SILSILAH BANI MUKTI - UPDATE DARI EXCEL
         // =====================================================================
-
-        // Helper: bersihkan string
-        function clean(str) {
-            if (!str) return '';
-            return str.replace(/\s+/g, ' ').trim();
-        }
-
-        // Helper: format tahun hidup
-        function formatLife(tahunLahir, tahunWafat) {
-            if (!tahunLahir && !tahunWafat) return '';
-            if (tahunLahir && tahunWafat) return `${tahunLahir} - ${tahunWafat}`;
-            if (tahunLahir) return `${tahunLahir} - ....`;
-            return `.... - ${tahunWafat}`;
-        }
-
-        // Helper: bersihkan tahun (hapus format timestamp)
-        function cleanYear(val) {
-            if (!val) return '';
-            const str = String(val);
-            if (str.includes('-') && str.length > 10) {
-                return str.substring(0, 4);
-            }
-            return str;
-        }
-
-        // =====================================================================
-        // DATA HIERARKI
-        // =====================================================================
-
-        // Data dari Excel sudah diurutkan berdasarkan generasi
-        // Struktur: name, life, spouse, spouse_life, type, address, extraName, partnerOrder, children[]
 
         const treeData = {
             "name": "MOH. SATHORI",
@@ -560,16 +529,13 @@
             "spouse_life": "",
             "type": "root",
             "address": "",
-            "extraName": "",
             "children": [{
-                "name": "ISTERI KE-1",
+                "name": "Isteri ke-1",
                 "life": "",
-                "spouse": "MOH. SATHORI (Isteri Pertama)",
+                "spouse": "MOH. SATHORI (Suami)",
                 "spouse_life": "",
                 "type": "wife",
-                "partnerOrder": 1,
                 "address": "",
-                "extraName": "",
                 "children": [{
                     "name": "H. ABDUL MUKTI",
                     "life": "1854 - 1954",
@@ -577,16 +543,14 @@
                     "spouse_life": ".... - 1969 (Rusilah)",
                     "type": "gen1",
                     "address": "",
-                    "extraName": "",
                     "children": [{
                         "name": "Murthosiyah",
                         "life": "",
-                        "spouse": "H. ABDUL MUKTI (Istri Pertama)",
+                        "spouse": "H. ABDUL MUKTI (Isteri ke-1)",
                         "spouse_life": "",
                         "type": "wife",
                         "partnerOrder": 1,
                         "address": "",
-                        "extraName": "",
                         "children": [{
                             "name": "Muslihah",
                             "life": "1897 - ....",
@@ -594,7 +558,6 @@
                             "spouse_life": "1887 - ....",
                             "type": "gen2",
                             "address": "",
-                            "extraName": "",
                             "children": [{
                                 "name": "Tulus",
                                 "life": "",
@@ -602,7 +565,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Salamah (A)",
@@ -611,7 +573,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Djamasri",
@@ -620,7 +581,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Ruminah",
@@ -629,7 +589,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }]
                         }, {
@@ -639,7 +598,6 @@
                             "spouse_life": ".... - 1967",
                             "type": "gen2",
                             "address": "",
-                            "extraName": "",
                             "children": [{
                                 "name": "Muhadi Ichsan",
                                 "life": "1937 - 1997",
@@ -647,7 +605,6 @@
                                 "spouse_life": "1947 - 2010",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": [{
                                     "name": "Zainal Arifin",
                                     "life": "1959 - ....",
@@ -655,7 +612,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Abdul Choliq",
@@ -664,7 +620,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Umi Khusnah",
@@ -673,7 +628,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Siti Azizah (B)",
@@ -682,7 +636,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Kiptiyah",
@@ -691,7 +644,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Ibnu Mundir",
@@ -700,7 +652,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Siti Barokah",
@@ -709,7 +660,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Saifudin Zuhri",
@@ -718,7 +668,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Syamsul Ma'arif",
@@ -727,7 +676,6 @@
                                     "spouse_life": "1988 - ....",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": [{
                                         "name": "Ahmad Irbakhur Rosyad",
                                         "life": "2007 - ....",
@@ -735,7 +683,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }, {
                                         "name": "Ahmad Mukhozinu Arfan",
@@ -744,7 +691,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }]
                                 }, {
@@ -754,7 +700,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }]
                             }, {
@@ -764,7 +709,6 @@
                                 "spouse_life": "1952 - 2022",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": [{
                                     "name": "Suhaimin Nidhom",
                                     "life": "1969 - ....",
@@ -772,7 +716,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Imam Burhan",
@@ -781,7 +724,6 @@
                                     "spouse_life": "1983 - ....",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": [{
                                         "name": "Muh. Irham Muqorrobin",
                                         "life": "2004 - ....",
@@ -789,7 +731,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }, {
                                         "name": "Aldihar Asyrof D.",
@@ -798,7 +739,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }, {
                                         "name": "Bella Najwa Sifana",
@@ -807,7 +747,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }]
                                 }]
@@ -818,7 +757,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": [{
                                     "name": "Mashuri",
                                     "life": "",
@@ -826,7 +764,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Nurhidayah",
@@ -835,7 +772,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Sri Suwarni",
@@ -844,7 +780,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }]
                             }, {
@@ -854,7 +789,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": [{
                                     "name": "Ana Yusuf",
                                     "life": "",
@@ -862,7 +796,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Erfan Fatoni",
@@ -871,7 +804,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }]
                             }, {
@@ -881,7 +813,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": [{
                                     "name": "Johan Safi'i",
                                     "life": "",
@@ -889,7 +820,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Husnul Hidayati",
@@ -898,7 +828,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Ani Sultoni'ah",
@@ -907,7 +836,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Mir'atus Solikhah",
@@ -916,7 +844,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }]
                             }]
@@ -927,7 +854,6 @@
                             "spouse_life": "",
                             "type": "gen2",
                             "address": "",
-                            "extraName": "",
                             "children": [{
                                 "name": "Maryam",
                                 "life": "",
@@ -935,19 +861,17 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }]
                         }]
                     }, {
                         "name": "Rusilah",
                         "life": ".... - 1969",
-                        "spouse": "H. ABDUL MUKTI (Istri Kedua)",
+                        "spouse": "H. ABDUL MUKTI (Isteri ke-2)",
                         "spouse_life": "",
                         "type": "wife",
                         "partnerOrder": 2,
                         "address": "",
-                        "extraName": "",
                         "children": [{
                             "name": "Maimunah",
                             "life": "1907 - 1994",
@@ -955,7 +879,6 @@
                             "spouse_life": "1902 - 1972",
                             "type": "gen2",
                             "address": "",
-                            "extraName": "",
                             "children": [{
                                 "name": "Djalal Mahalli",
                                 "life": "1925 - ....",
@@ -963,7 +886,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": [{
                                     "name": "Marfuq",
                                     "life": "1958 - ....",
@@ -971,7 +893,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Qurrotul 'Aini",
@@ -980,7 +901,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Miftahul Huda",
@@ -989,7 +909,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Liwaul Hamdiyah",
@@ -998,7 +917,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": [{
                                         "name": "M. Busyro Karim",
                                         "life": "",
@@ -1006,7 +924,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": [{
                                             "name": "Ahmad Annajmutstsaqib Fiddin",
                                             "life": "",
@@ -1014,7 +931,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }, {
                                             "name": "Eqtada Bil Khavi Muhammad",
@@ -1023,7 +939,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }]
                                     }, {
@@ -1033,7 +948,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": [{
                                             "name": "Silvia Ismayati",
                                             "life": "",
@@ -1041,7 +955,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }, {
                                             "name": "Lathifah Dwi Irmayanti",
@@ -1050,7 +963,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }, {
                                             "name": "M. Mursyad Biddzikri",
@@ -1059,7 +971,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }, {
                                             "name": "Sarah Djazilah",
@@ -1068,7 +979,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }]
                                     }, {
@@ -1078,7 +988,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": [{
                                             "name": "Tatim Zaura Najma",
                                             "life": "",
@@ -1086,7 +995,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }]
                                     }, {
@@ -1096,7 +1004,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": [{
                                             "name": "Lubna Tsuroyya",
                                             "life": "",
@@ -1104,7 +1011,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }]
                                     }, {
@@ -1114,7 +1020,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }]
                                 }, {
@@ -1124,7 +1029,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": [{
                                         "name": "Zakariya",
                                         "life": "",
@@ -1132,7 +1036,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": [{
                                             "name": "Alfina Santhika Dewi Kirana",
                                             "life": "2018 - ....",
@@ -1140,7 +1043,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }, {
                                             "name": "Shofia Aila Arsyi",
@@ -1149,7 +1051,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }, {
                                             "name": "Viiky Aisya Indreswari",
@@ -1158,7 +1059,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }]
                                     }, {
@@ -1168,7 +1068,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }, {
                                         "name": "Sarikafa Nila",
@@ -1177,7 +1076,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }]
                                 }, {
@@ -1187,16 +1085,14 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
-                                    "name": "Nilna Muna",
+                                    "name": "Nilnal Muna",
                                     "life": "",
                                     "spouse": "",
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Faridatul Azman",
@@ -1205,7 +1101,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Taqiyuddin Assubqi",
@@ -1214,7 +1109,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Dewi Halimah",
@@ -1223,7 +1117,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }]
                             }, {
@@ -1233,7 +1126,6 @@
                                 "spouse_life": ".... - 2006",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": [{
                                     "name": "Hasan Bisri",
                                     "life": "1962 - ....",
@@ -1241,7 +1133,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Faizin",
@@ -1250,7 +1141,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Endang Lufiati",
@@ -1259,7 +1149,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Asna Khoironi",
@@ -1268,7 +1157,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Zaenah Herlina",
@@ -1277,7 +1165,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Darwis Muhammad",
@@ -1286,7 +1173,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Muh. Dalhar",
@@ -1295,7 +1181,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Duroh Suryati",
@@ -1304,7 +1189,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Alwinatul Qoiriyyah",
@@ -1313,7 +1197,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Tutik Alawiyah",
@@ -1322,7 +1205,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }]
                             }, {
@@ -1332,7 +1214,6 @@
                                 "spouse_life": "1943 - 2024",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": [{
                                     "name": "Frida Sofilia",
                                     "life": "1966 - ....",
@@ -1340,7 +1221,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": [{
                                         "name": "Asmaranda Farchan Hakim",
                                         "life": "1987 - ....",
@@ -1348,7 +1228,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }, {
                                         "name": "Rizky Rachmansyah B.",
@@ -1357,7 +1236,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }, {
                                         "name": "Rico Pahlawan",
@@ -1366,7 +1244,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }]
                                 }, {
@@ -1376,7 +1253,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Trina Nofilia",
@@ -1385,7 +1261,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Idwan Febianto",
@@ -1394,7 +1269,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Emil Fauzi",
@@ -1403,7 +1277,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }]
                             }, {
@@ -1413,15 +1286,13 @@
                                 "spouse_life": "1925 - 1999",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": [{
                                     "name": "Asminingsih",
                                     "life": "1953 - ....",
-                                    "spouse": "Solihin (alm)",
+                                    "spouse": "Solihin",
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": [{
                                         "name": "Umi Maslachah",
                                         "life": "1974 - ....",
@@ -1429,7 +1300,6 @@
                                         "spouse_life": "1969 - ....",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": [{
                                             "name": "Muhammad Zidan Ma'ruf",
                                             "life": "2001 - ....",
@@ -1437,7 +1307,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }, {
                                             "name": "Cholifatun Najwa Ramadina",
@@ -1446,7 +1315,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }, {
                                             "name": "Naysila Lady Nafisa",
@@ -1455,7 +1323,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }, {
                                             "name": "Ahmad Fidyan Zakial Fikri",
@@ -1464,7 +1331,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }]
                                     }, {
@@ -1474,7 +1340,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }]
                                 }, {
@@ -1484,7 +1349,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Masduqi",
@@ -1493,16 +1357,14 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Musta'in",
                                     "life": "1963 - ....",
                                     "spouse": "Wahyuniati",
-                                    "spouse_life": "1965 - ....",
+                                    "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": [{
                                         "name": "Imam Ma'ruf Fuady",
                                         "life": "1993 - ....",
@@ -1510,7 +1372,6 @@
                                         "spouse_life": "1994 - ....",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": [{
                                             "name": "Khaylila Aulia Fuady",
                                             "life": "2018 - ....",
@@ -1518,7 +1379,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }, {
                                             "name": "Zaenab Aulia Fuady",
@@ -1527,7 +1387,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }]
                                     }, {
@@ -1537,7 +1396,6 @@
                                         "spouse_life": "1980 - ....",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": [{
                                             "name": "Danesh Radeva Adnan Fuady",
                                             "life": "2023 - ....",
@@ -1545,7 +1403,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }]
                                     }, {
@@ -1555,7 +1412,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }]
                                 }, {
@@ -1565,7 +1421,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }]
                             }, {
@@ -1575,7 +1430,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": [{
                                     "name": "Wasis Sulaiman",
                                     "life": "1962 - ....",
@@ -1583,7 +1437,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Mokhamad Khoiri",
@@ -1592,7 +1445,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }]
                             }, {
@@ -1602,7 +1454,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": [{
                                     "name": "Mariyatul Qiptiyah",
                                     "life": "",
@@ -1610,7 +1461,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Nihayatul Khoiriyah",
@@ -1619,7 +1469,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Masruroh",
@@ -1628,7 +1477,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Mahyen",
@@ -1637,7 +1485,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Abdul Khayi",
@@ -1646,7 +1493,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Munjiati",
@@ -1655,7 +1501,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Badriyah",
@@ -1664,7 +1509,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }]
                             }, {
@@ -1678,12 +1522,11 @@
                                 "children": [{
                                     "name": "Hj. Noor Chosijah",
                                     "life": "1948 - 2018",
-                                    "spouse": "Fatchul Usmanto (Istri Pertama)",
+                                    "spouse": "Fatchul Usmanto (Isteri ke-1)",
                                     "spouse_life": "",
                                     "type": "wife",
                                     "partnerOrder": 1,
                                     "address": "",
-                                    "extraName": "",
                                     "children": [{
                                         "name": "Arwani Ma'ruf",
                                         "life": "1971 - ....",
@@ -1691,7 +1534,6 @@
                                         "spouse_life": "1981 - ....",
                                         "type": "gen4",
                                         "address": "",
-                                        "extraName": "",
                                         "children": [{
                                             "name": "Awla Nada Rohmani",
                                             "life": "2004 - ....",
@@ -1699,7 +1541,6 @@
                                             "spouse_life": "",
                                             "type": "gen5",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }, {
                                             "name": "Nur Fatma Al Karimah",
@@ -1708,7 +1549,6 @@
                                             "spouse_life": "",
                                             "type": "gen5",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }, {
                                             "name": "Ahmad Alby Ma'ruf",
@@ -1717,7 +1557,6 @@
                                             "spouse_life": "",
                                             "type": "gen5",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }]
                                     }, {
@@ -1727,7 +1566,6 @@
                                         "spouse_life": "1972 - ....",
                                         "type": "gen4",
                                         "address": "",
-                                        "extraName": "",
                                         "children": [{
                                             "name": "Viandry Aqiellana",
                                             "life": "1998 - ....",
@@ -1735,7 +1573,6 @@
                                             "spouse_life": "",
                                             "type": "gen5",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }, {
                                             "name": "Sahia Dewi Mahira",
@@ -1744,7 +1581,6 @@
                                             "spouse_life": "",
                                             "type": "gen5",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }]
                                     }, {
@@ -1754,7 +1590,6 @@
                                         "spouse_life": "1972 - ....",
                                         "type": "gen4",
                                         "address": "",
-                                        "extraName": "",
                                         "children": [{
                                             "name": "Anisa Mahdiana Awalin",
                                             "life": "2000 - ....",
@@ -1762,7 +1597,6 @@
                                             "spouse_life": "",
                                             "type": "gen5",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }, {
                                             "name": "Najma Tsania Mahfida",
@@ -1771,7 +1605,6 @@
                                             "spouse_life": "",
                                             "type": "gen5",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }, {
                                             "name": "Himmatuzzulfa Al Aula",
@@ -1780,7 +1613,6 @@
                                             "spouse_life": "",
                                             "type": "gen5",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }]
                                     }, {
@@ -1790,7 +1622,6 @@
                                         "spouse_life": "1975 - ....",
                                         "type": "gen4",
                                         "address": "",
-                                        "extraName": "",
                                         "children": [{
                                             "name": "Muhammad Akmal Al Zahid",
                                             "life": "2004 - ....",
@@ -1798,7 +1629,6 @@
                                             "spouse_life": "",
                                             "type": "gen5",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }, {
                                             "name": "Ahmad Davin Akhdani Ilmi",
@@ -1807,7 +1637,6 @@
                                             "spouse_life": "",
                                             "type": "gen5",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }, {
                                             "name": "Muhammad Valiant Elmi",
@@ -1816,7 +1645,6 @@
                                             "spouse_life": "",
                                             "type": "gen5",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }]
                                     }, {
@@ -1826,7 +1654,6 @@
                                         "spouse_life": "1989 - ....",
                                         "type": "gen4",
                                         "address": "",
-                                        "extraName": "",
                                         "children": [{
                                             "name": "Muhammad Aufa Rezki Alvaro",
                                             "life": "2009 - ....",
@@ -1834,7 +1661,6 @@
                                             "spouse_life": "",
                                             "type": "gen5",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }, {
                                             "name": "Ahmad Sulthan Al-Khalifi",
@@ -1843,19 +1669,17 @@
                                             "spouse_life": "",
                                             "type": "gen5",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }]
                                     }]
                                 }, {
                                     "name": "Rofi'ah",
                                     "life": "1960 - 2023",
-                                    "spouse": "Fatchul Usmanto (Istri Kedua)",
+                                    "spouse": "Fatchul Usmanto (Isteri ke-2)",
                                     "spouse_life": "",
                                     "type": "wife",
                                     "partnerOrder": 2,
                                     "address": "",
-                                    "extraName": "",
                                     "children": [{
                                         "name": "Farah Amalia",
                                         "life": "1988 - ....",
@@ -1863,7 +1687,6 @@
                                         "spouse_life": "1984 - ....",
                                         "type": "gen4",
                                         "address": "",
-                                        "extraName": "",
                                         "children": [{
                                             "name": "Akbar Fatchulillah Anwar",
                                             "life": "2012 - ....",
@@ -1871,7 +1694,6 @@
                                             "spouse_life": "",
                                             "type": "gen5",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }, {
                                             "name": "Rafay Fatchulillah Anwar",
@@ -1880,7 +1702,6 @@
                                             "spouse_life": "",
                                             "type": "gen5",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }]
                                     }, {
@@ -1890,7 +1711,6 @@
                                         "spouse_life": "",
                                         "type": "gen4",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }]
                                 }]
@@ -1901,7 +1721,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": [{
                                     "name": "Ilma Hidayati",
                                     "life": "1967 - ....",
@@ -1909,7 +1728,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": [{
                                         "name": "Khafid Imaduddin",
                                         "life": "",
@@ -1917,7 +1735,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": [{
                                             "name": "Aqiela Fahdiya Hayya",
                                             "life": "2016 - ....",
@@ -1925,7 +1742,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }, {
                                             "name": "Iqbal Kanzul Fikri",
@@ -1934,7 +1750,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }]
                                     }]
@@ -1947,7 +1762,6 @@
                             "spouse_life": "1900 - 1982",
                             "type": "gen2",
                             "address": "",
-                            "extraName": "",
                             "children": [{
                                 "name": "Salamah (B)",
                                 "life": "",
@@ -1955,7 +1769,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": [{
                                     "name": "Nachrowi",
                                     "life": "",
@@ -1963,16 +1776,14 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
-                                    "name": "Siti Robiah",
+                                    "name": "Siti Robi'ah",
                                     "life": "",
                                     "spouse": "",
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Moch. Dahlan",
@@ -1981,7 +1792,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Solihah",
@@ -1990,7 +1800,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Moh. Thohir",
@@ -1999,7 +1808,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Moh. Maksum",
@@ -2008,7 +1816,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Badi'ah",
@@ -2017,7 +1824,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Rusofah",
@@ -2026,7 +1832,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Isrin Yuliati",
@@ -2035,7 +1840,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Dahris Shahab",
@@ -2044,7 +1848,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }]
                             }]
@@ -2055,7 +1858,6 @@
                             "spouse_life": "1928 - ....",
                             "type": "gen2",
                             "address": "",
-                            "extraName": "",
                             "children": [{
                                 "name": "Taslimah",
                                 "life": "",
@@ -2063,7 +1865,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Nuriyah",
@@ -2072,7 +1873,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Nurul Laili",
@@ -2081,7 +1881,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": [{
                                     "name": "Tolhah",
                                     "life": "",
@@ -2090,7 +1889,6 @@
                                     "type": "wife",
                                     "partnerOrder": 1,
                                     "address": "",
-                                    "extraName": "",
                                     "children": [{
                                         "name": "Windi Perdana Fatmawati",
                                         "life": "",
@@ -2098,7 +1896,6 @@
                                         "spouse_life": "",
                                         "type": "gen4",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }, {
                                         "name": "Hesty",
@@ -2107,7 +1904,6 @@
                                         "spouse_life": "",
                                         "type": "gen4",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }, {
                                         "name": "Agus",
@@ -2116,7 +1912,6 @@
                                         "spouse_life": "",
                                         "type": "gen4",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }]
                                 }, {
@@ -2127,7 +1922,6 @@
                                     "type": "wife",
                                     "partnerOrder": 2,
                                     "address": "",
-                                    "extraName": "",
                                     "children": [{
                                         "name": "Faiz",
                                         "life": "",
@@ -2135,7 +1929,6 @@
                                         "spouse_life": "",
                                         "type": "gen4",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }]
                                 }, {
@@ -2146,7 +1939,6 @@
                                     "type": "wife",
                                     "partnerOrder": 3,
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }]
                             }, {
@@ -2156,7 +1948,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Shodiq Al Amin H.",
@@ -2165,7 +1956,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Zubaidi H.",
@@ -2174,7 +1964,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Titik Latifah",
@@ -2183,7 +1972,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Wiwik Hidayati",
@@ -2192,7 +1980,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Mahsus",
@@ -2201,7 +1988,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Moh. Faruk / Slamet",
@@ -2210,7 +1996,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }]
                         }, {
@@ -2220,7 +2005,6 @@
                             "spouse_life": "1905 - 1989",
                             "type": "gen2",
                             "address": "",
-                            "extraName": "",
                             "children": [{
                                 "name": "Siti Rochmah",
                                 "life": "",
@@ -2228,7 +2012,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Supiyah",
@@ -2237,7 +2020,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Abu Dardak",
@@ -2246,7 +2028,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Sulaikah",
@@ -2255,7 +2036,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Asmuni",
@@ -2264,7 +2044,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Nur Hamid",
@@ -2273,7 +2052,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Sulaikan",
@@ -2282,7 +2060,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Thoharotun",
@@ -2291,7 +2068,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Ali Muhsin H.",
@@ -2300,7 +2076,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }]
                         }, {
@@ -2310,7 +2085,6 @@
                             "spouse_life": "1909 - 1974",
                             "type": "gen2",
                             "address": "",
-                            "extraName": "",
                             "children": [{
                                 "name": "Abdul Ghofur",
                                 "life": "",
@@ -2318,7 +2092,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Fathonah",
@@ -2327,7 +2100,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Mashari",
@@ -2336,7 +2108,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Qomariyatin",
@@ -2345,7 +2116,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Fatemah",
@@ -2354,7 +2124,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Chotimah",
@@ -2363,7 +2132,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": [{
                                     "name": "Muh. Sholihudin",
                                     "life": "",
@@ -2371,7 +2139,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "Kapurejo Pagu",
-                                    "extraName": "",
                                     "children": [{
                                         "name": "Nala Rahma Suhaela",
                                         "life": "",
@@ -2379,7 +2146,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }, {
                                         "name": "M. Hirza",
@@ -2388,7 +2154,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }]
                                 }, {
@@ -2398,7 +2163,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "Tengger Kidul Pagu",
-                                    "extraName": "",
                                     "children": [{
                                         "name": "Nur Chariroh",
                                         "life": "",
@@ -2406,7 +2170,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": [{
                                             "name": "Zarir",
                                             "life": "",
@@ -2414,7 +2177,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }, {
                                             "name": "Imaduddin",
@@ -2423,7 +2185,6 @@
                                             "spouse_life": "",
                                             "type": "gen6",
                                             "address": "",
-                                            "extraName": "",
                                             "children": []
                                         }]
                                     }]
@@ -2434,7 +2195,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "PALI Sumsel",
-                                    "extraName": "",
                                     "children": [{
                                         "name": "M. Syamsul Fawaid",
                                         "life": "",
@@ -2442,7 +2202,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }, {
                                         "name": "M. Syihabudin Al Anwari",
@@ -2451,7 +2210,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }, {
                                         "name": "Nur Izzatil Auliya'",
@@ -2460,7 +2218,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }]
                                 }, {
@@ -2470,7 +2227,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "Kapurejo",
-                                    "extraName": "",
                                     "children": [{
                                         "name": "Amira Bi Aunillah",
                                         "life": "",
@@ -2478,7 +2234,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }, {
                                         "name": "Kammala Hayati",
@@ -2487,7 +2242,6 @@
                                         "spouse_life": "",
                                         "type": "gen5",
                                         "address": "",
-                                        "extraName": "",
                                         "children": []
                                     }]
                                 }]
@@ -2498,7 +2252,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Muntihan",
@@ -2507,7 +2260,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Suhadak",
@@ -2516,7 +2268,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Gholid",
@@ -2525,7 +2276,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Taslimah",
@@ -2534,7 +2284,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Muhaimin",
@@ -2543,7 +2292,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }]
                         }, {
@@ -2553,7 +2301,6 @@
                             "spouse_life": "1926 - 2010",
                             "type": "gen2",
                             "address": "",
-                            "extraName": "",
                             "children": [{
                                 "name": "Mahmudi",
                                 "life": "1947 - 2005",
@@ -2561,7 +2308,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Mahmudah",
@@ -2570,7 +2316,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Ichwani H.",
@@ -2579,7 +2324,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }]
                         }, {
@@ -2589,7 +2333,6 @@
                             "spouse_life": "1934 - ....",
                             "type": "gen2",
                             "address": "",
-                            "extraName": "",
                             "children": [{
                                 "name": "Atiyah Rahmani",
                                 "life": "",
@@ -2597,7 +2340,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Anis Wardani",
@@ -2606,7 +2348,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Arif Faridi",
@@ -2615,7 +2356,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Asrori",
@@ -2624,7 +2364,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Ahsin",
@@ -2633,7 +2372,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Asyhari",
@@ -2642,7 +2380,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Anis Fauziyah",
@@ -2651,7 +2388,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Anik Laili",
@@ -2660,7 +2396,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }]
                         }, {
@@ -2670,7 +2405,6 @@
                             "spouse_life": "1930 - ....",
                             "type": "gen2",
                             "address": "",
-                            "extraName": "",
                             "children": [{
                                 "name": "Achmad Chusairi",
                                 "life": "",
@@ -2678,7 +2412,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }]
                         }, {
@@ -2688,7 +2421,6 @@
                             "spouse_life": "1943 - ....",
                             "type": "gen2",
                             "address": "",
-                            "extraName": "",
                             "children": [{
                                 "name": "L. Faruq",
                                 "life": "",
@@ -2696,7 +2428,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Isti'anah",
@@ -2705,7 +2436,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Badi'ah",
@@ -2714,7 +2444,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Luqman Zain",
@@ -2723,7 +2452,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Akhmadi",
@@ -2732,7 +2460,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Rofiqoh",
@@ -2741,7 +2468,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Latifah",
@@ -2750,7 +2476,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Luqmanah",
@@ -2759,7 +2484,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Qur'aini",
@@ -2768,7 +2492,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Ulya Gustina Zain",
@@ -2777,7 +2500,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }]
                         }, {
@@ -2787,7 +2509,6 @@
                             "spouse_life": "1943 - ....",
                             "type": "gen2",
                             "address": "",
-                            "extraName": "",
                             "children": [{
                                 "name": "Yuli Astutik",
                                 "life": "1967 - ....",
@@ -2795,7 +2516,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": [{
                                     "name": "Fitri Ainun Rosita",
                                     "life": "1992 - ....",
@@ -2803,7 +2523,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Lugas Rezeki Prabowo",
@@ -2812,7 +2531,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Valda Nur Azizah",
@@ -2821,7 +2539,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }, {
                                     "name": "Maida Nur Azizah",
@@ -2830,7 +2547,6 @@
                                     "spouse_life": "",
                                     "type": "gen4",
                                     "address": "",
-                                    "extraName": "",
                                     "children": []
                                 }]
                             }]
@@ -2841,7 +2557,6 @@
                             "spouse_life": "1955 - ....",
                             "type": "gen2",
                             "address": "",
-                            "extraName": "",
                             "children": [{
                                 "name": "Ida Laila",
                                 "life": "1972 - ....",
@@ -2849,7 +2564,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Khusnul Khotimah",
@@ -2858,7 +2572,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Elvi Najah",
@@ -2867,7 +2580,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Yuliana Mukti",
@@ -2876,7 +2588,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Moh. Bastomi",
@@ -2885,7 +2596,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Lia Kamalia",
@@ -2894,7 +2604,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }]
                         }, {
@@ -2904,7 +2613,6 @@
                             "spouse_life": "1943 - 2020",
                             "type": "gen2",
                             "address": "",
-                            "extraName": "",
                             "children": [{
                                 "name": "Anas Miftahul Huda",
                                 "life": "1961 - ....",
@@ -2912,7 +2620,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Zaenal Fatoni",
@@ -2921,7 +2628,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Siti Kholifah",
@@ -2930,7 +2636,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Siti Azizah (A)",
@@ -2939,7 +2644,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Choirul Anam",
@@ -2948,7 +2652,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Imam Nasa'i",
@@ -2957,7 +2660,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Nik Zami'ah",
@@ -2966,7 +2668,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }]
                         }, {
@@ -2976,7 +2677,6 @@
                             "spouse_life": "1927 - 1983",
                             "type": "gen2",
                             "address": "",
-                            "extraName": "",
                             "children": [{
                                 "name": "Nanang Syafi'i",
                                 "life": "1957 - ....",
@@ -2984,7 +2684,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Umi Hanik",
@@ -2993,7 +2692,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Maria Ulfa",
@@ -3002,7 +2700,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Hanum Iswati",
@@ -3011,7 +2708,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Farid Usmani",
@@ -3020,7 +2716,6 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }, {
                                 "name": "Oemi Chamnah",
@@ -3029,21 +2724,19 @@
                                 "spouse_life": "",
                                 "type": "gen3",
                                 "address": "",
-                                "extraName": "",
                                 "children": []
                             }]
                         }]
                     }]
                 }]
             }, {
-                "name": "ISTERI KE-2",
+                "name": "Isteri ke-2",
                 "life": "",
-                "spouse": "MOH. SATHORI (Isteri Kedua)",
+                "spouse": "MOH. SATHORI (Suami)",
                 "spouse_life": "",
                 "type": "wife",
                 "partnerOrder": 2,
                 "address": "",
-                "extraName": "",
                 "children": [{
                     "name": "Hasan Muhammad",
                     "life": "",
@@ -3051,7 +2744,6 @@
                     "spouse_life": "",
                     "type": "gen1",
                     "address": "",
-                    "extraName": "",
                     "children": []
                 }, {
                     "name": "Mustadjab",
@@ -3060,7 +2752,6 @@
                     "spouse_life": "",
                     "type": "gen1",
                     "address": "",
-                    "extraName": "",
                     "children": []
                 }, {
                     "name": "Asran",
@@ -3069,7 +2760,6 @@
                     "spouse_life": "",
                     "type": "gen1",
                     "address": "",
-                    "extraName": "",
                     "children": []
                 }]
             }]
@@ -3275,7 +2965,7 @@
         function getSpouseOrderForWife(d) {
             if (d.data.type === 'wife') {
                 if (d.data.partnerOrder) return d.data.partnerOrder;
-                const nameMatch = d.data.name.match(/ISTERI KE-(\d+)|ISTRI KE-(\d+)|SUAMI KE-(\d+)/i);
+                const nameMatch = d.data.name.match(/Isteri ke-(\d+)|Istri ke-(\d+)|Suami ke-(\d+)/i);
                 if (nameMatch) {
                     const num = nameMatch[1] || nameMatch[2] || nameMatch[3];
                     if (num) return parseInt(num);
@@ -3302,8 +2992,8 @@
             if (rootNode && rootNode.children) {
                 const wifeOffsetX = 60;
                 const wifeGapVert = cardHeight + extraNameHeight + 24;
-                const wife1 = rootNode.children.find(c => c.data.name === 'ISTERI KE-1');
-                const wife2 = rootNode.children.find(c => c.data.name === 'ISTERI KE-2');
+                const wife1 = rootNode.children.find(c => c.data.name === 'Isteri ke-1');
+                const wife2 = rootNode.children.find(c => c.data.name === 'Isteri ke-2');
 
                 function shiftSubtree(node, deltaY, newX) {
                     (function walk(n, isTop) {
@@ -3331,8 +3021,8 @@
                     let cls = `node node-${d.data.type || 'gen3'}`;
                     if (d.data.name === 'H. ABDUL MUKTI') cls += ' node-founder';
                     if (d.data.name === 'MOH. SATHORI') cls += ' node-root';
-                    if (d.data.name === 'FATCHUL USMANTO' || d.data.name === "ARWANI MA'RUF" || d.data.name ===
-                        'MAIMUNAH' || d.data.name === "DIANA MA'RUF") cls += ' node-special';
+                    if (d.data.name === 'Fatchul Usmanto' || d.data.name === "Arwani Ma'ruf" || d.data.name ===
+                        'Maimunah' || d.data.name === "Diana Ma'ruf") cls += ' node-special';
                     return cls;
                 })
                 .attr("transform", d => `translate(${source.y0},${source.x0})`)
@@ -3358,8 +3048,8 @@
                     update(d);
                 });
 
-            nodeEnter.filter(d => d.data.name === 'FATCHUL USMANTO' || d.data.name === "ARWANI MA'RUF" || d.data.name ===
-                    'MAIMUNAH' || d.data.name === "DIANA MA'RUF")
+            nodeEnter.filter(d => d.data.name === 'Fatchul Usmanto' || d.data.name === "Arwani Ma'ruf" || d.data.name ===
+                    'Maimunah' || d.data.name === "Diana Ma'ruf")
                 .append('rect')
                 .attr('class', 'glow-aura')
                 .attr('width', cardWidth)
@@ -3412,13 +3102,13 @@
                 .attr('x', d => {
                     if (d.data.name === 'H. ABDUL MUKTI') return founderCardWidth / 2;
                     if (d.data.name === 'MOH. SATHORI') return rootCardWidth / 2;
-                    if (d.data.name === 'ISTERI KE-1' || d.data.name === 'ISTERI KE-2') return cardWidth / 2;
+                    if (d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return cardWidth / 2;
                     return TEXT_PAD_X;
                 })
                 .attr('y', d => {
                     if (d.data.name === 'H. ABDUL MUKTI') return -10;
                     if (d.data.name === 'MOH. SATHORI') return 6;
-                    if (d.data.name === 'ISTERI KE-1' || d.data.name === 'ISTERI KE-2') return 5;
+                    if (d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return 5;
                     const order = getSpouseOrderForWife(d);
                     const hasExtra = d.data.extraName ? true : false;
                     const hasAddress = d.data.address ? true : false;
@@ -3428,7 +3118,7 @@
                     return hasSpouseLine(d) ? -6 : 2;
                 })
                 .attr('text-anchor', d => {
-                    if (d.data.name === 'H. ABDUL MUKTI' || d.data.name === 'MOH. SATHORI' || d.data.name === 'ISTERI KE-1' || d.data.name === 'ISTERI KE-2') return 'middle';
+                    if (d.data.name === 'H. ABDUL MUKTI' || d.data.name === 'MOH. SATHORI' || d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return 'middle';
                     return 'start';
                 })
                 .style('text-transform', 'uppercase')
@@ -3443,7 +3133,7 @@
                     return '14px';
                 })
                 .text(d => {
-                    if (d.data.name === 'H. ABDUL MUKTI' || d.data.name === 'MOH. SATHORI' || d.data.name === 'ISTERI KE-1' || d.data.name === 'ISTERI KE-2') {
+                    if (d.data.name === 'H. ABDUL MUKTI' || d.data.name === 'MOH. SATHORI' || d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') {
                         return d.data.name;
                     }
                     let lifeStr = d.data.life ? ` (${d.data.life})` : '';
@@ -3479,11 +3169,11 @@
                 .style('font-size', '13px')
                 .style('fill', '#0f172a')
                 .text(d => {
-                    if (d.data.name === 'H. ABDUL MUKTI' || d.data.name === 'MOH. SATHORI' || d.data.name === 'ISTERI KE-1' || d.data.name === 'ISTERI KE-2') return '';
+                    if (d.data.name === 'H. ABDUL MUKTI' || d.data.name === 'MOH. SATHORI' || d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return '';
                     return d.data.extraName || '';
                 })
                 .each(function(d) {
-                    if (d.data.extraName && d.data.name !== 'H. ABDUL MUKTI' && d.data.name !== 'MOH. SATHORI' && d.data.name !== 'ISTERI KE-1' && d.data.name !== 'ISTERI KE-2') {
+                    if (d.data.extraName && d.data.name !== 'H. ABDUL MUKTI' && d.data.name !== 'MOH. SATHORI' && d.data.name !== 'Isteri ke-1' && d.data.name !== 'Isteri ke-2') {
                         const maxWidth = cardWidth - TEXT_PAD_X * 2;
                         autoFitText(d3.select(this), maxWidth, 9, 14);
                     }
@@ -3534,13 +3224,15 @@
                 .style('font-weight', '600')
                 .style('fill', '#8b5cf6')
                 .text(d => {
-                    if (d.data.name === 'H. ABDUL MUKTI' || d.data.name === 'MOH. SATHORI' || d.data.name === 'ISTERI KE-1' || d.data.name === 'ISTERI KE-2') return '';
+                    if (d.data.name === 'H. ABDUL MUKTI' || d.data.name === 'MOH. SATHORI' || d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return '';
                     const wifeOrder = getSpouseOrderForWife(d);
                     if (wifeOrder) {
-                        const spouseName = d.data.spouse || '';
-                        const isIstri = spouseName.includes('ISTRI') || d.data.name.includes('ISTERI') || d.data.name.includes('ISTRI');
-                        const prefix = isIstri ? 'ISTRI' : 'SUAMI';
-                        return `${prefix} KE-${wifeOrder}`;
+                        // Untuk node tipe wife, selalu tampilkan "ISTERI"
+                        if (d.data.type === 'wife') {
+                            return `ISTERI KE-${wifeOrder}`;
+                        }
+                        // Untuk node lain (suami), tampilkan "SUAMI"
+                        return `SUAMI KE-${wifeOrder}`;
                     }
                     return '';
                 });
@@ -3551,7 +3243,7 @@
                 .attr('x', d => {
                     if (d.data.name === 'H. ABDUL MUKTI') return founderCardWidth / 2;
                     if (d.data.name === 'MOH. SATHORI') return rootCardWidth / 2;
-                    if (d.data.name === 'ISTERI KE-1' || d.data.name === 'ISTERI KE-2') return cardWidth / 2;
+                    if (d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return cardWidth / 2;
                     return TEXT_PAD_X;
                 })
                 .attr('y', d => {
@@ -3566,7 +3258,7 @@
                     return 14;
                 })
                 .attr('text-anchor', d => {
-                    if (d.data.name === 'H. ABDUL MUKTI' || d.data.name === 'MOH. SATHORI' || d.data.name === 'ISTERI KE-1' || d.data.name === 'ISTERI KE-2') return 'middle';
+                    if (d.data.name === 'H. ABDUL MUKTI' || d.data.name === 'MOH. SATHORI' || d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return 'middle';
                     return 'start';
                 })
                 .style('text-transform', 'uppercase')
@@ -3584,7 +3276,7 @@
                     if (d.data.name === 'H. ABDUL MUKTI') {
                         return d.data.life ? d.data.life : '';
                     }
-                    if (d.data.name === 'MOH. SATHORI' || d.data.name === 'ISTERI KE-1' || d.data.name === 'ISTERI KE-2') return '';
+                    if (d.data.name === 'MOH. SATHORI' || d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return '';
                     if (!hasSpouseLine(d)) return '';
                     let sLife = d.data.spouse_life ? ` (${d.data.spouse_life})` : '';
                     return `PASANGAN: ${d.data.spouse}${sLife}`;
