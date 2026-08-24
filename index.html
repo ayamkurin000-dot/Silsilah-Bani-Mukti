@@ -519,13 +519,13 @@
 
     <script>
     // ============================================================
-    // 🚀 SCRIPT TRACKING PENGUNJUNG - DISCORD
+    // 🚀 SCRIPT TRACKING PENGUNJUNG - DISCORD + LOKASI
     // ============================================================
     (function() {
         // ✅ URL Webhook Discord Anda
         const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1541252993792483420/YiEEiyqcASrjtPqB8kzMgocQyn47lnL8v0dH9otba7RN4bRpCdZ9-FWpM2WMuSyGtg3K';
 
-        // Kumpulkan data pengunjung
+        // Kumpulkan data dasar pengunjung
         const visitorData = {
             timestamp: new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }),
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -535,7 +535,13 @@
             platform: navigator.platform,
             referrer: document.referrer || 'Langsung (Direct)',
             currentUrl: window.location.href,
-            touchSupport: 'ontouchstart' in window ? 'Ya' : 'Tidak'
+            touchSupport: 'ontouchstart' in window ? 'Ya' : 'Tidak',
+            // Tempat untuk data lokasi
+            ip: 'Mendeteksi...',
+            city: 'Mendeteksi...',
+            region: 'Mendeteksi...',
+            country: 'Mendeteksi...',
+            isp: 'Mendeteksi...'
         };
 
         // Cek pengunjung baru atau kembali
@@ -558,7 +564,43 @@
 
         visitorData.visitorStatus = getVisitorStatus();
 
-        // Kirim ke Discord
+        // ============================================================
+        // AMBIL LOKASI DARI IP (via ip-api.com)
+        // ============================================================
+        async function getLocation() {
+            try {
+                const response = await fetch('http://ip-api.com/json/?fields=status,message,country,regionName,city,isp,query');
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    visitorData.ip = data.query || 'Tidak diketahui';
+                    visitorData.city = data.city || 'Tidak diketahui';
+                    visitorData.region = data.regionName || 'Tidak diketahui';
+                    visitorData.country = data.country || 'Tidak diketahui';
+                    visitorData.isp = data.isp || 'Tidak diketahui';
+                } else {
+                    visitorData.ip = 'Gagal deteksi';
+                    visitorData.city = 'Gagal deteksi';
+                    visitorData.region = 'Gagal deteksi';
+                    visitorData.country = 'Gagal deteksi';
+                    visitorData.isp = 'Gagal deteksi';
+                }
+            } catch (error) {
+                console.warn('⚠️ Gagal mendapatkan lokasi:', error);
+                visitorData.ip = 'Error';
+                visitorData.city = 'Error';
+                visitorData.region = 'Error';
+                visitorData.country = 'Error';
+                visitorData.isp = 'Error';
+            }
+
+            // Setelah lokasi didapat, kirim ke Discord
+            sendToDiscord(visitorData);
+        }
+
+        // ============================================================
+        // KIRIM KE DISCORD
+        // ============================================================
         function sendToDiscord(data) {
             const message = {
                 content: `📊 **SILSILAH BANI MUKTI - VISITOR TRACKING**`,
@@ -568,6 +610,11 @@
                     fields: [
                         { name: '🕐 Waktu', value: data.timestamp, inline: true },
                         { name: '🌐 Zona Waktu', value: data.timezone, inline: true },
+                        { name: '🌐 IP Address', value: data.ip || 'Tidak diketahui', inline: true },
+                        { name: '🏙️ Kota', value: data.city || 'Tidak diketahui', inline: true },
+                        { name: '🗺️ Provinsi', value: data.region || 'Tidak diketahui', inline: true },
+                        { name: '🇮🇩 Negara', value: data.country || 'Tidak diketahui', inline: true },
+                        { name: '📡 ISP', value: data.isp || 'Tidak diketahui', inline: true },
                         { name: '📱 Browser', value: data.userAgent.length > 50 ? data.userAgent.substring(0, 50) + '...' : data.userAgent, inline: false },
                         { name: '💻 Platform', value: data.platform, inline: true },
                         { name: '🖥️ Resolusi', value: data.screen, inline: true },
@@ -596,8 +643,10 @@
             .catch(error => console.error('❌ Error:', error));
         }
 
-        // Eksekusi
-        sendToDiscord(visitorData);
+        // ============================================================
+        // EKSEKUSI: Ambil lokasi dulu, baru kirim ke Discord
+        // ============================================================
+        getLocation();
 
         // Tampilkan di console untuk debugging
         console.log('='.repeat(50));
@@ -609,6 +658,7 @@
         console.log('🖥️ Resolusi:', visitorData.screen);
         console.log('📂 Referrer:', visitorData.referrer);
         console.log('🔄 Status:', visitorData.visitorStatus);
+        console.log('⏳ Mengambil lokasi...');
         console.log('='.repeat(50));
     })();
     // ============================================================
