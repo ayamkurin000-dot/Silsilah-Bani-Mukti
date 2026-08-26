@@ -242,21 +242,20 @@
         .node {
             cursor: pointer;
         }
-        .node rect {
-            rx: 14;
-            ry: 14;
+        .node .node-shape {
             stroke-width: 2px;
+            stroke-linejoin: round;
             transition: transform 0.15s ease, filter 0.2s ease, stroke-width 0.2s ease;
             transform-box: fill-box;
             transform-origin: center;
             filter: drop-shadow(0 3px 6px rgba(15, 23, 42, 0.28));
         }
-        .node:hover rect {
+        .node:hover .node-shape {
             transform: scale(1.045);
             filter: drop-shadow(0 7px 16px rgba(15, 23, 42, 0.35)) brightness(1.06);
             stroke-width: 2.5px;
         }
-        .node.pressed rect {
+        .node.pressed .node-shape {
             animation: btn-press 0.32s cubic-bezier(.4, 0, .2, 1);
         }
         @keyframes btn-press {
@@ -300,7 +299,7 @@
                 filter: blur(12px) hue-rotate(360deg);
             }
         }
-        .node-special:hover rect:not(.glow-aura) {
+        .node-special:hover .node-shape:not(.glow-aura) {
             animation: holo-shift 1.8s linear infinite !important;
             stroke: url(#grad-hologram) !important;
             stroke-width: 3px !important;
@@ -395,47 +394,47 @@
             stroke: #cbd5e1;
             stroke-width: 2px;
         }
-        .node-root rect {
+        .node-root .node-shape {
             fill: url(#grad-root);
             stroke: #ca8a04;
         }
-        .node-wife rect {
+        .node-wife .node-shape {
             fill: url(#grad-wife);
             stroke: #db2777;
         }
-        .node-gen1 rect {
+        .node-gen1 .node-shape {
             fill: url(#grad-gen1);
             stroke: #2563eb;
         }
-        .node-gen2 rect {
+        .node-gen2 .node-shape {
             fill: url(#grad-gen2);
             stroke: #4f46e5;
         }
-        .node-gen3 rect {
+        .node-gen3 .node-shape {
             fill: url(#grad-gen3);
             stroke: #16a34a;
         }
-        .node-gen4 rect {
+        .node-gen4 .node-shape {
             fill: url(#grad-gen4);
             stroke: #9333ea;
         }
-        .node-gen5 rect {
+        .node-gen5 .node-shape {
             fill: url(#grad-gen5);
             stroke: #ea580c;
         }
-        .node-gen6 rect {
+        .node-gen6 .node-shape {
             fill: url(#grad-gen6);
             stroke: #0891b2;
         }
-        .node-gen7 rect {
+        .node-gen7 .node-shape {
             fill: url(#grad-gen7);
             stroke: #e11d48;
         }
-        .node-gen8 rect {
+        .node-gen8 .node-shape {
             fill: url(#grad-gen8);
             stroke: #7c3aed;
         }
-        .node-founder rect {
+        .node-founder .node-shape {
             fill: url(#grad-founder);
             stroke: #15803d;
             stroke-width: 3.5px;
@@ -451,7 +450,7 @@
             font-weight: 700;
             fill: #14532d;
         }
-        .node.search-highlight rect:not(.glow-aura) {
+        .node.search-highlight .node-shape:not(.glow-aura) {
             stroke: #f59e0b !important;
             stroke-width: 4px !important;
             animation: search-pulse 1.3s ease-in-out 2;
@@ -467,17 +466,30 @@
                 filter: drop-shadow(0 0 0px rgba(245, 158, 11, 0.95));
             }
         }
-        .node-founder-shape rect {
+        .node-founder-shape .node-shape {
             width: 280px !important;
             height: 76px !important;
         }
-        .node-root-shape rect {
+        .node-root-shape .node-shape {
             width: 260px !important;
             height: 68px !important;
         }
-        .node-default-shape rect {
+        .node-default-shape .node-shape {
             width: 240px !important;
             height: 60px !important;
+        }
+        .toggle-indicator {
+            pointer-events: none;
+        }
+        .toggle-indicator circle {
+            fill: #ffffff;
+            stroke: #94a3b8;
+            stroke-width: 1.5px;
+        }
+        .toggle-indicator .toggle-icon {
+            stroke: #334155;
+            stroke-width: 1.8px;
+            stroke-linecap: round;
         }
     </style>
 </head>
@@ -4198,6 +4210,24 @@
     const rootCardHeight = 68;
     const extraNameHeight = 18;
 
+    // Menghasilkan path SVG berbentuk baterai (rounded rect + terminal/nub di kanan)
+    function batteryPath(w, h) {
+        if (!w || !h) return 'M0,0 Z';
+        const r = Math.min(14, h / 2, w / 2);
+        const nubH = Math.min(h * 0.38, 34);
+        const nubW = 10;
+        const nubR = 3;
+        const y0 = -h / 2, y1 = h / 2;
+        return `M ${r},${y0} L ${w - r},${y0} Q ${w},${y0} ${w},${y0 + r} ` +
+            `L ${w},${-nubH / 2 - nubR} Q ${w},${-nubH / 2} ${w + nubR},${-nubH / 2} ` +
+            `L ${w + nubW - nubR},${-nubH / 2} Q ${w + nubW},${-nubH / 2} ${w + nubW},${-nubH / 2 + nubR} ` +
+            `L ${w + nubW},${nubH / 2 - nubR} Q ${w + nubW},${nubH / 2} ${w + nubW - nubR},${nubH / 2} ` +
+            `L ${w + nubR},${nubH / 2} Q ${w},${nubH / 2} ${w},${nubH / 2 + nubR} ` +
+            `L ${w},${y1 - r} Q ${w},${y1} ${w - r},${y1} ` +
+            `L ${r},${y1} Q 0,${y1} 0,${y1 - r} ` +
+            `L 0,${y0 + r} Q 0,${y0} ${r},${y0} Z`;
+    }
+
     let i = 0;
     const duration = 500;
     let root;
@@ -4469,33 +4499,34 @@
 
         nodeEnter.filter(d => d.data.name === 'H. Fatchul Usmanto' || d.data.name === "Arwani Ma'ruf" || d.data.name ===
                 'Hj. Maimunah' || d.data.name === "Hj. Diana Ma'ruf")
-            .append('rect')
-            .attr('class', 'glow-aura')
-            .attr('width', cardWidth)
-            .attr('height', d => cardHeight + (d.data.extraName ? extraNameHeight : 0) + (d.data.address ? extraNameHeight : 0))
-            .attr('x', 0)
-            .attr('y', d => -(cardHeight + (d.data.extraName ? extraNameHeight : 0) + (d.data.address ? extraNameHeight : 0)) / 2)
-            .attr('rx', 14)
-            .attr('ry', 14);
+            .append('path')
+            .attr('class', 'glow-aura node-shape')
+            .attr('d', d => batteryPath(cardWidth, cardHeight + (d.data.extraName ? extraNameHeight : 0) + (d.data.address ? extraNameHeight : 0)));
 
-        nodeEnter.append('rect')
-            .attr('width', d => {
-                if (d.data.name === 'H. ABDUL MUKTI') return founderCardWidth;
-                if (d.data.name === 'MOH. SATHORI') return rootCardWidth;
-                return cardWidth;
-            })
-            .attr('height', d => {
-                if (d.data.name === 'H. ABDUL MUKTI') return founderCardHeight;
-                if (d.data.name === 'MOH. SATHORI') return rootCardHeight;
-                return cardHeight + (d.data.extraName ? extraNameHeight : 0) + (d.data.address ? extraNameHeight : 0);
-            })
-            .attr('x', 0)
-            .attr('y', d => {
-                if (d.data.name === 'H. ABDUL MUKTI') return -founderCardHeight / 2;
-                if (d.data.name === 'MOH. SATHORI') return -rootCardHeight / 2;
-                return -(cardHeight + (d.data.extraName ? extraNameHeight : 0) + (d.data.address ? extraNameHeight : 0)) / 2;
+        nodeEnter.append('path')
+            .attr('class', 'node-shape')
+            .attr('d', d => {
+                let w = cardWidth, h = cardHeight + (d.data.extraName ? extraNameHeight : 0) + (d.data.address ? extraNameHeight : 0);
+                if (d.data.name === 'H. ABDUL MUKTI') { w = founderCardWidth; h = founderCardHeight; }
+                else if (d.data.name === 'MOH. SATHORI') { w = rootCardWidth; h = rootCardHeight; }
+                return batteryPath(w, h);
             })
             .style("box-shadow", "0 4px 6px rgba(0,0,0,0.1)");
+
+        // ===== INDIKATOR "+" (menandakan masih ada cabang/anak di bawahnya) =====
+        const toggleIndicator = nodeEnter.append('g')
+            .attr('class', 'toggle-indicator')
+            .attr('transform', d => {
+                const w = (d.data.name === 'H. ABDUL MUKTI') ? founderCardWidth :
+                    (d.data.name === 'MOH. SATHORI') ? rootCardWidth : cardWidth;
+                return `translate(${w + 10},0)`;
+            })
+            .style('display', d => (d.children || d._children) ? null : 'none');
+        toggleIndicator.append('circle')
+            .attr('r', 9);
+        toggleIndicator.append('path')
+            .attr('class', 'toggle-icon')
+            .attr('d', d => d._children ? 'M -4,0 L 4,0 M 0,-4 L 0,4' : 'M -4,0 L 4,0');
 
         const hasSpouseLine = d => {
             if (!d.data.spouse) return false;
@@ -4707,14 +4738,18 @@
             .duration(duration)
             .attr("transform", d => `translate(${d.y},${d.x})`);
 
+        nodeUpdate.select('.toggle-indicator')
+            .style('display', d => (d.children || d._children) ? null : 'none');
+        nodeUpdate.select('.toggle-icon')
+            .attr('d', d => d._children ? 'M -4,0 L 4,0 M 0,-4 L 0,4' : 'M -4,0 L 4,0');
+
         const nodeExit = node.exit().transition()
             .duration(duration)
             .attr("transform", d => `translate(${source.y},${source.x})`)
             .remove();
 
-        nodeExit.selectAll('rect')
-            .attr('width', 0)
-            .attr('height', 0);
+        nodeExit.selectAll('.node-shape')
+            .attr('d', batteryPath(0, 0));
 
         const link = gContainer.selectAll('path.link')
             .data(links, d => d.target.id);
