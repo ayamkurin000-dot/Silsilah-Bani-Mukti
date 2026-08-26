@@ -136,7 +136,7 @@
                 font-size: 1rem;
             }
             #header p {
-                font-size: 0.58rem;
+                font-size: 0.6rem;
                 white-space: nowrap;
                 letter-spacing: -0.1px;
             }
@@ -5536,8 +5536,8 @@
                 let cls = `node node-${d.data.type || 'gen3'}`;
                 if (d.data.name === 'H. ABDUL MUKTI') cls += ' node-founder';
                 if (d.data.name === 'MOH. SATHORI') cls += ' node-root';
-                if (d.data.name === 'H. Fatchul Usmanto' || d.data.name === "Arwani Ma'ruf" || d.data.name ===
-                    'Hj. Maimunah' || d.data.name === "Hj. Diana Ma'ruf") cls += ' node-special';
+                if (d.data.name === 'H. Fatchul Usmanto' || d.data.name === 'Hj. Noor Chosijah' || d.data.name ===
+                    'Hj. Maimunah') cls += ' node-special';
                 if (/farath/i.test(d.data.name || '')) cls += ' node-plain-white';
                 return cls;
             })
@@ -5564,8 +5564,8 @@
                 update(d);
             });
 
-        nodeEnter.filter(d => d.data.name === 'H. Fatchul Usmanto' || d.data.name === "Arwani Ma'ruf" || d.data.name ===
-                'Hj. Maimunah' || d.data.name === "Hj. Diana Ma'ruf")
+        nodeEnter.filter(d => d.data.name === 'H. Fatchul Usmanto' || d.data.name === 'Hj. Noor Chosijah' || d.data.name ===
+                'Hj. Maimunah')
             .append('path')
             .attr('class', 'glow-aura node-shape')
             .attr('d', d => batteryPath(cardWidth, cardHeight + (d.data.extraName ? extraNameHeight : 0) + (d.data.address ? extraNameHeight : 0)));
