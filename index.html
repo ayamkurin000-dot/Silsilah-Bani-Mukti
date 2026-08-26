@@ -158,20 +158,60 @@
             pointer-events: none;
             z-index: 9999;
         }
+        
+                #panel-switcher {
+            position: fixed;
+            bottom: 10px;
+            right: 165px;
+            z-index: 10000;
+            background: #ffffffee;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            display: flex;
+            overflow: hidden;
+            width: auto;
+            font-size: 0.6rem;
+        }
+        #panel-switcher button {
+            background: #f8fafc;
+            border: none;
+            padding: 5px 9px;
+            font-size: 0.58rem;
+            font-weight: 800;
+            color: #64748b;
+            cursor: pointer;
+            transition: 0.15s;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+        #panel-switcher button.active {
+            background: #3b82f6;
+            color: white;
+        }
+        #panel-switcher button:hover {
+            background: #e2e8f0;
+        }
+        #panel-switcher button.active:hover {
+            background: #2563eb;
+        }
         #credit-tag {
             position: fixed;
             bottom: 10px;
             right: 14px;
-            font-size: 0.75rem;
+            font-size: 0.6rem;
             color: #475569;
             background: #ffffff;
-            padding: 5px 12px;
+            padding: 5px 10px;
             border-radius: 6px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
             border: 1px solid #e2e8f0;
             z-index: 10000;
             pointer-events: none;
             user-select: none;
+            letter-spacing: 0.2px;
+            font-weight: 600;
         }
         #gen-legend {
             position: fixed;
@@ -206,35 +246,9 @@
             display: none;
         }
         /* ===== PANEL SWITCHER & CHAT BANI - TAMBAHAN BARU ===== */
-        #panel-switcher {
-            position: fixed;
-            top: 80px;
-            left: 14px;
-            z-index: 9998;
-            background: #ffffffee;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
-            display: flex;
-            overflow: hidden;
-            width: 220px;
-        }
-        #panel-switcher button {
-            flex: 1;
-            border: none;
-            padding: 7px 8px;
-            font-size: 0.7rem;
-            font-weight: 800;
-            cursor: pointer;
-            background: #f8fafc;
-            color: #64748b;
-            transition: all 0.2s ease;
-            letter-spacing: 0.3px;
-        }
-        #panel-switcher button.active {
-            background: #3b82f6;
-            color: white;
-        }
+        
+        
+        
         #panel-switcher button:hover:not(.active) {
             background: #eff6ff;
             color: #1d4ed8;
@@ -262,6 +276,60 @@
         }
         #gen-legend.chat-hidden {
             display: none;
+        }
+                #panel-switcher {
+            position: fixed;
+            bottom: 10px;
+            right: 165px;
+            z-index: 10000;
+            background: #ffffffee;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            display: flex;
+            overflow: hidden;
+            width: auto;
+            font-size: 0.6rem;
+        }
+        #panel-switcher button {
+            background: #f8fafc;
+            border: none;
+            padding: 5px 9px;
+            font-size: 0.58rem;
+            font-weight: 800;
+            color: #64748b;
+            cursor: pointer;
+            transition: 0.15s;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+        #panel-switcher button.active {
+            background: #3b82f6;
+            color: white;
+        }
+        #panel-switcher button:hover {
+            background: #e2e8f0;
+        }
+        #panel-switcher button.active:hover {
+            background: #2563eb;
+        }
+        #credit-tag {
+            position: fixed;
+            bottom: 10px;
+            right: 14px;
+            font-size: 0.6rem;
+            color: #475569;
+            background: #ffffff;
+            padding: 5px 10px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            border: 1px solid #e2e8f0;
+            z-index: 10000;
+            pointer-events: none;
+            user-select: none;
+            letter-spacing: 0.2px;
+            font-weight: 600;
         }
         #gen-legend {
             top: 115px !important;
@@ -452,14 +520,62 @@
             color: #1e40af;
         }
         @media (max-width: 640px) {
-            #panel-switcher {
-                top: auto;
-                bottom: 280px;
-                left: 8px;
-                right: 8px;
-                width: auto;
-            }
-            #gen-legend {
+            
+                    #panel-switcher {
+            position: fixed;
+            bottom: 10px;
+            right: 165px;
+            z-index: 10000;
+            background: #ffffffee;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            display: flex;
+            overflow: hidden;
+            width: auto;
+            font-size: 0.6rem;
+        }
+        #panel-switcher button {
+            background: #f8fafc;
+            border: none;
+            padding: 5px 9px;
+            font-size: 0.58rem;
+            font-weight: 800;
+            color: #64748b;
+            cursor: pointer;
+            transition: 0.15s;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+        #panel-switcher button.active {
+            background: #3b82f6;
+            color: white;
+        }
+        #panel-switcher button:hover {
+            background: #e2e8f0;
+        }
+        #panel-switcher button.active:hover {
+            background: #2563eb;
+        }
+        #credit-tag {
+            position: fixed;
+            bottom: 10px;
+            right: 14px;
+            font-size: 0.6rem;
+            color: #475569;
+            background: #ffffff;
+            padding: 5px 10px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            border: 1px solid #e2e8f0;
+            z-index: 10000;
+            pointer-events: none;
+            user-select: none;
+            letter-spacing: 0.2px;
+            font-weight: 600;
+        }
+        #gen-legend {
                 top: auto !important;
                 bottom: 44px;
                 left: 8px;
@@ -475,12 +591,64 @@
                 height: 58vh;
                 max-height: 58vh;
             }
-            #panel-switcher {
-                bottom: calc(44px + 58vh + 8px);
-            }
+            
         }
         @media (max-width: 640px) {
-            #gen-legend {
+                    #panel-switcher {
+            position: fixed;
+            bottom: 10px;
+            right: 165px;
+            z-index: 10000;
+            background: #ffffffee;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            display: flex;
+            overflow: hidden;
+            width: auto;
+            font-size: 0.6rem;
+        }
+        #panel-switcher button {
+            background: #f8fafc;
+            border: none;
+            padding: 5px 9px;
+            font-size: 0.58rem;
+            font-weight: 800;
+            color: #64748b;
+            cursor: pointer;
+            transition: 0.15s;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+        #panel-switcher button.active {
+            background: #3b82f6;
+            color: white;
+        }
+        #panel-switcher button:hover {
+            background: #e2e8f0;
+        }
+        #panel-switcher button.active:hover {
+            background: #2563eb;
+        }
+        #credit-tag {
+            position: fixed;
+            bottom: 10px;
+            right: 14px;
+            font-size: 0.6rem;
+            color: #475569;
+            background: #ffffff;
+            padding: 5px 10px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            border: 1px solid #e2e8f0;
+            z-index: 10000;
+            pointer-events: none;
+            user-select: none;
+            letter-spacing: 0.2px;
+            font-weight: 600;
+        }
+        #gen-legend {
                 top: auto;
                 bottom: 44px;
                 left: 8px;
@@ -769,7 +937,23 @@
             stroke-width: 1.8px;
             stroke-linecap: round;
         }
-    </style>
+    
+        @media (max-width: 640px) {
+            #panel-switcher {
+                top: auto !important;
+                bottom: 10px !important;
+                left: 8px !important;
+                right: auto !important;
+                width: auto !important;
+                font-size: 0.52rem !important;
+            }
+            #credit-tag {
+                bottom: 10px !important;
+                right: 8px !important;
+                left: auto !important;
+            }
+        }
+        </style>
 </head>
 <body>
     <div id="header">
@@ -794,7 +978,7 @@
     <div id="credit-tag">DIBUAT OLEH: MANNIXS-21</div>
     <div id="panel-switcher">
         <button id="tab-generasi" class="active" onclick="switchSide('generasi')">GENERASI</button>
-        <button id="tab-chat" onclick="switchSide('chat')">CHAT BANI (16)</button>
+        <button id="tab-chat" onclick="switchSide('chat')">CHAT BANI</button>
     </div>
 
     <div id="gen-legend">
@@ -831,8 +1015,8 @@
                 <input type="text" id="chat-name" placeholder="Contoh: Ahmad Fauzi" maxlength="40">
             </div>
             <div>
-                <label>Email (untuk login) *</label>
-                <input type="email" id="chat-email" placeholder="nama@email.com">
+                <label>Email (optional) - tidak wajib</label>
+                <input type="email" id="chat-email" placeholder="nama@email.com (opsional, tidak wajib)">
             </div>
             <div>
                 <label>Pilih Bani / Asal *</label>
@@ -881,14 +1065,26 @@
                     <span id="reply-text"></span>
                     <button onclick="cancelReply()" style="background:none; border:none; color:#dc2626; font-weight:800; cursor:pointer;">✕</button>
                 </div>
-                <textarea id="chat-input" placeholder="Tulis saran, pertanyaan, atau info keluarga... (Enter untuk kirim, Shift+Enter baris baru)"></textarea>
-                <div style="display:flex; gap:6px;">
+                <div id="file-preview" style="display:none; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; padding:8px; margin-bottom:6px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span id="file-preview-name" style="font-size:0.7rem; font-weight:700; color:#334155;"></span>
+                        <button onclick="clearFilePreview()" style="background:none; border:none; color:#dc2626; font-weight:800; cursor:pointer;">✕ Hapus</button>
+                    </div>
+                    <img id="file-preview-img" style="display:none; max-width:100%; max-height:120px; border-radius:6px; margin-top:6px;">
+                </div>
+                <div style="display:flex; gap:6px; align-items:flex-end;">
+                    <textarea id="chat-input" placeholder="Tulis pesan... (Enter kirim)" style="flex:1; min-height:58px;"></textarea>
+                    <input type="file" id="chat-file-input" accept="image/*,.pdf,.doc,.docx,.txt" style="display:none;">
+                    <button class="btn" style="background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; padding:8px 10px;" onclick="document.getElementById('chat-file-input').click()" title="Lampirkan file / foto">📎</button>
+                </div>
+                <div style="display:flex; gap:6px; margin-top:6px;">
                     <button class="btn" style="flex:1; padding:8px;" onclick="sendMessage()">KIRIM 💬</button>
                     <button class="btn" style="background:#f1f5f9; color:#475569; border:1px solid #e2e8f0;" onclick="clearChatLocal()">HAPUS</button>
                     <button id="admin-clear-all" class="btn" style="display:none; background:#7c3aed; color:white;" onclick="adminClearAll()">HAPUS SEMUA (ADMIN)</button>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <script>
@@ -5481,7 +5677,7 @@
             .style('font-size', '13px')
             .style('fill', '#0f172a')
             .text(d => {
-                if (d.data.name === 'H. ABDUL MUKTI' || d.data.name === 'MOH. SATHORI' || d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return ''; // founder hanya nama + tahun
+                if (d.data.name === 'H. ABDUL MUKTI' || d.data.name === 'MOH. SATHORI' || d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return '';
                 return d.data.extraName || '';
             })
             .each(function(d) {
@@ -5536,7 +5732,7 @@
             .style('font-weight', '600')
             .style('fill', '#8b5cf6')
             .text(d => {
-                if (d.data.name === 'H. ABDUL MUKTI' || d.data.name === 'MOH. SATHORI' || d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return ''; // founder hanya nama + tahun
+                if (d.data.name === 'H. ABDUL MUKTI' || d.data.name === 'MOH. SATHORI' || d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return '';
                 const wifeOrder = getSpouseOrderForWife(d);
                 if (wifeOrder) {
                     // Untuk node tipe wife, selalu tampilkan "ISTERI"
@@ -5575,9 +5771,9 @@
             })
             .style('text-transform', 'uppercase')
             .style('font-size', d => {
-                if (d.data.name === 'H. ABDUL MUKTI') return '16px';
-                if (d.data.name === 'MOH. SATHORI') return '16px';
-                return '16px';
+                if (d.data.name === 'H. ABDUL MUKTI') return '13px';
+                if (d.data.name === 'MOH. SATHORI') return '10px';
+                return '10px';
             })
             .style('font-weight', d => {
                 if (d.data.name === 'H. ABDUL MUKTI') return 700;
@@ -5840,11 +6036,84 @@
         arr.push({ id: 'sys_'+Date.now(), name: 'Sistem', bani: 'Bani Mukti', ibu: 'Panitia', text, ts: Date.now(), sys: true });
         saveMessages(arr);
     }
+    
+    // ===== FILE / PHOTO ATTACHMENT =====
+    let pendingFileData = null;
+    let pendingFileName = null;
+    let pendingFileType = null;
+
+    function clearFilePreview() {
+        pendingFileData = null;
+        pendingFileName = null;
+        pendingFileType = null;
+        const preview = document.getElementById('file-preview');
+        const img = document.getElementById('file-preview-img');
+        const nameEl = document.getElementById('file-preview-name');
+        const fileInput = document.getElementById('chat-file-input');
+        if (preview) preview.style.display = 'none';
+        if (img) { img.style.display = 'none'; img.src = ''; }
+        if (nameEl) nameEl.textContent = '';
+        if (fileInput) fileInput.value = '';
+    }
+
+    function compressImage(dataUrl, maxWidth, callback) {
+        const img = new Image();
+        img.onload = function() {
+            let width = img.width;
+            let height = img.height;
+            if (width > maxWidth) {
+                height = height * (maxWidth / width);
+                width = maxWidth;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressed = canvas.toDataURL('image/jpeg', 0.7);
+            callback(compressed);
+        };
+        img.onerror = function() { callback(dataUrl); };
+        img.src = dataUrl;
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+        const fileInput = document.getElementById('chat-file-input');
+        if (fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                if (file.size > 5 * 1024 * 1024) { alert('File terlalu besar, maksimal 5MB ya'); fileInput.value = ''; return; }
+                pendingFileName = file.name;
+                pendingFileType = file.type;
+                const preview = document.getElementById('file-preview');
+                const nameEl = document.getElementById('file-preview-name');
+                const imgEl = document.getElementById('file-preview-img');
+                if (nameEl) nameEl.textContent = '📎 ' + file.name + ' (' + (file.size/1024).toFixed(0) + 'KB)';
+                if (preview) preview.style.display = 'block';
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    const dataUrl = ev.target.result;
+                    if (file.type.startsWith('image/')) {
+                        compressImage(dataUrl, 800, function(compressed) {
+                            pendingFileData = compressed;
+                            if (imgEl) { imgEl.src = compressed; imgEl.style.display = 'block'; }
+                        });
+                    } else {
+                        pendingFileData = dataUrl;
+                        if (imgEl) imgEl.style.display = 'none';
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+    });
+
     function sendMessage() {
         if (!chatUser) { alert('Login dulu'); return; }
         const input = document.getElementById('chat-input');
         const text = input.value.trim();
-        if (!text) return;
+        if (!text && !pendingFileData) return;
         if (text.length < 2) { alert('Pesan terlalu pendek'); return; }
         const arr = getMessages();
         const msg = {
@@ -5860,6 +6129,7 @@
         arr.push(msg);
         saveMessages(arr);
         input.value = '';
+        clearFilePreview();
         cancelReply();
         renderMessages();
         // auto scroll
@@ -5898,7 +6168,7 @@
                     <span class="msg-name" style="font-weight:800; color:#0f172a; font-size:0.8rem;">${escapeHtml(m.name)}</span>
                     <span class="chat-bani-badge" style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:20px; font-size:0.65rem; font-weight:800;">${escapeHtml(m.bani)}</span>
                 </div>
-                <div class="msg-text" style="color:#334155; font-size:0.82rem; line-height:1.4; white-space:pre-wrap; word-break:break-word;">${escapeHtml(m.text)}</div>
+                <div class="msg-text" style="color:#334155; font-size:0.82rem; line-height:1.4; white-space:pre-wrap; word-break:break-word;">${escapeHtml(m.text)}</div>${m.image ? `<div style="margin-top:8px;"><img src="${m.image}" style="max-width:220px; max-height:220px; border-radius:10px; border:1px solid #e2e8f0; cursor:pointer;" onclick="window.open(this.src, '_blank')"><div style="font-size:0.6rem; color:#64748b; margin-top:2px;">📎 ${escapeHtml(m.fileName||'file')}</div></div>` : ''}
                 <div class="msg-actions" style="margin-top:6px; display:flex; gap:10px;">
                     <button onclick="replyMessage('${m.id}')" style="background:none; border:none; font-size:0.68rem; font-weight:700; color:#3b82f6; cursor:pointer;">↩️ Balas</button>
                     ${(isMe||isAdmin)?`<button onclick="deleteMessage('${m.id}')" style="background:none; border:none; font-size:0.68rem; font-weight:700; color:${isAdmin && !isMe ? '#7c3aed' : '#dc2626'}; cursor:pointer;">${isAdmin && !isMe ? '🛡️ Hapus' : '🗑️ Hapus'}</button>`:''}
