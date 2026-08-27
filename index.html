@@ -1276,7 +1276,7 @@
                     "spouse_life": "",
                     "type": "gen1",
                     "address": "",
-                    "extraName": "Mbah Ji Mukti",
+                    "extraName": "",
                     "children": [
                         {
                             "name": "Murthosiyah",
@@ -5626,7 +5626,8 @@
                 return TEXT_PAD_X;
             })
             .attr('y', d => {
-                if (d.data.name === 'H. ABDUL MUKTI') return -10;
+                if (d.data.name === 'H. ABDUL MUKTI') return -9;
+
                 if (d.data.name === 'MOH. SATHORI') return 6;
                 if (d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return 5;
                 const order = getSpouseOrderForWife(d);
@@ -5641,6 +5642,7 @@
                 if (d.data.name === 'H. ABDUL MUKTI' || d.data.name === 'MOH. SATHORI' || d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return 'middle';
                 return 'start';
             })
+            .attr('dominant-baseline', 'middle')
             .style('text-transform', 'uppercase')
             .style('font-weight', d => {
                 if (d.data.name === 'H. ABDUL MUKTI') return 900;
@@ -5648,7 +5650,7 @@
                 return 700;
             })
             .style('font-size', d => {
-                if (d.data.name === 'H. ABDUL MUKTI') return '18px';
+                if (d.data.name === 'H. ABDUL MUKTI') return '20px';
                 if (d.data.name === 'MOH. SATHORI') return '17px';
                 return '14px';
             })
@@ -5767,7 +5769,7 @@
                 return TEXT_PAD_X;
             })
             .attr('y', d => {
-                if (d.data.name === 'H. ABDUL MUKTI') return 12;
+                if (d.data.name === 'H. ABDUL MUKTI') return 14;
                 if (d.data.name === 'MOH. SATHORI') return 0;
                 const wifeOrder = getSpouseOrderForWife(d);
                 const hasExtra = d.data.extraName ? true : false;
@@ -5783,7 +5785,7 @@
             })
             .style('text-transform', 'uppercase')
             .style('font-size', d => {
-                if (d.data.name === 'H. ABDUL MUKTI') return '16px';
+                if (d.data.name === 'H. ABDUL MUKTI') return '13px';
                 if (d.data.name === 'MOH. SATHORI') return '10px';
                 return '10px';
             })
