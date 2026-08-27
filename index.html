@@ -5622,7 +5622,7 @@
             .attr('x', d => {
                 if (d.data.name === 'H. ABDUL MUKTI') return founderCardWidth / 2;
                 if (d.data.name === 'MOH. SATHORI') return rootCardWidth / 2;
-                if (d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return cardWidth / 2;
+                if (d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return cardWidth / 2 + 5;
                 return TEXT_PAD_X;
             })
             .attr('y', d => {
@@ -5764,7 +5764,7 @@
             .attr('x', d => {
                 if (d.data.name === 'H. ABDUL MUKTI') return founderCardWidth / 2;
                 if (d.data.name === 'MOH. SATHORI') return rootCardWidth / 2;
-                if (d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return cardWidth / 2;
+                if (d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return cardWidth / 2 + 5;
                 return TEXT_PAD_X;
             })
             .attr('y', d => {
@@ -5897,6 +5897,16 @@
     }
     // Init panel sesuai localStorage
     setTimeout(() => switchSide(currentSide), 100);
+
+    // Klik di luar area chat -> otomatis kembali ke tampilan diagram (generasi)
+    document.addEventListener('click', function(e) {
+        if (currentSide !== 'chat') return;
+        const chatPanel = document.getElementById('chat-panel');
+        const switcher = document.getElementById('panel-switcher');
+        if (chatPanel && chatPanel.contains(e.target)) return;
+        if (switcher && switcher.contains(e.target)) return;
+        switchSide('generasi');
+    }, true);
 
     // =====================================================================
     // CHAT BANI - NAMA + EMAIL + PILIH BANI (16 BANI)
