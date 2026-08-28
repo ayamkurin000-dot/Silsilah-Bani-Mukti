@@ -180,6 +180,26 @@
             pointer-events: none;
             z-index: 9999;
         }
+        #panel-switcher button {
+            position: relative;
+        }
+        .chat-notif-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            min-width: 15px;
+            height: 15px;
+            padding: 0 3px;
+            background: #dc2626;
+            color: #ffffff;
+            border-radius: 999px;
+            font-size: 0.55rem;
+            font-weight: 800;
+            line-height: 15px;
+            text-align: center;
+            box-shadow: 0 0 0 2px #ffffff;
+            pointer-events: none;
+        }
         
                 #panel-switcher {
             position: fixed;
@@ -1000,7 +1020,7 @@
     <div id="credit-tag">DIBUAT OLEH: MANNIXS-21</div>
     <div id="panel-switcher">
         <button id="tab-generasi" class="active" onclick="switchSide('generasi')">GENERASI</button>
-        <button id="tab-chat" onclick="switchSide('chat')">CHAT BANI</button>
+        <button id="tab-chat" onclick="switchSide('chat')">CHAT BANI<span id="chat-notif-badge" class="chat-notif-badge" style="display:none;">0</span></button>
     </div>
 
     <div id="gen-legend">
@@ -5913,6 +5933,8 @@
             tabChat.classList.add('active');
             // render ulang saat dibuka
             setTimeout(renderMessages, 50);
+            // tandai semua pesan sebagai sudah dibaca -> sembunyikan badge notif
+            markChatAsRead();
         }
     }
     // Init panel sesuai localStorage
@@ -6013,6 +6035,41 @@
 
     function escapeHtml(s) {
         return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ===== BADGE NOTIF PESAN BELUM DIBUKA =====
+    function getLastReadTs() {
+        return parseInt(localStorage.getItem('bani_chat_last_read') || '0', 10);
+    }
+    function markChatAsRead() {
+        localStorage.setItem('bani_chat_last_read', String(Date.now()));
+        updateChatNotifBadge();
+    }
+    function updateChatNotifBadge() {
+        const badge = document.getElementById('chat-notif-badge');
+        if (!badge) return;
+        // selama tab CHAT BANI sedang dibuka, anggap semua pesan yang masuk langsung terbaca
+        if (typeof currentSide !== 'undefined' && currentSide === 'chat') {
+            localStorage.setItem('bani_chat_last_read', String(Date.now()));
+            badge.style.display = 'none';
+            return;
+        }
+        const lastRead = getLastReadTs();
+        let msgs = typeof getAllMessages === 'function' ? getAllMessages() : (typeof getMessages === 'function' ? getMessages() : []);
+        msgs = msgs.filter(m => !m.sys && m.ts > lastRead);
+        // jangan hitung pesan milik sendiri sebagai belum dibaca
+        if (chatUser && chatUser.email) {
+            msgs = msgs.filter(m => m.email !== chatUser.email);
+        }
+        const count = msgs.length;
+        if (count > 0) {
+            badge.textContent = count > 99 ? '99+' : String(count);
+            badge.style.display = 'inline-flex';
+            badge.style.alignItems = 'center';
+            badge.style.justifyContent = 'center';
+        } else {
+            badge.style.display = 'none';
+        }
     }
     function loadUserSession() {
         // Pesan selalu dirender, siapapun (belum login) tetap bisa membaca chat.
@@ -6253,6 +6310,7 @@
         const container = document.getElementById('chat-messages');
         if (!container) return;
         let msgs = typeof getAllMessages === 'function' ? getAllMessages() : (typeof getMessages === 'function' ? getMessages() : []);
+        if (typeof updateChatNotifBadge === 'function') updateChatNotifBadge();
         // hapus sys messages biar fokus chat user saja
         msgs = msgs.filter(m => !m.sys);
         msgs.sort((a,b)=>a.ts-b.ts);
