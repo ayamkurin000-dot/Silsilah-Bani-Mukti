@@ -1156,6 +1156,22 @@
     </div>
     </div>
 
+    <!-- MODAL CROP FOTO PROFIL -->
+    <div id="photo-crop-modal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.75); z-index:20000; align-items:center; justify-content:center; padding:16px;">
+        <div style="background:#ffffff; border-radius:14px; padding:18px; width:300px; max-width:100%; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.35);">
+            <div style="font-weight:800; font-size:0.85rem; color:#0f172a; margin-bottom:10px;">✂️ Sesuaikan Foto Profil</div>
+            <div id="crop-viewport" style="width:240px; height:240px; margin:0 auto; border-radius:50%; overflow:hidden; position:relative; background:#e2e8f0; cursor:grab; border:2px solid #cbd5e1; touch-action:none;">
+                <img id="crop-image" draggable="false" style="position:absolute; top:0; left:0; user-select:none; -webkit-user-drag:none; max-width:none;">
+            </div>
+            <input type="range" id="crop-zoom" min="100" max="300" value="100" style="width:100%; margin-top:14px; accent-color:#3b82f6;">
+            <div style="font-size:0.6rem; color:#94a3b8; margin-top:2px;">Geser foto untuk atur posisi &bull; geser slider untuk zoom</div>
+            <div style="display:flex; gap:8px; margin-top:14px;">
+                <button class="btn" style="flex:1; background:#f1f5f9; color:#475569; border:1px solid #e2e8f0;" onclick="cancelCrop()">Batal</button>
+                <button class="btn" style="flex:1;" onclick="confirmCrop()">Simpan Foto</button>
+            </div>
+        </div>
+    </div>
+
     <script>
     // ============================================================
     // 🚀 SCRIPT TRACKING PENGUNJUNG - DISCORD + LOKASI
@@ -6314,6 +6330,130 @@
         img.src = dataUrl;
     }
 
+    // ===== CROP FOTO PROFIL (geser + zoom) =====
+    const CROP_VP = 240; // ukuran viewport lingkaran (px)
+    let cropTargetContext = null; // 'login' atau 'header'
+    let cropMinScale = 1;
+    let cropScale = 1;
+    let cropImgX = 0, cropImgY = 0;
+    let cropNaturalW = 0, cropNaturalH = 0;
+    let cropDragging = false;
+    let cropDragStartX = 0, cropDragStartY = 0, cropStartImgX = 0, cropStartImgY = 0;
+
+    function openCropModal(dataUrl, context) {
+        cropTargetContext = context;
+        const modal = document.getElementById('photo-crop-modal');
+        const imgEl = document.getElementById('crop-image');
+        const zoomSlider = document.getElementById('crop-zoom');
+        if (!modal || !imgEl) return;
+        imgEl.onload = function() {
+            cropNaturalW = imgEl.naturalWidth;
+            cropNaturalH = imgEl.naturalHeight;
+            cropMinScale = Math.max(CROP_VP / cropNaturalW, CROP_VP / cropNaturalH);
+            cropScale = cropMinScale;
+            cropImgX = (CROP_VP - cropNaturalW * cropScale) / 2;
+            cropImgY = (CROP_VP - cropNaturalH * cropScale) / 2;
+            if (zoomSlider) zoomSlider.value = 100;
+            applyCropTransform();
+        };
+        imgEl.src = dataUrl;
+        modal.style.display = 'flex';
+    }
+
+    function applyCropTransform() {
+        const imgEl = document.getElementById('crop-image');
+        if (!imgEl) return;
+        imgEl.style.width = (cropNaturalW * cropScale) + 'px';
+        imgEl.style.height = (cropNaturalH * cropScale) + 'px';
+        imgEl.style.transform = `translate(${cropImgX}px, ${cropImgY}px)`;
+    }
+
+    function clampCropPosition() {
+        const dispW = cropNaturalW * cropScale;
+        const dispH = cropNaturalH * cropScale;
+        const minX = CROP_VP - dispW;
+        const minY = CROP_VP - dispH;
+        cropImgX = Math.min(0, Math.max(minX, cropImgX));
+        cropImgY = Math.min(0, Math.max(minY, cropImgY));
+    }
+
+    function cancelCrop() {
+        const modal = document.getElementById('photo-crop-modal');
+        if (modal) modal.style.display = 'none';
+        cropTargetContext = null;
+    }
+
+    function confirmCrop() {
+        const canvas = document.createElement('canvas');
+        canvas.width = CROP_VP;
+        canvas.height = CROP_VP;
+        const ctx = canvas.getContext('2d');
+        const imgEl = document.getElementById('crop-image');
+        ctx.drawImage(imgEl, cropImgX, cropImgY, cropNaturalW * cropScale, cropNaturalH * cropScale);
+        const cropped = canvas.toDataURL('image/jpeg', 0.85);
+        compressImage(cropped, CROP_VP, function(finalPhoto) {
+            if (cropTargetContext === 'login') {
+                pendingProfilePhoto = finalPhoto;
+                const preview = document.getElementById('profile-photo-preview');
+                if (preview) preview.innerHTML = `<img src="${finalPhoto}" style="width:100%; height:100%; object-fit:cover; display:block;" alt="">`;
+            } else if (cropTargetContext === 'header' && chatUser) {
+                chatUser.photoUrl = finalPhoto;
+                localStorage.setItem('bani_chat_user', JSON.stringify(chatUser));
+                renderHeaderAvatar();
+            }
+            cancelCrop();
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const viewport = document.getElementById('crop-viewport');
+        const zoomSlider = document.getElementById('crop-zoom');
+        if (!viewport) return;
+
+        function startDrag(clientX, clientY) {
+            cropDragging = true;
+            cropDragStartX = clientX;
+            cropDragStartY = clientY;
+            cropStartImgX = cropImgX;
+            cropStartImgY = cropImgY;
+            viewport.style.cursor = 'grabbing';
+        }
+        function moveDrag(clientX, clientY) {
+            if (!cropDragging) return;
+            cropImgX = cropStartImgX + (clientX - cropDragStartX);
+            cropImgY = cropStartImgY + (clientY - cropDragStartY);
+            clampCropPosition();
+            applyCropTransform();
+        }
+        function endDrag() {
+            cropDragging = false;
+            viewport.style.cursor = 'grab';
+        }
+
+        viewport.addEventListener('pointerdown', (e) => {
+            viewport.setPointerCapture(e.pointerId);
+            startDrag(e.clientX, e.clientY);
+        });
+        viewport.addEventListener('pointermove', (e) => moveDrag(e.clientX, e.clientY));
+        viewport.addEventListener('pointerup', endDrag);
+        viewport.addEventListener('pointercancel', endDrag);
+
+        if (zoomSlider) {
+            zoomSlider.addEventListener('input', () => {
+                const oldScale = cropScale;
+                const newScale = cropMinScale * (parseFloat(zoomSlider.value) / 100);
+                // jaga titik tengah viewport tetap fokus pada konten yang sama saat zoom
+                const cx = (CROP_VP / 2 - cropImgX) / oldScale;
+                const cy = (CROP_VP / 2 - cropImgY) / oldScale;
+                cropScale = newScale;
+                cropImgX = CROP_VP / 2 - cx * cropScale;
+                cropImgY = CROP_VP / 2 - cy * cropScale;
+                clampCropPosition();
+                applyCropTransform();
+            });
+        }
+    });
+
     document.addEventListener('DOMContentLoaded', ()=>{
         const fileInput = document.getElementById('chat-file-input');
         if (fileInput) {
@@ -6355,11 +6495,8 @@
                 if (file.size > 5 * 1024 * 1024) { alert('Foto terlalu besar, maksimal 5MB ya'); profilePhotoInput.value = ''; return; }
                 const reader = new FileReader();
                 reader.onload = function(ev) {
-                    compressImage(ev.target.result, 200, function(compressed) {
-                        pendingProfilePhoto = compressed;
-                        const preview = document.getElementById('profile-photo-preview');
-                        if (preview) preview.innerHTML = `<img src="${compressed}" style="width:100%; height:100%; object-fit:cover; display:block;" alt="">`;
-                    });
+                    openCropModal(ev.target.result, 'login');
+                    profilePhotoInput.value = '';
                 };
                 reader.readAsDataURL(file);
             });
@@ -6376,12 +6513,8 @@
                 if (!chatUser) return;
                 const reader = new FileReader();
                 reader.onload = function(ev) {
-                    compressImage(ev.target.result, 200, function(compressed) {
-                        chatUser.photoUrl = compressed;
-                        localStorage.setItem('bani_chat_user', JSON.stringify(chatUser));
-                        renderHeaderAvatar();
-                        profilePhotoEditInput.value = '';
-                    });
+                    openCropModal(ev.target.result, 'header');
+                    profilePhotoEditInput.value = '';
                 };
                 reader.readAsDataURL(file);
             });
