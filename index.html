@@ -1069,6 +1069,13 @@
                 <div style="font-weight:800; font-size:0.85rem; color:#0f172a;">Masuk ke Chat Bani</div>
                 <div style="font-size:0.68rem; color:#64748b; margin-top:3px;">Isi nama, email & pilih bani kamu (16 bani)</div>
             </div>
+            <div style="display:flex; justify-content:center; margin-bottom:2px;">
+                <div style="position:relative;">
+                    <div id="profile-photo-preview" style="width:64px; height:64px; border-radius:50%; background:#e2e8f0; display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:#94a3b8; overflow:hidden; border:2px dashed #cbd5e1; cursor:pointer;" onclick="document.getElementById('chat-profile-photo-input').click()" title="Upload foto profil">📷</div>
+                    <input type="file" id="chat-profile-photo-input" accept="image/*" style="display:none;">
+                </div>
+            </div>
+            <div style="text-align:center; font-size:0.6rem; color:#94a3b8; margin:-4px 0 8px;">Tap foto untuk upload foto profil (opsional)</div>
             <div>
                 <label>Email (optional) - tidak wajib</label>
                 <input type="email" id="chat-email" placeholder="nama@email.com (opsional, tidak wajib)">
@@ -1110,10 +1117,14 @@
         <!-- CHAT AREA (setelah login: kotak nama user + form kirim pesan) -->
         <div id="chat-main" style="display:none; flex-direction:column; overflow:hidden;">
             <div class="chat-user-info">
-                <div>
-                    <span>Halo, <b id="chat-user-name"></b> <span id="admin-badge" style="display:none; background:#7c3aed; color:white; padding:2px 6px; border-radius:10px; font-size:0.55rem; font-weight:900; margin-left:4px;">ADMIN FULL</span></span><br>
-                    <span id="chat-user-bani" class="chat-bani-badge"></span>
-                    <small id="chat-user-ibu" style="font-size:0.6rem; color:#64748b; margin-left:4px;"></small>
+                <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+                    <div id="chat-header-avatar" onclick="document.getElementById('chat-profile-photo-edit-input').click()" title="Ganti foto profil" style="width:34px; height:34px; min-width:34px; border-radius:50%; overflow:hidden; cursor:pointer; flex-shrink:0;"></div>
+                    <input type="file" id="chat-profile-photo-edit-input" accept="image/*" style="display:none;">
+                    <div style="min-width:0;">
+                        <span>Halo, <b id="chat-user-name"></b> <span id="admin-badge" style="display:none; background:#7c3aed; color:white; padding:2px 6px; border-radius:10px; font-size:0.55rem; font-weight:900; margin-left:4px;">ADMIN FULL</span></span><br>
+                        <span id="chat-user-bani" class="chat-bani-badge"></span>
+                        <small id="chat-user-ibu" style="font-size:0.6rem; color:#64748b; margin-left:4px;"></small>
+                    </div>
                 </div>
                 <button onclick="logoutChat()" style="background:#fee2e2; border:1px solid #fecaca; color:#dc2626; padding:4px 8px; border-radius:6px; font-size:0.65rem; font-weight:700; cursor:pointer;">KELUAR</button>
             </div>
@@ -6093,10 +6104,26 @@
         if (parts.length === 1) return parts[0].slice(0,2).toUpperCase();
         return (parts[0][0] + parts[1][0]).toUpperCase();
     }
-    function renderAvatarHtml(name, key) {
+    function renderAvatarHtml(name, key, photoUrl) {
+        if (photoUrl) {
+            return `<div class="msg-avatar" style="width:32px; height:32px; min-width:32px; border-radius:50%; overflow:hidden; flex-shrink:0; background:#e2e8f0;"><img src="${photoUrl}" style="width:100%; height:100%; object-fit:cover; display:block;" alt=""></div>`;
+        }
         const initials = getInitials(name);
         const color = getAvatarColor(key || name);
         return `<div class="msg-avatar" style="width:32px; height:32px; min-width:32px; border-radius:50%; background:${color}; color:#ffffff; display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:800; flex-shrink:0; user-select:none;">${escapeHtml(initials)}</div>`;
+    }
+    function renderHeaderAvatarHtml(name, key, photoUrl) {
+        if (photoUrl) {
+            return `<img src="${photoUrl}" style="width:100%; height:100%; object-fit:cover; display:block;" alt="">`;
+        }
+        const initials = getInitials(name);
+        const color = getAvatarColor(key || name);
+        return `<div style="width:100%; height:100%; background:${color}; color:#ffffff; display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:800; user-select:none;">${escapeHtml(initials)}</div>`;
+    }
+    function renderHeaderAvatar() {
+        const el = document.getElementById('chat-header-avatar');
+        if (!el || !chatUser) return;
+        el.innerHTML = renderHeaderAvatarHtml(chatUser.name, chatUser.email, chatUser.photoUrl);
     }
 
     // ===== BADGE NOTIF PESAN BELUM DIBUKA =====
@@ -6153,6 +6180,7 @@
                     const ac = document.getElementById('admin-clear-all');
                     if (ac) ac.style.display = 'inline-block';
                 }
+                renderHeaderAvatar();
             } else {
                 // Belum pernah login -> tampilkan mode tamu (baca saja), form login disembunyikan dulu.
                 document.getElementById('chat-main').style.display = 'none';
@@ -6187,9 +6215,10 @@
         }
         if (!baniVal) { alert('Pilih Bani dulu (3 dari Murthosiyah + 13 dari Rusilah)'); return; }
         const [bani, ibu] = baniVal.split('|');
-        const user = { name, email: (email||name.toLowerCase().replace(/\s+/g,'_')+'@bani.local').toLowerCase(), bani, ibu, loginAt: new Date().toISOString() };
+        const user = { name, email: (email||name.toLowerCase().replace(/\s+/g,'_')+'@bani.local').toLowerCase(), bani, ibu, loginAt: new Date().toISOString(), photoUrl: pendingProfilePhoto || null };
         localStorage.setItem('bani_chat_user', JSON.stringify(user));
         chatUser = user;
+        pendingProfilePhoto = null;
         document.getElementById('chat-login-form').style.display = 'none';
         document.getElementById('chat-guest-bar').style.display = 'none';
         document.getElementById('chat-main').style.display = 'flex';
@@ -6203,6 +6232,7 @@
             const ac = document.getElementById('admin-clear-all');
             if (ac) ac.style.display = 'inline-block';
         }
+        renderHeaderAvatar();
         const msgs = getMessages();
         if (false && msgs.length === 0) { // disabled welcome
             // welcome disabled - fokus chat saja
@@ -6219,6 +6249,9 @@
         document.getElementById('chat-name').value = '';
         document.getElementById('chat-email').value = '';
         document.getElementById('chat-bani').value = '';
+        pendingProfilePhoto = null;
+        const photoPreview = document.getElementById('profile-photo-preview');
+        if (photoPreview) photoPreview.innerHTML = '📷';
         if (typeof updateLoginButtonState === 'function') updateLoginButtonState();
         renderMessages();
     }
@@ -6244,6 +6277,7 @@
     let pendingFileData = null;
     let pendingFileName = null;
     let pendingFileType = null;
+    let pendingProfilePhoto = null;
 
     function clearFilePreview() {
         pendingFileData = null;
@@ -6311,6 +6345,48 @@
             });
         }
 
+        // ===== Upload foto profil (di form login) =====
+        const profilePhotoInput = document.getElementById('chat-profile-photo-input');
+        if (profilePhotoInput) {
+            profilePhotoInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                if (!file.type.startsWith('image/')) { alert('File harus berupa gambar/foto'); profilePhotoInput.value = ''; return; }
+                if (file.size > 5 * 1024 * 1024) { alert('Foto terlalu besar, maksimal 5MB ya'); profilePhotoInput.value = ''; return; }
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    compressImage(ev.target.result, 200, function(compressed) {
+                        pendingProfilePhoto = compressed;
+                        const preview = document.getElementById('profile-photo-preview');
+                        if (preview) preview.innerHTML = `<img src="${compressed}" style="width:100%; height:100%; object-fit:cover; display:block;" alt="">`;
+                    });
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // ===== Ganti foto profil (dari header, saat sudah login) =====
+        const profilePhotoEditInput = document.getElementById('chat-profile-photo-edit-input');
+        if (profilePhotoEditInput) {
+            profilePhotoEditInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                if (!file.type.startsWith('image/')) { alert('File harus berupa gambar/foto'); profilePhotoEditInput.value = ''; return; }
+                if (file.size > 5 * 1024 * 1024) { alert('Foto terlalu besar, maksimal 5MB ya'); profilePhotoEditInput.value = ''; return; }
+                if (!chatUser) return;
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    compressImage(ev.target.result, 200, function(compressed) {
+                        chatUser.photoUrl = compressed;
+                        localStorage.setItem('bani_chat_user', JSON.stringify(chatUser));
+                        renderHeaderAvatar();
+                        profilePhotoEditInput.value = '';
+                    });
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
         // Tombol MASUK CHAT aktif (biru) hanya kalau Nama & Bani sudah diisi
         const nameInput = document.getElementById('chat-name');
         const baniSelect = document.getElementById('chat-bani');
@@ -6342,6 +6418,7 @@
             email: chatUser.email,
             bani: chatUser.bani,
             ibu: chatUser.ibu,
+            photoUrl: chatUser.photoUrl || null,
             text,
             ts: Date.now()
         };
@@ -6399,7 +6476,7 @@
             htmlOut += `<div class="chat-msg ${m.parentId?'reply':''}" style="${isMe?'border-color:#93c5fd; background:#eff6ff;':''}">
                 ${parentHtml}
                 <div style="display:flex; gap:8px; align-items:flex-start;">
-                    ${renderAvatarHtml(m.name, m.email)}
+                    ${renderAvatarHtml(m.name, m.email, m.photoUrl)}
                     <div style="flex:1; min-width:0;">
                         <div class="msg-head" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; gap:6px;">
                             <span style="display:flex; align-items:baseline; gap:6px; min-width:0; flex:1; overflow:hidden;">
