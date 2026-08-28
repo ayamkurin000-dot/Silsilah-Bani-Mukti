@@ -5959,7 +5959,10 @@
     let useFirebase = false;
     let allMessagesCache = [];
     let fsFns = null; // { collection, addDoc, serverTimestamp, doc, deleteDoc }
+    let firebaseInitStarted = false;
     async function initFirebase() {
+        if (firebaseInitStarted) return useFirebase;
+        firebaseInitStarted = true;
         if (typeof USE_FIREBASE === 'undefined' || !USE_FIREBASE) return false;
         try {
             const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
@@ -6278,6 +6281,7 @@
     }
     // Enter to send, Shift+Enter new line
     document.addEventListener('DOMContentLoaded', ()=>{
+        initFirebase();
         loadUserSession();
         const ta = document.getElementById('chat-input');
         if (ta) {
@@ -6292,6 +6296,7 @@
         setTimeout(()=>switchSide(currentSide), 200);
     });
     // Fallback if DOMContentLoaded already fired
+    initFirebase();
     loadUserSession();
 
     function resetZoom() {
