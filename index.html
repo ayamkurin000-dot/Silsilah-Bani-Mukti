@@ -5987,8 +5987,11 @@
         if (currentSide !== 'chat') return;
         const chatPanel = document.getElementById('chat-panel');
         const switcher = document.getElementById('panel-switcher');
+        const lightbox = document.getElementById('photo-lightbox-modal');
         if (chatPanel && chatPanel.contains(e.target)) return;
         if (switcher && switcher.contains(e.target)) return;
+        // Klik pada lightbox foto profil (buka/tutup) tidak boleh menutup panel chat
+        if (lightbox && lightbox.contains(e.target)) return;
         switchSide('generasi');
     }, true);
 
