@@ -6436,26 +6436,35 @@
     }
 
     function confirmCrop() {
+        const EXPORT_SIZE = 320; // resolusi hasil akhir foto profil (lebih tajam dari viewport 240px)
+        const ratio = EXPORT_SIZE / CROP_VP;
         const canvas = document.createElement('canvas');
-        canvas.width = CROP_VP;
-        canvas.height = CROP_VP;
+        canvas.width = EXPORT_SIZE;
+        canvas.height = EXPORT_SIZE;
         const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
         const imgEl = document.getElementById('crop-image');
-        ctx.drawImage(imgEl, cropImgX, cropImgY, cropNaturalW * cropScale, cropNaturalH * cropScale);
-        const cropped = canvas.toDataURL('image/jpeg', 0.85);
-        compressImage(cropped, CROP_VP, function(finalPhoto) {
-            if (cropTargetContext === 'login') {
-                pendingProfilePhoto = finalPhoto;
-                const preview = document.getElementById('profile-photo-preview');
-                if (preview) preview.innerHTML = `<img src="${finalPhoto}" style="width:100%; height:100%; object-fit:cover; display:block;" alt="">`;
-            } else if (cropTargetContext === 'header' && chatUser) {
-                chatUser.photoUrl = finalPhoto;
-                localStorage.setItem('bani_chat_user', JSON.stringify(chatUser));
-                saveProfilePhoto(chatUser.email, chatUser.name, finalPhoto);
-                renderHeaderAvatar();
-            }
-            cancelCrop();
-        });
+        ctx.drawImage(
+            imgEl,
+            cropImgX * ratio,
+            cropImgY * ratio,
+            cropNaturalW * cropScale * ratio,
+            cropNaturalH * cropScale * ratio
+        );
+        // Satu kali kompresi saja (kualitas 0.9) - tidak dikompres ulang lagi biar tidak makin kasar
+        const finalPhoto = canvas.toDataURL('image/jpeg', 0.9);
+        if (cropTargetContext === 'login') {
+            pendingProfilePhoto = finalPhoto;
+            const preview = document.getElementById('profile-photo-preview');
+            if (preview) preview.innerHTML = `<img src="${finalPhoto}" style="width:100%; height:100%; object-fit:cover; display:block;" alt="">`;
+        } else if (cropTargetContext === 'header' && chatUser) {
+            chatUser.photoUrl = finalPhoto;
+            localStorage.setItem('bani_chat_user', JSON.stringify(chatUser));
+            saveProfilePhoto(chatUser.email, chatUser.name, finalPhoto);
+            renderHeaderAvatar();
+        }
+        cancelCrop();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -6604,7 +6613,8 @@
             email: chatUser.email,
             bani: chatUser.bani,
             ibu: chatUser.ibu,
-            photoUrl: chatUser.photoUrl || null,
+            // Foto profil TIDAK lagi ditempel di setiap pesan baru (biar tidak menumpuk).
+            // Avatar tetap muncul karena diambil live dari data profil terpusat (getEffectivePhoto).
             text,
             ts: Date.now()
         };
