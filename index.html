@@ -5912,14 +5912,15 @@
     // CHAT BANI - NAMA + EMAIL + PILIH BANI (16 BANI)
     // =====================================================================
     const FIREBASE_CONFIG = {
-        apiKey: "GANTI_DENGAN_APIKEY_ANDA",
-        authDomain: "bani-mukti.firebaseapp.com",
-        projectId: "bani-mukti",
-        storageBucket: "bani-mukti.appspot.com",
-        messagingSenderId: "1234567890",
-        appId: "1:1234567890:web:abc123"
+        apiKey: "AIzaSyDPvMYPtwuVdyhmvjg1I671HjafrxBUfBk",
+        authDomain: "silsilah-bani-mukti.firebaseapp.com",
+        databaseURL: "https://silsilah-bani-mukti-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "silsilah-bani-mukti",
+        storageBucket: "silsilah-bani-mukti.firebasestorage.app",
+        messagingSenderId: "516754526764",
+        appId: "1:516754526764:web:8b19ed718f4aac47beb789"
     };
-    const USE_FIREBASE = false; // ganti true setelah isi config asli
+    const USE_FIREBASE = true; // sudah diisi config asli
 
     const ADMIN_CONFIG = {
         names: ['mannixs-21'],
@@ -5957,6 +5958,7 @@
     let db = null, auth = null, firebaseApp = null;
     let useFirebase = false;
     let allMessagesCache = [];
+    let fsFns = null; // { collection, addDoc, serverTimestamp, doc, deleteDoc }
     async function initFirebase() {
         if (typeof USE_FIREBASE === 'undefined' || !USE_FIREBASE) return false;
         try {
@@ -5968,6 +5970,7 @@
             auth = getAuth(firebaseApp);
             await signInAnonymously(auth);
             useFirebase = true;
+            fsFns = { collection, addDoc, serverTimestamp, doc, deleteDoc, getDocs };
             const q = query(collection(db, 'bani_mukti_chat'), orderBy('ts','asc'));
             onSnapshot(q, (snap)=>{
                 const msgs = [];
@@ -6048,6 +6051,10 @@
     }
     function getMessages() {
         try { return JSON.parse(localStorage.getItem('bani_chat_messages')||'[]'); } catch(e){ return []; }
+    }
+    function getAllMessages() {
+        if (typeof useFirebase !== 'undefined' && useFirebase) return allMessagesCache;
+        return getMessages();
     }
     function saveMessages(arr) {
         localStorage.setItem('bani_chat_messages', JSON.stringify(arr));
@@ -6132,13 +6139,12 @@
         }
     });
 
-    function sendMessage() {
+    async function sendMessage() {
         if (!chatUser) { alert('Login dulu'); return; }
         const input = document.getElementById('chat-input');
         const text = input.value.trim();
         if (!text && !pendingFileData) return;
-        if (text.length < 2) { alert('Pesan terlalu pendek'); return; }
-        const arr = getMessages();
+        if (text.length < 2 && !pendingFileData) { alert('Pesan terlalu pendek'); return; }
         const msg = {
             id: 'msg_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
             parentId: replyToId,
@@ -6149,8 +6155,22 @@
             text,
             ts: Date.now()
         };
-        arr.push(msg);
-        saveMessages(arr);
+        if (pendingFileData) { msg.image = pendingFileData; msg.fileName = pendingFileName; }
+        if (typeof useFirebase !== 'undefined' && useFirebase && db && fsFns) {
+            try {
+                const { id, ...msgData } = msg;
+                await fsFns.addDoc(fsFns.collection(db, 'bani_mukti_chat'), msgData);
+            } catch (e) {
+                console.warn('Gagal kirim ke Firebase, simpan lokal saja', e);
+                const arr = getMessages();
+                arr.push(msg);
+                saveMessages(arr);
+            }
+        } else {
+            const arr = getMessages();
+            arr.push(msg);
+            saveMessages(arr);
+        }
         input.value = '';
         clearFilePreview();
         cancelReply();
@@ -6219,14 +6239,21 @@
         const preview = document.getElementById('reply-preview');
         if (preview) preview.style.display = 'none';
     }
-    function deleteMessage(id) {
-        const isAdminDel = isAdminUser(chatUser);
+    async function deleteMessage(id) {
         if (!confirm('Hapus pesan ini?')) return;
-        let arr = getMessages();
-        // also delete children replies? keep them but orphan
-        arr = arr.filter(m=>m.id!==id);
-        saveMessages(arr);
-        renderMessages();
+        if (typeof useFirebase !== 'undefined' && useFirebase && db && fsFns) {
+            try {
+                await fsFns.deleteDoc(fsFns.doc(db, 'bani_mukti_chat', id));
+            } catch (e) {
+                console.warn('Gagal hapus di Firebase', e);
+                alert('Gagal menghapus pesan, coba lagi.');
+            }
+        } else {
+            let arr = getMessages();
+            arr = arr.filter(m=>m.id!==id);
+            saveMessages(arr);
+            renderMessages();
+        }
     }
     async function adminClearAll() {
         if (!isAdminUser(chatUser)) { alert('Hanya MANNIXS-21 yang bisa hapus semua!'); return; }
