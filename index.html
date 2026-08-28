@@ -6051,6 +6051,29 @@
             return tgl + ', ' + jam + ' WIB';
         } catch(e) { return ''; }
     }
+    function formatRelativeTime(ts) {
+        if (!ts) return '';
+        const diffSec = Math.floor((Date.now() - ts) / 1000);
+        if (diffSec < 10) return 'Baru saja';
+        if (diffSec < 60) return diffSec + ' detik yang lalu';
+        const diffMin = Math.floor(diffSec / 60);
+        if (diffMin < 60) return diffMin + ' menit yang lalu';
+        const diffHour = Math.floor(diffMin / 60);
+        if (diffHour < 24) return diffHour + ' jam yang lalu';
+        const diffDay = Math.floor(diffHour / 24);
+        if (diffDay < 30) return diffDay + ' hari yang lalu';
+        const diffMonth = Math.floor(diffDay / 30);
+        if (diffMonth < 12) return diffMonth + ' bulan yang lalu';
+        const diffYear = Math.floor(diffDay / 365);
+        return diffYear + ' tahun yang lalu';
+    }
+    function refreshRelativeTimes() {
+        document.querySelectorAll('.msg-time-relative').forEach(el => {
+            const ts = parseInt(el.getAttribute('data-ts'), 10);
+            if (ts) el.textContent = formatRelativeTime(ts);
+        });
+    }
+    setInterval(refreshRelativeTimes, 30000);
 
     // ===== BADGE NOTIF PESAN BELUM DIBUKA =====
     function getLastReadTs() {
@@ -6348,14 +6371,16 @@
                 const p = map[m.parentId];
                 parentHtml = `<div class="reply-preview">↳ ${escapeHtml(p.name)}: ${escapeHtml(p.text.slice(0,50))}</div>`;
             }
-            // SIMPLE: hanya nama + bani di kanan
+            // SIMPLE: nama + waktu relatif di kiri, bani di kanan
             htmlOut += `<div class="chat-msg ${m.parentId?'reply':''}" style="${isMe?'border-color:#93c5fd; background:#eff6ff;':''}">
                 ${parentHtml}
-                <div class="msg-head" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                    <span class="msg-name" style="font-weight:800; color:#0f172a; font-size:0.8rem;">${escapeHtml(m.name)}</span>
-                    <span class="chat-bani-badge" style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:20px; font-size:0.65rem; font-weight:800;">${escapeHtml(m.bani)}</span>
+                <div class="msg-head" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; gap:6px;">
+                    <span style="display:flex; align-items:baseline; gap:6px; min-width:0; flex:1; overflow:hidden;">
+                        <span class="msg-name" style="font-weight:800; color:#0f172a; font-size:0.8rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:60%;">${escapeHtml(m.name)}</span>
+                        <span class="msg-time-relative" data-ts="${m.ts}" title="${formatChatTime(m.ts)}" style="font-size:0.62rem; color:#94a3b8; font-weight:600; white-space:nowrap; flex-shrink:0;">${formatRelativeTime(m.ts)}</span>
+                    </span>
+                    <span class="chat-bani-badge" style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:20px; font-size:0.65rem; font-weight:800; flex-shrink:0;">${escapeHtml(m.bani)}</span>
                 </div>
-                <div class="msg-time" style="margin:-2px 0 5px;">🕒 ${formatChatTime(m.ts)}</div>
                 <div class="msg-text" style="color:#334155; font-size:0.82rem; line-height:1.4; white-space:pre-wrap; word-break:break-word;">${escapeHtml(m.text)}</div>${m.image ? `<div style="margin-top:8px;"><img src="${m.image}" style="max-width:220px; max-height:220px; border-radius:10px; border:1px solid #e2e8f0; cursor:pointer;" onclick="window.open(this.src, '_blank')"><div style="font-size:0.6rem; color:#64748b; margin-top:2px;">📎 ${escapeHtml(m.fileName||'file')}</div></div>` : ''}
                 <div class="msg-actions" style="margin-top:6px; display:flex; gap:10px;">
                     <button onclick="replyMessage('${m.id}')" style="background:none; border:none; font-size:0.68rem; font-weight:700; color:#3b82f6; cursor:pointer;">↩️ Balas</button>
