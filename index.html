@@ -6041,14 +6041,14 @@
         if (typeof USE_FIREBASE === 'undefined' || !USE_FIREBASE) return false;
         try {
             const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
-            const { getFirestore, collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, deleteDoc, getDocs } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+            const { getFirestore, collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, deleteDoc, getDocs, setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
             const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
             firebaseApp = initializeApp(FIREBASE_CONFIG);
             db = getFirestore(firebaseApp);
             auth = getAuth(firebaseApp);
             await signInAnonymously(auth);
             useFirebase = true;
-            fsFns = { collection, addDoc, serverTimestamp, doc, deleteDoc, getDocs };
+            fsFns = { collection, addDoc, serverTimestamp, doc, deleteDoc, getDocs, setDoc };
             const q = query(collection(db, 'bani_mukti_chat'), orderBy('ts','asc'));
             onSnapshot(q, (snap)=>{
                 const msgs = [];
@@ -6059,12 +6059,37 @@
                 allMessagesCache = msgs;
                 if (typeof renderMessages === 'function') renderMessages();
             });
+            onSnapshot(collection(db, 'bani_mukti_profiles'), (snap)=>{
+                snap.forEach(d=>{
+                    const data = d.data();
+                    profilePhotoMap[d.id] = data.photoUrl || null;
+                });
+                if (typeof renderMessages === 'function') renderMessages();
+            });
             return true;
         } catch(e) { console.warn('Firebase gagal', e); useFirebase = false; return false; }
     }
 
     let chatUser = null;
     let replyToId = null;
+    let profilePhotoMap = {}; // email -> photoUrl terbaru (biar pesan lama ikut update kalau foto profil diganti)
+
+    function getEffectivePhoto(email, fallbackPhoto) {
+        const key = String(email || '').toLowerCase();
+        if (chatUser && chatUser.email === key) return chatUser.photoUrl || null;
+        if (Object.prototype.hasOwnProperty.call(profilePhotoMap, key)) return profilePhotoMap[key];
+        return fallbackPhoto || null;
+    }
+
+    function saveProfilePhoto(email, name, photoUrl) {
+        const key = String(email || '').toLowerCase();
+        if (!key) return;
+        profilePhotoMap[key] = photoUrl;
+        if (typeof useFirebase !== 'undefined' && useFirebase && db && fsFns && fsFns.setDoc && fsFns.doc) {
+            fsFns.setDoc(fsFns.doc(db, 'bani_mukti_profiles', key), { name, photoUrl, updatedAt: Date.now() }).catch(e => console.warn('Gagal sinkron foto profil', e));
+        }
+        if (typeof renderMessages === 'function') renderMessages();
+    }
 
     function escapeHtml(s) {
         return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -6249,6 +6274,7 @@
             if (ac) ac.style.display = 'inline-block';
         }
         renderHeaderAvatar();
+        if (user.photoUrl) saveProfilePhoto(user.email, user.name, user.photoUrl);
         const msgs = getMessages();
         if (false && msgs.length === 0) { // disabled welcome
             // welcome disabled - fokus chat saja
@@ -6399,6 +6425,7 @@
             } else if (cropTargetContext === 'header' && chatUser) {
                 chatUser.photoUrl = finalPhoto;
                 localStorage.setItem('bani_chat_user', JSON.stringify(chatUser));
+                saveProfilePhoto(chatUser.email, chatUser.name, finalPhoto);
                 renderHeaderAvatar();
             }
             cancelCrop();
@@ -6609,7 +6636,7 @@
             htmlOut += `<div class="chat-msg ${m.parentId?'reply':''}" style="${isMe?'border-color:#93c5fd; background:#eff6ff;':''}">
                 ${parentHtml}
                 <div style="display:flex; gap:8px; align-items:flex-start;">
-                    ${renderAvatarHtml(m.name, m.email, m.photoUrl)}
+                    ${renderAvatarHtml(m.name, m.email, getEffectivePhoto(m.email, m.photoUrl))}
                     <div style="flex:1; min-width:0;">
                         <div class="msg-head" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; gap:6px;">
                             <span style="display:flex; align-items:baseline; gap:6px; min-width:0; flex:1; overflow:hidden;">
