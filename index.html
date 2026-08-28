@@ -6042,6 +6042,15 @@
     function escapeHtml(s) {
         return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
+    function formatChatTime(ts) {
+        if (!ts) return '';
+        try {
+            const d = new Date(ts);
+            const tgl = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' });
+            const jam = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' });
+            return tgl + ', ' + jam + ' WIB';
+        } catch(e) { return ''; }
+    }
 
     // ===== BADGE NOTIF PESAN BELUM DIBUKA =====
     function getLastReadTs() {
@@ -6346,6 +6355,7 @@
                     <span class="msg-name" style="font-weight:800; color:#0f172a; font-size:0.8rem;">${escapeHtml(m.name)}</span>
                     <span class="chat-bani-badge" style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:20px; font-size:0.65rem; font-weight:800;">${escapeHtml(m.bani)}</span>
                 </div>
+                <div class="msg-time" style="margin:-2px 0 5px;">🕒 ${formatChatTime(m.ts)}</div>
                 <div class="msg-text" style="color:#334155; font-size:0.82rem; line-height:1.4; white-space:pre-wrap; word-break:break-word;">${escapeHtml(m.text)}</div>${m.image ? `<div style="margin-top:8px;"><img src="${m.image}" style="max-width:220px; max-height:220px; border-radius:10px; border:1px solid #e2e8f0; cursor:pointer;" onclick="window.open(this.src, '_blank')"><div style="font-size:0.6rem; color:#64748b; margin-top:2px;">📎 ${escapeHtml(m.fileName||'file')}</div></div>` : ''}
                 <div class="msg-actions" style="margin-top:6px; display:flex; gap:10px;">
                     <button onclick="replyMessage('${m.id}')" style="background:none; border:none; font-size:0.68rem; font-weight:700; color:#3b82f6; cursor:pointer;">↩️ Balas</button>
