@@ -65,6 +65,16 @@
         .btn:hover {
             background: #2563eb;
         }
+        .btn:disabled,
+        .btn[disabled] {
+            background: #cbd5e1;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+        .btn:disabled:hover,
+        .btn[disabled]:hover {
+            background: #cbd5e1;
+        }
         .controls .btn {
             font-size: 0.7rem;
             padding: 5px 10px;
@@ -1038,7 +1048,7 @@
                 <input type="email" id="chat-email" placeholder="nama@email.com (opsional, tidak wajib)">
             </div>
             <div>
-                <label>Nama Lengkap *</label>
+                <label>Nama Lengkap * <span style="text-transform:none; font-weight:600; color:#94a3b8;">(Buku Tamu)</span></label>
                 <input type="text" id="chat-name" placeholder="Contoh: Ahmad Fauzi" maxlength="40">
             </div>
             <div>
@@ -1067,7 +1077,7 @@
                     </optgroup>
                 </select>
             </div>
-            <button class="btn" style="width:100%; padding:9px; margin-top:4px; font-size:0.82rem;" onclick="loginChat()">MASUK CHAT →</button>
+            <button class="btn" id="login-submit-btn" disabled style="width:100%; padding:9px; margin-top:4px; font-size:0.82rem;" onclick="loginChat()">MASUK CHAT →</button>
             <div style="font-size:0.62rem; color:#94a3b8; text-align:center; line-height:1.4;">Data hanya disimpan di browser ini (localStorage).<br>Untuk multi-user real-time bisa hubungkan ke Firebase/Supabase nanti.</div>
         </div>
 
@@ -6090,6 +6100,7 @@
         document.getElementById('chat-name').value = '';
         document.getElementById('chat-email').value = '';
         document.getElementById('chat-bani').value = '';
+        if (typeof updateLoginButtonState === 'function') updateLoginButtonState();
         renderMessages();
     }
     function getMessages() {
@@ -6180,7 +6191,24 @@
                 reader.readAsDataURL(file);
             });
         }
+
+        // Tombol MASUK CHAT aktif (biru) hanya kalau Nama & Bani sudah diisi
+        const nameInput = document.getElementById('chat-name');
+        const baniSelect = document.getElementById('chat-bani');
+        if (nameInput) nameInput.addEventListener('input', updateLoginButtonState);
+        if (baniSelect) baniSelect.addEventListener('change', updateLoginButtonState);
+        updateLoginButtonState();
     });
+
+    function updateLoginButtonState() {
+        const nameInput = document.getElementById('chat-name');
+        const baniSelect = document.getElementById('chat-bani');
+        const btn = document.getElementById('login-submit-btn');
+        if (!nameInput || !baniSelect || !btn) return;
+        const nameOk = nameInput.value.trim().length >= 3;
+        const baniOk = !!baniSelect.value;
+        btn.disabled = !(nameOk && baniOk);
+    }
 
     async function sendMessage() {
         if (!chatUser) { showLoginForm(); return; }
