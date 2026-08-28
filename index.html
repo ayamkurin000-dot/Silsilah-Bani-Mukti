@@ -1014,10 +1014,21 @@
             <span>💬 CHAT & SARAN BANI MUKTI</span>
             <small id="chat-count">0 pesan</small>
         </div>
-        
-        <!-- LOGIN FORM - NAMA + EMAIL + BANI -->
-        <div id="chat-login-form">
-            <div style="text-align:center; padding: 4px 0 6px;">
+
+        <!-- PESAN CHAT - SELALU TAMPIL, SIAPA SAJA BISA BACA TANPA LOGIN -->
+        <div id="chat-messages"></div>
+
+        <!-- GUEST BAR - tampil untuk pengunjung yang BELUM login. Klik untuk login baru saat mau kirim/balas -->
+        <div id="chat-guest-bar" style="padding:10px 12px; border-top:1px solid #e2e8f0; background:#f8fafc;">
+            <button class="btn" style="width:100%; padding:9px; font-size:0.8rem;" onclick="showLoginForm()">✍️ Masuk untuk Kirim / Balas Pesan</button>
+        </div>
+
+        <!-- LOGIN FORM - NAMA + EMAIL + BANI - hanya tampil saat guest menekan tombol di atas -->
+        <div id="chat-login-form" style="display:none;">
+            <div style="display:flex; justify-content:flex-end; margin:-6px -6px -6px 0;">
+                <button onclick="hideLoginForm()" title="Tutup" style="background:none; border:none; color:#94a3b8; font-weight:800; font-size:0.95rem; cursor:pointer; padding:2px 6px;">✕</button>
+            </div>
+            <div style="text-align:center; padding: 0 0 6px;">
                 <div style="font-size:1.3rem;">👋</div>
                 <div style="font-weight:800; font-size:0.85rem; color:#0f172a;">Masuk ke Chat Bani</div>
                 <div style="font-size:0.68rem; color:#64748b; margin-top:3px;">Isi nama, email & pilih bani kamu (16 bani)</div>
@@ -1060,8 +1071,8 @@
             <div style="font-size:0.62rem; color:#94a3b8; text-align:center; line-height:1.4;">Data hanya disimpan di browser ini (localStorage).<br>Untuk multi-user real-time bisa hubungkan ke Firebase/Supabase nanti.</div>
         </div>
 
-        <!-- CHAT AREA (setelah login) -->
-        <div id="chat-main" style="display:none; flex:1; flex-direction:column; overflow:hidden;">
+        <!-- CHAT AREA (setelah login: kotak nama user + form kirim pesan) -->
+        <div id="chat-main" style="display:none; flex-direction:column; overflow:hidden;">
             <div class="chat-user-info">
                 <div>
                     <span>Halo, <b id="chat-user-name"></b> <span id="admin-badge" style="display:none; background:#7c3aed; color:white; padding:2px 6px; border-radius:10px; font-size:0.55rem; font-weight:900; margin-left:4px;">ADMIN FULL</span></span><br>
@@ -1070,8 +1081,7 @@
                 </div>
                 <button onclick="logoutChat()" style="background:#fee2e2; border:1px solid #fecaca; color:#dc2626; padding:4px 8px; border-radius:6px; font-size:0.65rem; font-weight:700; cursor:pointer;">KELUAR</button>
             </div>
-            
-            <div id="chat-messages"></div>
+
             <div id="chat-input-area">
                 <div id="reply-preview" class="replying-to" style="display:none;">
                     <span id="reply-text"></span>
@@ -5995,18 +6005,45 @@
         return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
     function loadUserSession() {
+        // Pesan selalu dirender, siapapun (belum login) tetap bisa membaca chat.
         try {
             const u = JSON.parse(localStorage.getItem('bani_chat_user')||'null');
             if (u && u.name && u.bani) {
+                // User sudah pernah login sebelumnya -> langsung masuk, TIDAK perlu login ulang.
                 chatUser = u;
                 document.getElementById('chat-login-form').style.display = 'none';
+                document.getElementById('chat-guest-bar').style.display = 'none';
                 document.getElementById('chat-main').style.display = 'flex';
                 document.getElementById('chat-user-name').textContent = u.name;
                 document.getElementById('chat-user-bani').textContent = u.bani;
                 document.getElementById('chat-user-ibu').textContent = 'dari Ibu ' + (u.ibu || '');
-                renderMessages();
+                const admBadge = document.getElementById('admin-badge');
+                if (admBadge) admBadge.style.display = isAdminUser(u) ? 'inline-block' : 'none';
+                if (isAdminUser(u)) {
+                    document.getElementById('chat-user-name').style.color = '#7c3aed';
+                    const ac = document.getElementById('admin-clear-all');
+                    if (ac) ac.style.display = 'inline-block';
+                }
+            } else {
+                // Belum pernah login -> tampilkan mode tamu (baca saja), form login disembunyikan dulu.
+                document.getElementById('chat-main').style.display = 'none';
+                document.getElementById('chat-login-form').style.display = 'none';
+                document.getElementById('chat-guest-bar').style.display = 'block';
             }
         } catch(e){}
+        renderMessages();
+    }
+    function showLoginForm() {
+        const guestBar = document.getElementById('chat-guest-bar');
+        const form = document.getElementById('chat-login-form');
+        if (guestBar) guestBar.style.display = 'none';
+        if (form) form.style.display = 'flex';
+    }
+    function hideLoginForm() {
+        const guestBar = document.getElementById('chat-guest-bar');
+        const form = document.getElementById('chat-login-form');
+        if (form) form.style.display = 'none';
+        if (!chatUser && guestBar) guestBar.style.display = 'block';
     }
     function loginChat() {
         const name = document.getElementById('chat-name').value.trim();
@@ -6025,6 +6062,7 @@
         localStorage.setItem('bani_chat_user', JSON.stringify(user));
         chatUser = user;
         document.getElementById('chat-login-form').style.display = 'none';
+        document.getElementById('chat-guest-bar').style.display = 'none';
         document.getElementById('chat-main').style.display = 'flex';
         document.getElementById('chat-user-name').textContent = user.name;
         document.getElementById('chat-user-bani').textContent = user.bani;
@@ -6047,10 +6085,12 @@
         localStorage.removeItem('bani_chat_user');
         chatUser = null;
         document.getElementById('chat-main').style.display = 'none';
-        document.getElementById('chat-login-form').style.display = 'flex';
+        document.getElementById('chat-login-form').style.display = 'none';
+        document.getElementById('chat-guest-bar').style.display = 'block';
         document.getElementById('chat-name').value = '';
         document.getElementById('chat-email').value = '';
         document.getElementById('chat-bani').value = '';
+        renderMessages();
     }
     function getMessages() {
         try { return JSON.parse(localStorage.getItem('bani_chat_messages')||'[]'); } catch(e){ return []; }
@@ -6143,7 +6183,7 @@
     });
 
     async function sendMessage() {
-        if (!chatUser) { alert('Login dulu'); return; }
+        if (!chatUser) { showLoginForm(); return; }
         const input = document.getElementById('chat-input');
         const text = input.value.trim();
         if (!text && !pendingFileData) return;
@@ -6227,6 +6267,7 @@
         if (ce) ce.textContent = msgs.length + ' pesan';
     }
     function replyMessage(id) {
+        if (!chatUser) { showLoginForm(); return; }
         const msgs = getMessages();
         const m = msgs.find(x=>x.id===id);
         if (!m) return;
