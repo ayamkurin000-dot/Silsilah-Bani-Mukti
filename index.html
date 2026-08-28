@@ -6065,6 +6065,8 @@
                     profilePhotoMap[d.id] = data.photoUrl || null;
                 });
                 if (typeof renderMessages === 'function') renderMessages();
+            }, (err)=>{
+                console.error('❌ Gagal baca koleksi bani_mukti_profiles dari Firestore. Kemungkinan besar Security Rules belum mengizinkan koleksi ini. Detail:', err);
             });
             return true;
         } catch(e) { console.warn('Firebase gagal', e); useFirebase = false; return false; }
@@ -6086,7 +6088,7 @@
         if (!key) return;
         profilePhotoMap[key] = photoUrl;
         if (typeof useFirebase !== 'undefined' && useFirebase && db && fsFns && fsFns.setDoc && fsFns.doc) {
-            fsFns.setDoc(fsFns.doc(db, 'bani_mukti_profiles', key), { name, photoUrl, updatedAt: Date.now() }).catch(e => console.warn('Gagal sinkron foto profil', e));
+            fsFns.setDoc(fsFns.doc(db, 'bani_mukti_profiles', key), { name, photoUrl, updatedAt: Date.now() }).catch(e => console.error('❌ Gagal simpan foto profil ke Firestore (bani_mukti_profiles). Kemungkinan besar Security Rules belum mengizinkan koleksi ini. Detail:', e));
         }
         if (typeof renderMessages === 'function') renderMessages();
     }
