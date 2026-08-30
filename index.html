@@ -3855,7 +3855,7 @@
                                                 {
                                                     "name": "Tolhah",
                                                     "life": "",
-                                                    "spouse": "Hj. Nurul Laili (Isteri ke-1)",
+                                                    "spouse": "Hj. Nurul Laili (Suami ke-1)",
                                                     "spouse_life": "",
                                                     "type": "wife",
                                                     "partnerOrder": 1,
@@ -3894,7 +3894,7 @@
                                                 {
                                                     "name": "Imam",
                                                     "life": "",
-                                                    "spouse": "Hj. Nurul Laili (Isteri ke-2)",
+                                                    "spouse": "Hj. Nurul Laili (Suami ke-2)",
                                                     "spouse_life": "",
                                                     "type": "wife",
                                                     "partnerOrder": 2,
@@ -3914,7 +3914,7 @@
                                                 {
                                                     "name": "Hasan Bisri",
                                                     "life": "1962 - ....",
-                                                    "spouse": "Hj. Nurul Laili (Isteri ke-3)",
+                                                    "spouse": "Hj. Nurul Laili (Suami ke-3)",
                                                     "spouse_life": "",
                                                     "type": "wife",
                                                     "partnerOrder": 3,
@@ -5938,11 +5938,17 @@
                 if (d.data.name === 'H. ABDUL MUKTI' || d.data.name === 'MOH. SATHORI' || d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return '';
                 const wifeOrder = getSpouseOrderForWife(d);
                 if (wifeOrder) {
-                    // Untuk node tipe wife, selalu tampilkan "ISTERI"
+                    const sp = (d.data.spouse || '').toLowerCase();
+                    if (sp.includes('suami ke-')) {
+                        return `SUAMI KE-${wifeOrder}`;
+                    }
+                    if (sp.includes('isteri ke-') || sp.includes('istri ke-')) {
+                        return `ISTERI KE-${wifeOrder}`;
+                    }
+                    // Fallback: jika type wife tapi ini suami (data lama), tetap deteksi dari nama parent
                     if (d.data.type === 'wife') {
                         return `ISTERI KE-${wifeOrder}`;
                     }
-                    // Untuk node lain (suami), tampilkan "SUAMI"
                     return `SUAMI KE-${wifeOrder}`;
                 }
                 return '';
