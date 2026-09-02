@@ -836,88 +836,6 @@
                 filter: drop-shadow(0 3px 6px rgba(15, 23, 42, 0.28));
             }
         }
-        .glow-aura {
-            fill: url(#grad-hologram);
-            opacity: 0;
-            filter: blur(12px);
-            transform-box: fill-box;
-            transform-origin: center;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-        }
-        .node-special:hover .glow-aura {
-            opacity: 0.85;
-            animation: holo-aura 1.8s linear infinite;
-        }
-        @keyframes holo-aura {
-            0% {
-                transform: scale(1.1);
-                filter: blur(12px) hue-rotate(0deg);
-            }
-            50% {
-                transform: scale(1.35);
-                filter: blur(16px) hue-rotate(180deg);
-            }
-            100% {
-                transform: scale(1.1);
-                filter: blur(12px) hue-rotate(360deg);
-            }
-        }
-        .node-special:hover .node-shape:not(.glow-aura) {
-            animation: holo-shift 1.8s linear infinite !important;
-            stroke: url(#grad-hologram) !important;
-            stroke-width: 3px !important;
-        }
-        @keyframes holo-shift {
-            0% {
-                transform: scale(1.05) skewY(0deg);
-                filter: hue-rotate(0deg) saturate(1.7) brightness(1.05) drop-shadow(0 0 10px rgba(34, 211, 238, 0.6));
-            }
-            25% {
-                transform: scale(1.08) skewY(1.2deg);
-                filter: hue-rotate(90deg) saturate(1.9) brightness(1.15) drop-shadow(0 0 14px rgba(232, 121, 249, 0.65));
-            }
-            50% {
-                transform: scale(1.1) skewY(0deg);
-                filter: hue-rotate(180deg) saturate(1.7) brightness(1.1) drop-shadow(0 0 14px rgba(129, 140, 248, 0.65));
-            }
-            75% {
-                transform: scale(1.08) skewY(-1.2deg);
-                filter: hue-rotate(270deg) saturate(1.9) brightness(1.15) drop-shadow(0 0 14px rgba(45, 212, 191, 0.65));
-            }
-            100% {
-                transform: scale(1.05) skewY(0deg);
-                filter: hue-rotate(360deg) saturate(1.7) brightness(1.05) drop-shadow(0 0 10px rgba(34, 211, 238, 0.6));
-            }
-        }
-        .node-special text {
-            transform-box: fill-box;
-            transform-origin: 0% 50%;
-            transition: filter 0.2s ease;
-        }
-        .node-special:hover text.name-life {
-            fill: url(#grad-hologram) !important;
-            animation: holo-text 1.8s linear infinite;
-        }
-        .node-special:hover text.spouse-info {
-            fill: url(#grad-hologram) !important;
-            animation: holo-text 1.8s linear infinite;
-            animation-delay: 0.15s;
-        }
-        @keyframes holo-text {
-            0% {
-                transform: scale(1.02);
-                filter: hue-rotate(0deg) drop-shadow(0 0 3px rgba(34, 211, 238, 0.9));
-            }
-            50% {
-                transform: scale(1.1);
-                filter: hue-rotate(180deg) drop-shadow(0 0 7px rgba(232, 121, 249, 0.9));
-            }
-            100% {
-                transform: scale(1.02);
-                filter: hue-rotate(360deg) drop-shadow(0 0 3px rgba(34, 211, 238, 0.9));
-            }
-        }
         .node text.name-life {
             font-size: 11px;
             font-weight: 700;
@@ -1131,23 +1049,6 @@
             .node.pressed .node-shape {
                 animation: btn-press 0.32s cubic-bezier(.4, 0, .2, 1);
             }
-            /* Animasi hologram (holo-aura/holo-shift/holo-text) infinite loop
-               dimatikan total di HP. */
-            .glow-aura {
-                display: none !important;
-            }
-            .node-special:hover .glow-aura {
-                animation: none !important;
-                opacity: 0 !important;
-            }
-            .node-special:hover .node-shape:not(.glow-aura) {
-                animation: none !important;
-                filter: none !important;
-            }
-            .node-special:hover text.name-life,
-            .node-special:hover text.spouse-info {
-                animation: none !important;
-            }
             /* backdrop-filter blur memaksa compositing terus-menerus selama
                panel terbuka; ganti jadi latar solid biasa di HP. */
             #chat-panel {
@@ -1159,13 +1060,11 @@
             body {
                 background-attachment: scroll !important;
             }
-            /* Hint panah & animasi bounce/pulse yang infinite dimatikan. */
-            #root-tap-hint .hint-hand {
-                animation: none !important;
-            }
-            #pan-hint .pan-hint-icon {
-                animation: none !important;
-            }
+            /* Animasi "👇 mentul-mentul" & panah 4-arah ini AMAN di HP:
+               keduanya elemen HTML position:fixed yang berdiri sendiri di
+               layer-nya sendiri, tidak terhubung ke <g> pohon silsilah sama
+               sekali — jadi tidak ikut dihitung ulang saat pohon digeser/zoom.
+               Makanya dikembalikan lagi (tidak bikin berat). */
         }
         </style>
 </head>
@@ -6274,47 +6173,6 @@
         lg.append('stop').attr('offset', '100%').attr('stop-color', g.c2);
     });
 
-    const rainbowGrad = defs.append('linearGradient')
-        .attr('id', 'grad-rainbow')
-        .attr('x1', '0%').attr('y1', '0%')
-        .attr('x2', '100%').attr('y2', '0%');
-    [
-        { offset: '0%', color: '#f472b6' },
-        { offset: '25%', color: '#fbbf24' },
-        { offset: '50%', color: '#34d399' },
-        { offset: '75%', color: '#60a5fa' },
-        { offset: '100%', color: '#a78bfa' }
-    ].forEach(s => rainbowGrad.append('stop').attr('offset', s.offset).attr('stop-color', s.color));
-    if (!isMobileEarly) {
-        rainbowGrad.append('animateTransform')
-            .attr('attributeName', 'gradientTransform')
-            .attr('type', 'translate')
-            .attr('from', '-1 0')
-            .attr('to', '1 0')
-            .attr('dur', '1.5s')
-            .attr('repeatCount', 'indefinite');
-    }
-
-    const holoGrad = defs.append('linearGradient')
-        .attr('id', 'grad-hologram')
-        .attr('x1', '0%').attr('y1', '0%')
-        .attr('x2', '100%').attr('y2', '100%');
-    [
-        { offset: '0%', color: '#22d3ee' },
-        { offset: '30%', color: '#e879f9' },
-        { offset: '60%', color: '#818cf8' },
-        { offset: '100%', color: '#2dd4bf' }
-    ].forEach(s => holoGrad.append('stop').attr('offset', s.offset).attr('stop-color', s.color));
-    if (!isMobileEarly) {
-        holoGrad.append('animateTransform')
-            .attr('attributeName', 'gradientTransform')
-            .attr('type', 'translate')
-            .attr('from', '-1 -1')
-            .attr('to', '1 1')
-            .attr('dur', '1.8s')
-            .attr('repeatCount', 'indefinite');
-    }
-
     const gContainer = svg.append("g");
     if (isMobileEarly) {
         // Beri tahu browser supaya gContainer dipromosikan ke layer GPU
@@ -6552,8 +6410,6 @@
                 let cls = `node node-${d.data.type || 'gen3'}`;
                 if (d.data.name === 'H. ABDUL MUKTI') cls += ' node-founder';
                 if (d.data.name === 'MOH. SATHORI') cls += ' node-root';
-                if (d.data.name === 'H. Fatchul Usmanto' || d.data.name === 'Hj. Noor Chosijah' || d.data.name ===
-                    'Hj. Maimunah') cls += ' node-special';
                 if (/farath/i.test(d.data.name || '')) cls += ' node-plain-white';
                 return cls;
             })
@@ -6594,12 +6450,6 @@
                     }
                 }
             });
-
-        nodeEnter.filter(d => d.data.name === 'H. Fatchul Usmanto' || d.data.name === 'Hj. Noor Chosijah' || d.data.name ===
-                'Hj. Maimunah')
-            .append('path')
-            .attr('class', 'glow-aura node-shape')
-            .attr('d', d => batteryPath(cardWidth, cardHeight + (d.data.extraName ? extraNameHeight : 0) + (d.data.address ? extraNameHeight : 0)));
 
         nodeEnter.append('path')
             .attr('class', 'node-shape')
