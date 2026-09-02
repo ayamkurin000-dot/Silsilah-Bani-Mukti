@@ -1097,6 +1097,63 @@
             opacity: 1;
             transform: translateX(-50%) translateY(0);
         }
+
+        /* =====================================================================
+           MODE RINGAN UNTUK HP
+           Semua rule/logic tetap sama persis, hanya efek visual berat yang
+           dimatikan khusus untuk layar sentuh (pointer: coarse) agar rendering
+           SVG jadi jauh lebih ringan saat pan/zoom/expand pohon silsilah.
+           ===================================================================== */
+        @media (pointer: coarse) {
+            /* filter drop-shadow permanen di SETIAP node sangat berat untuk GPU
+               mobile karena dihitung ulang tiap frame saat pan/zoom. */
+            .node .node-shape {
+                filter: none !important;
+                transition: none !important;
+            }
+            .node:hover .node-shape {
+                transform: none !important;
+                filter: none !important;
+            }
+            .node.pressed .node-shape {
+                animation: none !important;
+            }
+            /* Animasi hologram (holo-aura/holo-shift/holo-text) infinite loop
+               dimatikan total di HP. */
+            .glow-aura {
+                display: none !important;
+            }
+            .node-special:hover .glow-aura {
+                animation: none !important;
+                opacity: 0 !important;
+            }
+            .node-special:hover .node-shape:not(.glow-aura) {
+                animation: none !important;
+                filter: none !important;
+            }
+            .node-special:hover text.name-life,
+            .node-special:hover text.spouse-info {
+                animation: none !important;
+            }
+            /* backdrop-filter blur memaksa compositing terus-menerus selama
+               panel terbuka; ganti jadi latar solid biasa di HP. */
+            #chat-panel {
+                backdrop-filter: none !important;
+                background: #ffffff !important;
+            }
+            /* background-attachment: fixed dengan pattern SVG bisa memicu
+               repaint mahal di sebagian browser mobile. */
+            body {
+                background-attachment: scroll !important;
+            }
+            /* Hint panah & animasi bounce/pulse yang infinite dimatikan. */
+            #root-tap-hint .hint-hand {
+                animation: none !important;
+            }
+            #pan-hint .pan-hint-icon {
+                animation: none !important;
+            }
+        }
         </style>
 </head>
 <body>
@@ -6166,7 +6223,10 @@
     }
 
     let i = 0;
-    const duration = 500;
+    // Deteksi HP lebih awal supaya durasi transisi node/link bisa langsung
+    // dimatikan sebelum pohon silsilah pertama kali digambar.
+    const isMobileEarly = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const duration = isMobileEarly ? 0 : 500;
     let root;
 
     const svg = d3.select("#chart-container")
