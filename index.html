@@ -1125,8 +1125,11 @@
                 transform: none !important;
                 filter: none !important;
             }
+            /* Efek "ditekan" saat node diketuk dikembalikan lagi — animasi ini
+               ringan (hanya jalan 0.32s sekali per tap, bukan tiap frame saat
+               geser), jadi aman dipakai di HP. */
             .node.pressed .node-shape {
-                animation: none !important;
+                animation: btn-press 0.32s cubic-bezier(.4, 0, .2, 1);
             }
             /* Animasi hologram (holo-aura/holo-shift/holo-text) infinite loop
                dimatikan total di HP. */
@@ -6236,7 +6239,11 @@
     // Deteksi HP lebih awal supaya durasi transisi node/link bisa langsung
     // dimatikan sebelum pohon silsilah pertama kali digambar.
     const isMobileEarly = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    const duration = isMobileEarly ? 0 : 500;
+    // Animasi buka/tutup cabang (expand/collapse) tetap dipakai di HP —
+    // yang bikin berat kemarin bukan animasi ini, tapi cara pan/zoom-nya
+    // (sudah diperbaiki di bawah pakai CSS transform). Dipercepat sedikit
+    // di HP (350ms) supaya tetap terasa ringan & responsif saat diketuk.
+    const duration = isMobileEarly ? 350 : 500;
     let root;
 
     const svg = d3.select("#chart-container")
