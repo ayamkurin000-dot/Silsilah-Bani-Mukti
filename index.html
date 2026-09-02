@@ -6023,7 +6023,10 @@
         .scaleExtent([0.2, 2])
         .on("zoom", (event) => {
             gContainer.attr("transform", event.transform);
-            if (event.sourceEvent) hidePanHint(); // interaksi manual user -> hint boleh hilang lebih awal
+            if (event.sourceEvent) {
+                hideRootTapHint(); // interaksi manual user (geser/pinch) -> hint "Ketuk di sini" boleh hilang juga
+                hidePanHint(); // interaksi manual user -> hint boleh hilang lebih awal
+            }
         });
 
     svg.call(zoom);
