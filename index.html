@@ -1097,6 +1097,73 @@
             opacity: 1;
             transform: translateX(-50%) translateY(0);
         }
+
+        /* =====================================================================
+           MODE RINGAN UNTUK HP
+           Semua rule/logic tetap sama persis, hanya efek visual berat yang
+           dimatikan khusus untuk layar sentuh (pointer: coarse) agar rendering
+           SVG jadi jauh lebih ringan saat pan/zoom/expand pohon silsilah.
+           ===================================================================== */
+        @media (pointer: coarse) {
+            /* Path kartu (bentuk custom dengan sudut membulat) & garis
+               penghubung memakai anti-aliasing lebih murah di HP supaya
+               browser tidak perlu menghitung kurva halus tiap frame. */
+            .node-shape,
+            path.link {
+                shape-rendering: optimizeSpeed;
+            }
+            .node text {
+                text-rendering: optimizeSpeed;
+            }
+            /* filter drop-shadow permanen di SETIAP node sangat berat untuk GPU
+               mobile karena dihitung ulang tiap frame saat pan/zoom. */
+            .node .node-shape {
+                filter: none !important;
+                transition: none !important;
+            }
+            .node:hover .node-shape {
+                transform: none !important;
+                filter: none !important;
+            }
+            .node.pressed .node-shape {
+                animation: none !important;
+            }
+            /* Animasi hologram (holo-aura/holo-shift/holo-text) infinite loop
+               dimatikan total di HP. */
+            .glow-aura {
+                display: none !important;
+            }
+            .node-special:hover .glow-aura {
+                animation: none !important;
+                opacity: 0 !important;
+            }
+            .node-special:hover .node-shape:not(.glow-aura) {
+                animation: none !important;
+                filter: none !important;
+            }
+            .node-special:hover text.name-life,
+            .node-special:hover text.spouse-info {
+                animation: none !important;
+            }
+            /* backdrop-filter blur memaksa compositing terus-menerus selama
+               panel terbuka; ganti jadi latar solid biasa di HP. */
+            #chat-panel {
+                backdrop-filter: none !important;
+                background: #ffffff !important;
+            }
+            /* background-attachment: fixed dengan pattern SVG bisa memicu
+               repaint mahal di sebagian browser mobile. */
+            body {
+                background-attachment: scroll !important;
+            }
+            /* Hint panah & animasi bounce/pulse yang infinite dimatikan. */
+            #root-tap-hint .hint-hand {
+                animation: none !important;
+            }
+            #pan-hint .pan-hint-icon {
+                animation: none !important;
+            }
+        }
         </style>
 </head>
 <body>
@@ -6166,7 +6233,10 @@
     }
 
     let i = 0;
-    const duration = 500;
+    // Deteksi HP lebih awal supaya durasi transisi node/link bisa langsung
+    // dimatikan sebelum pohon silsilah pertama kali digambar.
+    const isMobileEarly = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const duration = isMobileEarly ? 0 : 500;
     let root;
 
     const svg = d3.select("#chart-container")
@@ -6208,13 +6278,15 @@
         { offset: '75%', color: '#60a5fa' },
         { offset: '100%', color: '#a78bfa' }
     ].forEach(s => rainbowGrad.append('stop').attr('offset', s.offset).attr('stop-color', s.color));
-    rainbowGrad.append('animateTransform')
-        .attr('attributeName', 'gradientTransform')
-        .attr('type', 'translate')
-        .attr('from', '-1 0')
-        .attr('to', '1 0')
-        .attr('dur', '1.5s')
-        .attr('repeatCount', 'indefinite');
+    if (!isMobileEarly) {
+        rainbowGrad.append('animateTransform')
+            .attr('attributeName', 'gradientTransform')
+            .attr('type', 'translate')
+            .attr('from', '-1 0')
+            .attr('to', '1 0')
+            .attr('dur', '1.5s')
+            .attr('repeatCount', 'indefinite');
+    }
 
     const holoGrad = defs.append('linearGradient')
         .attr('id', 'grad-hologram')
@@ -6226,20 +6298,36 @@
         { offset: '60%', color: '#818cf8' },
         { offset: '100%', color: '#2dd4bf' }
     ].forEach(s => holoGrad.append('stop').attr('offset', s.offset).attr('stop-color', s.color));
-    holoGrad.append('animateTransform')
-        .attr('attributeName', 'gradientTransform')
-        .attr('type', 'translate')
-        .attr('from', '-1 -1')
-        .attr('to', '1 1')
-        .attr('dur', '1.8s')
-        .attr('repeatCount', 'indefinite');
+    if (!isMobileEarly) {
+        holoGrad.append('animateTransform')
+            .attr('attributeName', 'gradientTransform')
+            .attr('type', 'translate')
+            .attr('from', '-1 -1')
+            .attr('to', '1 1')
+            .attr('dur', '1.8s')
+            .attr('repeatCount', 'indefinite');
+    }
 
     const gContainer = svg.append("g");
+    if (isMobileEarly) {
+        // Beri tahu browser supaya gContainer dipromosikan ke layer GPU
+        // tersendiri, supaya pan/zoom tidak memicu repaint seluruh pohon.
+        gContainer.style('will-change', 'transform');
+    }
 
     const zoom = d3.zoom()
         .scaleExtent([0.2, 2])
         .on("zoom", (event) => {
-            gContainer.attr("transform", event.transform);
+            if (isMobileEarly) {
+                // Di HP, set transform lewat CSS (bukan atribut SVG) supaya
+                // pan/zoom dikerjakan compositor/GPU, bukan main-thread repaint
+                // per node — ini yang paling terasa mengurangi "nut-nut".
+                const t = event.transform;
+                gContainer.style('transform', `translate(${t.x}px, ${t.y}px) scale(${t.k})`);
+                gContainer.style('transform-origin', '0 0');
+            } else {
+                gContainer.attr("transform", event.transform);
+            }
             if (event.sourceEvent) {
                 hideRootTapHint(); // interaksi manual user (geser/pinch) -> hint "Ketuk di sini" boleh hilang juga
                 hidePanHint(); // interaksi manual user -> hint boleh hilang lebih awal
