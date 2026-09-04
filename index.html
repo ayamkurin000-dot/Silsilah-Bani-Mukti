@@ -3547,7 +3547,38 @@
                                                     "type": "gen4",
                                                     "address": "",
                                                     "extraName": "Mas Khoiri",
-                                                    "children": []
+                                                    "children": [
+                                                        {
+                                                            "name": "Roudatu Salma Magfira",
+                                                            "life": "2002 - ....",
+                                                            "spouse": "",
+                                                            "spouse_life": "",
+                                                            "type": "gen5",
+                                                            "address": "",
+                                                            "extraName": "",
+                                                            "children": []
+                                                        },
+                                                        {
+                                                            "name": "Nazaril I'ya Laudai",
+                                                            "life": "2005 - ....",
+                                                            "spouse": "",
+                                                            "spouse_life": "",
+                                                            "type": "gen5",
+                                                            "address": "",
+                                                            "extraName": "",
+                                                            "children": []
+                                                        },
+                                                        {
+                                                            "name": "Aira Hilda Auliya",
+                                                            "life": "2010 - ....",
+                                                            "spouse": "",
+                                                            "spouse_life": "",
+                                                            "type": "gen5",
+                                                            "address": "",
+                                                            "extraName": "",
+                                                            "children": []
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -8170,8 +8201,7 @@
     // =====================================================================
 
     function collectAllNames(node, list) {
-        if (node.name) list.push(node.name);
-        if (node.extraName) list.push(node.extraName);
+        if (node.name) list.push({ name: node.name, extraName: node.extraName || '' });
         if (Array.isArray(node.children)) {
             node.children.forEach(c => collectAllNames(c, list));
         }
@@ -8179,7 +8209,15 @@
     const allPersonNames = (function() {
         const raw = [];
         collectAllNames(treeData, raw);
-        return Array.from(new Set(raw)).sort((a, b) => a.localeCompare(b, 'id'));
+        const seen = new Set();
+        const deduped = [];
+        raw.forEach(p => {
+            if (!seen.has(p.name)) {
+                seen.add(p.name);
+                deduped.push(p);
+            }
+        });
+        return deduped.sort((a, b) => a.name.localeCompare(b.name, 'id'));
     })();
 
     const searchInputEl = document.getElementById('search-input');
@@ -8204,11 +8242,11 @@
             div.textContent = 'NAMA TIDAK DITEMUKAN';
             searchResultsEl.appendChild(div);
         } else {
-            matches.slice(0, 25).forEach(name => {
+            matches.slice(0, 25).forEach(person => {
                 const item = document.createElement('div');
                 item.className = 'search-result-item';
-                item.textContent = name;
-                item.addEventListener('click', () => selectSearchResult(name));
+                item.textContent = person.name;
+                item.addEventListener('click', () => selectSearchResult(person.name));
                 searchResultsEl.appendChild(item);
             });
         }
@@ -8221,7 +8259,9 @@
             closeSearchResults();
             return;
         }
-        const matches = allPersonNames.filter(n => n.toLowerCase().includes(q));
+        const matches = allPersonNames.filter(p =>
+            p.name.toLowerCase().includes(q) || p.extraName.toLowerCase().includes(q)
+        );
         renderSearchResults(matches);
     });
 
@@ -8242,9 +8282,9 @@
             items[searchActiveIndex].scrollIntoView({ block: 'nearest' });
         } else if (e.key === 'Enter') {
             if (searchActiveIndex >= 0 && searchCurrentMatches[searchActiveIndex]) {
-                selectSearchResult(searchCurrentMatches[searchActiveIndex]);
+                selectSearchResult(searchCurrentMatches[searchActiveIndex].name);
             } else if (searchCurrentMatches.length === 1) {
-                selectSearchResult(searchCurrentMatches[0]);
+                selectSearchResult(searchCurrentMatches[0].name);
             }
         }
     });
