@@ -2027,6 +2027,7 @@
                                                     "spouse_life": "",
                                                     "type": "gen4",
                                                     "address": "",
+                                                    "flower": true,
                                                     "extraName": "Alm.",
                                                     "children": [
                                                         {
@@ -2103,6 +2104,7 @@
                                                     "spouse_life": "",
                                                     "type": "gen4",
                                                     "address": "",
+                                                    "flower": true,
                                                     "extraName": "Alm.",
                                                     "children": [
                                                         {
@@ -2309,6 +2311,7 @@
                                                     "spouse_life": "1970 - ....",
                                                     "type": "gen4",
                                                     "address": "",
+                                                    "flower": true,
                                                     "children": [
                                                         {
                                                             "name": "Putri Setyarti Wardatus Sholichah",
@@ -2534,6 +2537,7 @@
                                                     "spouse_life": "",
                                                     "type": "gen4",
                                                     "address": "",
+                                                    "flower": true,
                                                     "extraName": "Alm.",
                                                     "children": [
                                                         {
@@ -2799,6 +2803,7 @@
                                                     "spouse_life": "",
                                                     "type": "gen4",
                                                     "address": "",
+                                                    "flower": true,
                                                     "extraName": "Mbak Nil",
                                                     "children": []
                                                 },
@@ -3066,6 +3071,7 @@
                                                     "spouse_life": "",
                                                     "type": "gen4",
                                                     "address": "",
+                                                    "flower": true,
                                                     "extraName": "Mas Bisri",
                                                     "children": []
                                                 },
@@ -3125,6 +3131,7 @@
                                                     "spouse_life": "",
                                                     "type": "gen4",
                                                     "address": "",
+                                                    "flower": true,
                                                     "extraName": "Mbak Nana",
                                                     "children": []
                                                 },
@@ -3401,6 +3408,7 @@
                                                     "spouse_life": "",
                                                     "type": "gen4",
                                                     "address": "",
+                                                    "flower": true,
                                                     "children": []
                                                 }
                                             ]
@@ -3421,6 +3429,7 @@
                                                     "spouse_life": "",
                                                     "type": "gen4",
                                                     "address": "",
+                                                    "flower": true,
                                                     "extraName": "Mbak As",
                                                     "children": [
                                                         {
@@ -3489,6 +3498,7 @@
                                                     "spouse_life": "",
                                                     "type": "gen4",
                                                     "address": "",
+                                                    "flower": true,
                                                     "extraName": "Kang Makrus",
                                                     "children": []
                                                 },
@@ -3499,6 +3509,7 @@
                                                     "spouse_life": "",
                                                     "type": "gen4",
                                                     "address": "",
+                                                    "flower": true,
                                                     "children": []
                                                 },
                                                 {
@@ -3942,6 +3953,7 @@
                                                     "spouse_life": "",
                                                     "type": "gen4",
                                                     "address": "",
+                                                    "flower": true,
                                                     "children": []
                                                 },
                                                 {
@@ -3951,6 +3963,7 @@
                                                     "spouse_life": "",
                                                     "type": "gen4",
                                                     "address": "",
+                                                    "flower": true,
                                                     "children": []
                                                 },
                                                 {
@@ -7457,6 +7470,29 @@
                 .attr('text-anchor', 'middle')
                 .style('font-size', '46px')
                 .text('🧕');
+        });
+
+        // ===== PENANDA ALMARHUM/AH (badge bunga merah di pojok kanan atas shape) =====
+        const flowerBadge = nodeEnter.filter(d => !!d.data.flower)
+            .append('g')
+            .attr('class', 'flower-badge')
+            .style('pointer-events', 'none');
+
+        flowerBadge.each(function(d) {
+            const w = (d.data.name === 'H. ABDUL MUKTI') ? founderCardWidth :
+                (d.data.name === 'MOH. SATHORI') ? rootCardWidth : cardWidth;
+            const h = (d.data.name === 'H. ABDUL MUKTI') ? founderCardHeight :
+                (d.data.name === 'MOH. SATHORI') ? rootCardHeight :
+                cardHeight + (d.data.extraName ? extraNameHeight : 0) + (d.data.address ? extraNameHeight : 0);
+            const topY = -h / 2;
+            const g = d3.select(this);
+
+            g.append('text')
+                .attr('x', w - 4)
+                .attr('y', topY + 6)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '38px')
+                .text('🌺');
         });
 
         const hasSpouseLine = d => {
