@@ -7487,11 +7487,18 @@
             const topY = -h / 2;
             const g = d3.select(this);
 
+            // Titik tengah badge digeser lebih ke dalam shape (±70% badge berada
+            // di dalam area kartu, sisanya "nongol" tipis di pojok kanan atas)
+            const badgeCx = w - 8;
+            const badgeCy = topY + 8;
+
             g.append('text')
-                .attr('x', w - 4)
-                .attr('y', topY + 6)
+                .attr('x', badgeCx)
+                .attr('y', badgeCy)
+                .attr('dominant-baseline', 'central')
                 .attr('text-anchor', 'middle')
-                .style('font-size', '38px')
+                .style('font-size', '30px')
+                .style('filter', 'drop-shadow(0 3px 6px rgba(15, 23, 42, 0.45))')
                 .text('🌺');
         });
 
@@ -7705,6 +7712,11 @@
                 let sLife = d.data.spouse_life ? ` (${d.data.spouse_life})` : '';
                 return `${d.data.spouse}${sLife}`;
             });
+
+        // Pastikan badge bunga (penanda almarhum/ah) selalu berada di layer
+        // paling depan, sehingga tetap terlihat jelas walau menutupi teks
+        // nama/keterangan yang panjang.
+        nodeEnter.selectAll('.flower-badge').raise();
 
         const nodeUpdate = nodeEnter.merge(node);
 
