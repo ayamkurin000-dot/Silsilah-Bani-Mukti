@@ -7520,6 +7520,16 @@
         };
         const TEXT_PAD_X = 14;
 
+        // Format tahun hidup: jika lahir diketahui tapi wafat belum (pola "19xx - ...."),
+        // tampilkan hanya tahun lahirnya saja. Jika wafat diketahui tapi lahir belum
+        // (pola ".... - 19xx"), atau keduanya diketahui, biarkan format apa adanya.
+        function formatLifeSpan(life) {
+            if (!life) return life;
+            const m = life.match(/^\s*(\d{3,4})\s*-\s*\.+\s*$/);
+            if (m) return m[1];
+            return life;
+        }
+
         function autoFitText(textEl, maxWidth, minFontSize, maxFontSize) {
             let fontSize = maxFontSize;
             textEl.style('font-size', fontSize + 'px');
@@ -7571,7 +7581,7 @@
                 if (d.data.name === 'H. ABDUL MUKTI' || d.data.name === 'MOH. SATHORI' || d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') {
                     return d.data.name;
                 }
-                let lifeStr = d.data.life ? ` (${d.data.life})` : '';
+                let lifeStr = d.data.life ? ` (${formatLifeSpan(d.data.life)})` : '';
                 return `${d.data.name}${lifeStr}`;
             })
             .each(function(d) {
@@ -7719,11 +7729,11 @@
             })
             .text(d => {
                 if (d.data.name === 'H. ABDUL MUKTI') {
-                    return d.data.life ? d.data.life : '';
+                    return d.data.life ? formatLifeSpan(d.data.life) : '';
                 }
                 if (d.data.name === 'MOH. SATHORI' || d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return '';
                 if (!hasSpouseLine(d)) return '';
-                let sLife = d.data.spouse_life ? ` (${d.data.spouse_life})` : '';
+                let sLife = d.data.spouse_life ? ` (${formatLifeSpan(d.data.spouse_life)})` : '';
                 return `${d.data.spouse}${sLife}`;
             });
 
