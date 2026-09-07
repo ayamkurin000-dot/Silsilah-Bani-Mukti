@@ -7372,7 +7372,7 @@
             const w = (d.data.name === 'H. ABDUL MUKTI') ? founderCardWidth :
                 (d.data.name === 'MOH. SATHORI') ? rootCardWidth : cardWidth;
             const h = (d.data.name === 'H. ABDUL MUKTI') ? founderCardHeight :
-                (d.data.name === 'MOH. SATHORI') ? rootCardHeight : cardHeight + (d.data.extraName && !isRedundantAlmTitle(d) ? extraNameHeight : 0);
+                (d.data.name === 'MOH. SATHORI') ? rootCardHeight : cardHeight + getCardExtraHeight(d);
             minX = Math.min(minX, d.x - h / 2);
             maxX = Math.max(maxX, d.x + h / 2);
             minY = Math.min(minY, d.y);
@@ -7488,6 +7488,32 @@
         return null;
     }
 
+    // Versi top-level dari cek "ada baris pasangan" (dipakai di luar update(),
+    // mis. computeVisibleBBox), sama persis logikanya dengan const hasSpouseLine
+    // di dalam update().
+    function hasSpouseLineTop(d) {
+        if (!d.data.spouse) return false;
+        if (d.data.type === 'root' || d.data.type === 'wife') return false;
+        const hasWifeBranch = Array.isArray(d.data.children) && d.data.children.some(c => c.type === 'wife');
+        return !hasWifeBranch;
+    }
+
+    // Kartu hanya butuh tambahan tinggi (extraNameHeight) jika baris kontennya
+    // ada 3 (nama + pasangan/urutan + nama panggilan). Kartu dengan 2 baris
+    // saja — entah itu nama+pasangan ATAU nama+nama panggilan — cukup pakai
+    // tinggi dasar kartu (cardHeight), supaya tidak terlihat kosong/kebesaran.
+    function getCardRowCount(d) {
+        const hasExtra = d.data.extraName && !isRedundantAlmTitle(d);
+        const hasSecond = !!getSpouseOrderForWife(d) || hasSpouseLineTop(d);
+        let n = 1;
+        if (hasSecond) n++;
+        if (hasExtra) n++;
+        return n;
+    }
+    function getCardExtraHeight(d) {
+        return getCardRowCount(d) >= 3 ? extraNameHeight : 0;
+    }
+
     // ============================================================
     // UPDATE VISUALISASI
     // ============================================================
@@ -7576,7 +7602,7 @@
         nodeEnter.append('path')
             .attr('class', 'node-shape')
             .attr('d', d => {
-                let w = cardWidth, h = cardHeight + (d.data.extraName && !isRedundantAlmTitle(d) ? extraNameHeight : 0);
+                let w = cardWidth, h = cardHeight + getCardExtraHeight(d);
                 if (d.data.name === 'H. ABDUL MUKTI') { w = founderCardWidth; h = founderCardHeight; }
                 else if (d.data.name === 'MOH. SATHORI') { w = rootCardWidth; h = rootCardHeight; }
                 return batteryPath(w, h);
@@ -7609,7 +7635,7 @@
                 (d.data.name === 'MOH. SATHORI') ? rootCardWidth : cardWidth;
             const h = (d.data.name === 'H. ABDUL MUKTI') ? founderCardHeight :
                 (d.data.name === 'MOH. SATHORI') ? rootCardHeight :
-                cardHeight + (d.data.extraName && !isRedundantAlmTitle(d) ? extraNameHeight : 0);
+                cardHeight + getCardExtraHeight(d);
             const topY = -h / 2;
             const baseY = topY + 14;
             const g = d3.select(this);
@@ -7640,7 +7666,7 @@
                 (d.data.name === 'MOH. SATHORI') ? rootCardWidth : cardWidth;
             const h = (d.data.name === 'H. ABDUL MUKTI') ? founderCardHeight :
                 (d.data.name === 'MOH. SATHORI') ? rootCardHeight :
-                cardHeight + (d.data.extraName && !isRedundantAlmTitle(d) ? extraNameHeight : 0);
+                cardHeight + getCardExtraHeight(d);
             const topY = -h / 2;
             const g = d3.select(this);
 
