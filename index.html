@@ -433,14 +433,20 @@
             display: none;
             opacity: 0;
             pointer-events: none;
-            transform: translate(-50%, 0) scale(0.9);
+            transform: translate(-50%, 0) scale(0.3) rotate(-200deg);
             transform-origin: center top;
-            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.34,1.56,0.64,1);
-            animation: nu-logo-float 3.2s ease-in-out infinite;
         }
         #nu-logo-splash.show {
             opacity: 1;
-            transform: translate(-50%, 0) scale(1);
+            animation: nu-logo-roll-in 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+                       nu-logo-float 3.2s ease-in-out 0.85s infinite;
+        }
+        @keyframes nu-logo-roll-in {
+            0%   { opacity: 0; transform: translate(-50%, 0) scale(0.3) rotate(-200deg); }
+            55%  { opacity: 1; transform: translate(-50%, 0) scale(1.12) rotate(18deg); }
+            75%  { transform: translate(-50%, 0) scale(0.94) rotate(-6deg); }
+            90%  { transform: translate(-50%, 0) scale(1.03) rotate(2deg); }
+            100% { opacity: 1; transform: translate(-50%, 0) scale(1) rotate(0deg); }
         }
         @keyframes nu-logo-float {
             0%, 100% { margin-top: 0px; }
@@ -458,7 +464,7 @@
             #nu-logo-splash img { width: 225px; max-width: 30vw; }
         }
         @media (prefers-reduced-motion: reduce) {
-            #nu-logo-splash { animation: none; }
+            #nu-logo-splash.show { animation: none; opacity: 1; transform: translate(-50%, 0) scale(1) rotate(0deg); }
         }
         #cursor-fx {
             position: fixed;
