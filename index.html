@@ -245,6 +245,185 @@
             0% { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
             100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
+        /* ===== ZOOM HINT: notifikasi cubit 2 jari - VERSI JARI BESAR REALISTIS & RINGAN ===== */
+        #zoom-hint-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.88);
+            background: rgba(15, 23, 42, 0.92);
+            color: #ffffff;
+            padding: 22px 30px 20px;
+            border-radius: 28px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255,255,255,0.08) inset;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            white-space: nowrap;
+            transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+            will-change: auto;
+            border: 1px solid rgba(255,255,255,0.1);
+            max-width: 92vw;
+            text-align: center;
+        }
+        #zoom-hint-toast.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            will-change: transform, opacity;
+        }
+        /* Container animasi jari - BESAR */
+        #zoom-hint-toast .pinch-real {
+            width: 132px;
+            height: 92px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            will-change: transform;
+        }
+        #zoom-hint-toast .pinch-real .pr-finger {
+            position: absolute;
+            width: 34px;
+            height: 78px;
+            border-radius: 18px 18px 14px 14px;
+            will-change: transform;
+            transform-origin: bottom center;
+        }
+        /* Jari kiri - gradasi kulit realistis */
+        #zoom-hint-toast .pinch-real .pr-finger-left {
+            background: linear-gradient(180deg, #fde9d2 0%, #f5c19e 18%, #e8a882 55%, #d48a64 100%);
+            left: 50%;
+            top: 6px;
+            box-shadow: inset -3px -4px 6px rgba(110, 60, 30, 0.28), inset 2px 2px 4px rgba(255,255,255,0.45), 0 4px 12px rgba(0,0,0,0.22);
+            animation: finger-left-pinch 1.6s ease-in-out infinite;
+        }
+        /* Jari kanan */
+        #zoom-hint-toast .pinch-real .pr-finger-right {
+            background: linear-gradient(180deg, #fde9d2 0%, #f5c19e 18%, #e8a882 55%, #d48a64 100%);
+            left: 50%;
+            top: 6px;
+            box-shadow: inset 3px -4px 6px rgba(110, 60, 30, 0.28), inset -2px 2px 4px rgba(255,255,255,0.45), 0 4px 12px rgba(0,0,0,0.22);
+            animation: finger-right-pinch 1.6s ease-in-out infinite;
+        }
+        /* Kuku jari */
+        #zoom-hint-toast .pinch-real .pr-finger .pr-nail {
+            position: absolute;
+            top: 7px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 18px;
+            height: 22px;
+            background: linear-gradient(180deg, #fffaf5 0%, #ffe8d6 100%);
+            border-radius: 9px 9px 11px 11px;
+            box-shadow: inset 0 -1px 2px rgba(120,70,40,0.18), 0 1px 1px rgba(0,0,0,0.1);
+            opacity: 0.95;
+        }
+        /* Garis ruas jari biar mirip beneran */
+        #zoom-hint-toast .pinch-real .pr-finger::after {
+            content: '';
+            position: absolute;
+            bottom: 22px;
+            left: 12%;
+            right: 12%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(110,60,30,0.18), transparent);
+            border-radius: 2px;
+        }
+        #zoom-hint-toast .pinch-real .pr-finger::before {
+            content: '';
+            position: absolute;
+            bottom: 36px;
+            left: 15%;
+            right: 15%;
+            height: 1.5px;
+            background: linear-gradient(90deg, transparent, rgba(110,60,30,0.13), transparent);
+            border-radius: 2px;
+        }
+        /* Titik sentuh - efek pas jari nyentuh layar */
+        #zoom-hint-toast .pinch-real .pr-touch {
+            position: absolute;
+            top: 2px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(96,165,250,0.25) 45%, rgba(59,130,246,0.0) 72%);
+            border: 1.5px solid rgba(147,197,253,0.7);
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+        #zoom-hint-toast .pinch-real .pr-touch-left {
+            left: 50%;
+            animation: touch-left 1.6s ease-in-out infinite;
+        }
+        #zoom-hint-toast .pinch-real .pr-touch-right {
+            left: 50%;
+            animation: touch-right 1.6s ease-in-out infinite;
+        }
+        /* Garis jarak cubit */
+        #zoom-hint-toast .pinch-real .pr-distance {
+            position: absolute;
+            top: 14px;
+            left: 50%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #93c5fd, transparent);
+            opacity: 0.7;
+            transform: translateX(-50%);
+            will-change: width, opacity;
+            animation: distance-line 1.6s ease-in-out infinite;
+            border-radius: 2px;
+        }
+        /* Keyframes - gerakan cubit beneran */
+        @keyframes finger-left-pinch {
+            0%, 100% { transform: translateX(-42px) translateY(2px) rotate(-18deg); }
+            20% { transform: translateX(-42px) translateY(2px) rotate(-18deg); }
+            50% { transform: translateX(-4px) translateY(0px) rotate(-2deg); }
+            80% { transform: translateX(-4px) translateY(0px) rotate(-2deg); }
+        }
+        @keyframes finger-right-pinch {
+            0%, 100% { transform: translateX(8px) translateY(2px) rotate(18deg); }
+            20% { transform: translateX(8px) translateY(2px) rotate(18deg); }
+            50% { transform: translateX(-30px) translateY(0px) rotate(2deg); }
+            80% { transform: translateX(-30px) translateY(0px) rotate(2deg); }
+        }
+        @keyframes touch-left {
+            0%, 18%, 82%, 100% { opacity: 0; transform: translate(-42px, 0) scale(0.6); }
+            22% { opacity: 0.85; transform: translate(-42px, 0) scale(1); }
+            48% { opacity: 0; transform: translate(-4px, 0) scale(0.7); }
+            52% { opacity: 0.9; transform: translate(-4px, 0) scale(1.1); }
+            78% { opacity: 0.9; transform: translate(-4px, 0) scale(1.1); }
+        }
+        @keyframes touch-right {
+            0%, 18%, 82%, 100% { opacity: 0; transform: translate(8px, 0) scale(0.6); }
+            22% { opacity: 0.85; transform: translate(8px, 0) scale(1); }
+            48% { opacity: 0; transform: translate(-30px, 0) scale(0.7); }
+            52% { opacity: 0.9; transform: translate(-30px, 0) scale(1.1); }
+            78% { opacity: 0.9; transform: translate(-30px, 0) scale(1.1); }
+        }
+        @keyframes distance-line {
+            0%, 18% { width: 58px; opacity: 0.55; }
+            50%, 78% { width: 8px; opacity: 0; }
+            82%, 100% { width: 58px; opacity: 0.55; }
+        }
+        @media (max-width: 640px) {
+            #zoom-hint-toast { padding: 20px 22px 18px; border-radius: 24px; }
+            #zoom-hint-toast .pinch-real { width: 118px; height: 84px; transform: scale(0.95); }
+            #zoom-hint-toast .pinch-real .pr-finger { width: 30px; height: 70px; }
+        }
+        /* Kurangi animasi kalau user pakai mode hemat baterai */
+        @media (prefers-reduced-motion: reduce) {
+            #zoom-hint-toast .pinch-real .pr-finger,
+            #zoom-hint-toast .pinch-real .pr-touch,
+            #zoom-hint-toast .pinch-real .pr-distance {
+                animation-duration: 2.4s !important;
+            }
+        }
         #cursor-fx {
             position: fixed;
             top: 0;
@@ -1109,6 +1288,18 @@
             </g>
         </svg>
         <div class="hint-text">Geser ke kanan-kiri-atas-bawah</div>
+    </div>
+
+    <!-- Toast hint zoom: muncul setelah hint geser (panah 4 arah) hilang, memandu bahwa layar bisa di-zoom pakai 2 jari -->
+    <div id="zoom-hint-toast">
+        <div class="pinch-real" aria-hidden="true">
+            <div class="pr-finger pr-finger-left"><span class="pr-nail"></span></div>
+            <div class="pr-finger pr-finger-right"><span class="pr-nail"></span></div>
+            <div class="pr-touch pr-touch-left"></div>
+            <div class="pr-touch pr-touch-right"></div>
+            <div class="pr-distance"></div>
+        </div>
+        <span>Cubit 2 jari untuk zoom in / out</span>
     </div>
     <canvas id="cursor-fx"></canvas>
     <div id="credit-tag">DIBUAT OLEH: MANNIXS-21</div>
@@ -7473,6 +7664,7 @@
     // user untuk pan/geser peta ke kanan-kiri-atas-bawah
     // ============================================================
     let panHintShown = false;
+    let panHintVisible = false;
     let panHintTimer = null;
 
     function showPanHint() {
@@ -7481,6 +7673,7 @@
         const el = document.getElementById('pan-hint');
         if (!el) return;
         el.style.display = 'flex';
+        panHintVisible = true;
         panHintTimer = setTimeout(hidePanHint, 4000);
     }
 
@@ -7488,6 +7681,34 @@
         const el = document.getElementById('pan-hint');
         if (el) el.style.display = 'none';
         if (panHintTimer) { clearTimeout(panHintTimer); panHintTimer = null; }
+        // Begitu hint geser (panah 4 arah) hilang -- baik karena timeout maupun
+        // karena user sudah geser/pinch layar -- gantikan dengan notifikasi
+        // cara zoom pakai 2 jari (sama seperti urutan di file mbah_kong).
+        if (panHintVisible) {
+            panHintVisible = false;
+            showZoomHint();
+        }
+    }
+
+    // ============================================================
+    // HINT ZOOM (cubit 2 jari) - muncul setelah hint geser (4 arah)
+    // hilang. Tampil sekali saja per sesi, lalu hilang otomatis.
+    // ============================================================
+    let zoomHintTimer = null;
+    let zoomHintEverShown = false;
+
+    function showZoomHint() {
+        if (zoomHintEverShown) return;
+        zoomHintEverShown = true;
+        const toast = document.getElementById('zoom-hint-toast');
+        if (!toast) return;
+        setTimeout(() => {
+            toast.classList.add('show');
+            clearTimeout(zoomHintTimer);
+            zoomHintTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4200);
+        }, 350);
     }
 
     setTimeout(positionRootTapHint, 700);
