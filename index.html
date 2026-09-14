@@ -7758,9 +7758,16 @@
             .attr('stroke', '#1e293b').attr('stroke-width', 0.9).attr('stroke-opacity', 0.18)
             .attr('clip-path', clipRef);
 
+        // Kilau dibuat selebar & serata penuh badan shape (x=0, width=w),
+        // lalu dipotong pakai clip-path bundar yang sama dengan badan.
+        // Sebelumnya kilau diberi inset kiri-kanan (x = r*0.6) yang lebih
+        // sempit dari radius sudut (r), jadi kilaunya berhenti sebelum
+        // mencapai lengkungan sudut atas & terlihat seperti "terpotong".
+        // Dengan x=0 & width=w, kilau ikut melengkung mengikuti sudut
+        // membulat kartu, jadi terlihat menyatu dan natural.
         g.append('rect')
-            .attr('x', r * 0.6).attr('y', -h / 2 + 2.5)
-            .attr('width', w - r * 1.2).attr('height', h * 0.36)
+            .attr('x', 0).attr('y', -h / 2)
+            .attr('width', w).attr('height', h * 0.4)
             .attr('fill', gradUrl(`gloss-${type}`)).attr('pointer-events', 'none')
             .attr('clip-path', clipRef);
 
@@ -8392,7 +8399,17 @@
         // baris paling bawah yang aktif (nama panggilan bila ada, kalau
         // tidak ada maka baris pasangan, kalau tidak ada juga maka baris nama).
         const SPECIAL_NODES = ['H. ABDUL MUKTI', 'MOH. SATHORI', 'Isteri ke-1', 'Isteri ke-2'];
-        const ROW_PITCH = 15; // jarak antar baris teks (dirapatkan, sebelumnya mengikuti tinggi kartu penuh)
+        const ROW_PITCH = 15; // jarak baris nama utama -> nama pasangan
+        // Jarak baris nama pasangan -> nama panggilan. Dibuat sedikit lebih
+        // rapat dari ROW_PITCH karena font nama panggilan lebih kecil
+        // (9px) daripada font nama pasangan (12px), sehingga kalau
+        // jarak-pusatnya disamakan, ruang kosong di antara keduanya
+        // terlihat lebih lebar daripada jarak nama utama -> nama pasangan.
+        const ROW_PITCH_EXTRA = 11;
+        function pitchBetween(a, b) {
+            if (a === 'second' && b === 'extra') return ROW_PITCH_EXTRA;
+            return ROW_PITCH;
+        }
         function getRowCenters(d) {
             if (SPECIAL_NODES.includes(d.data.name)) return null;
             const hasExtra = d.data.extraName && !isRedundantAlmTitle(d);
@@ -8403,9 +8420,17 @@
             if (hasSecond) rows.push('second');
             if (hasExtra) rows.push('extra');
 
-            const blockH = rows.length * ROW_PITCH;
+            // Posisi kumulatif tiap baris memakai jarak antar-pasangan baris
+            // (bisa berbeda per pasangan), lalu blok dipusatkan supaya kartu
+            // tetap rata tengah atas-bawah seperti sebelumnya.
+            const positions = [0];
+            for (let i = 1; i < rows.length; i++) {
+                positions.push(positions[i - 1] + pitchBetween(rows[i - 1], rows[i]));
+            }
+            const blockH = positions[positions.length - 1];
+            const centerOffset = blockH / 2;
             const centers = {};
-            rows.forEach((key, i) => { centers[key] = -blockH / 2 + ROW_PITCH / 2 + i * ROW_PITCH; });
+            rows.forEach((key, i) => { centers[key] = positions[i] - centerOffset; });
             // Alamat sejajar dengan baris paling bawah yang aktif
             const addressRowKey = hasExtra ? 'extra' : (hasSecond ? 'second' : 'name');
             centers.address = centers[addressRowKey];
