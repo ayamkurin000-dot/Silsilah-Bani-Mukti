@@ -7746,25 +7746,18 @@
     softWhiteGloss.append('stop').attr('offset', '68%').attr('stop-color', '#ffffff').attr('stop-opacity', 0);
 
     const gContainer = svg.append("g");
-    if (isMobileEarly) {
-        // Beri tahu browser supaya gContainer dipromosikan ke layer GPU
-        // tersendiri, supaya pan/zoom tidak memicu repaint seluruh pohon.
-        gContainer.style('will-change', 'transform');
-    }
+    // CATATAN: sebelumnya di HP, gContainer dipromosikan ke layer GPU lewat
+    // will-change + CSS transform supaya pan/zoom lebih mulus. TAPI ini
+    // memicu bug Chrome Android: shape ber-gradasi (fill="url(#id)") di
+    // dalam layer yang di-composite GPU jadi transparan, khususnya saat
+    // halaman diakses lewat jaringan (GitHub Pages), meski normal saat
+    // dibuka sebagai file lokal. Makanya sekarang SELALU pakai atribut SVG
+    // transform biasa (tidak lewat CSS/will-change) supaya gradasinya aman.
 
     const zoom = d3.zoom()
         .scaleExtent([0.2, 2])
         .on("zoom", (event) => {
-            if (isMobileEarly) {
-                // Di HP, set transform lewat CSS (bukan atribut SVG) supaya
-                // pan/zoom dikerjakan compositor/GPU, bukan main-thread repaint
-                // per node — ini yang paling terasa mengurangi "nut-nut".
-                const t = event.transform;
-                gContainer.style('transform', `translate(${t.x}px, ${t.y}px) scale(${t.k})`);
-                gContainer.style('transform-origin', '0 0');
-            } else {
-                gContainer.attr("transform", event.transform);
-            }
+            gContainer.attr("transform", event.transform);
             if (event.sourceEvent) {
                 hideRootTapHint(); // interaksi manual user (geser/pinch) -> hint "Ketuk di sini" boleh hilang juga
                 hidePanHint(); // interaksi manual user -> hint boleh hilang lebih awal
