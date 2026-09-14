@@ -1109,55 +1109,10 @@
             stroke: #cbd5e1;
             stroke-width: 2px;
         }
-        .node-root .node-shape {
-            fill: url(#grad-root);
-            stroke: #ca8a04;
-        }
-        .node-wife .node-shape {
-            fill: url(#grad-wife);
-            stroke: #db2777;
-        }
-        .node-gen1 .node-shape {
-            fill: url(#grad-gen1);
-            stroke: #2563eb;
-        }
-        .node-gen2 .node-shape {
-            fill: url(#grad-gen2);
-            stroke: #4f46e5;
-        }
-        .node-gen3 .node-shape {
-            fill: url(#grad-gen3);
-            stroke: #16a34a;
-        }
-        .node-gen4 .node-shape {
-            fill: url(#grad-gen4);
-            stroke: #9333ea;
-        }
-        .node-gen5 .node-shape {
-            fill: url(#grad-gen5);
-            stroke: #ea580c;
-        }
-        .node-gen6 .node-shape {
-            fill: url(#grad-gen6);
-            stroke: #0891b2;
-        }
-        .node-gen7 .node-shape {
-            fill: url(#grad-gen7);
-            stroke: #e11d48;
-        }
-        .node-gen8 .node-shape {
-            fill: url(#grad-gen8);
-            stroke: #7c3aed;
-        }
-        .node-founder .node-shape {
-            fill: url(#grad-founder);
-            stroke: #15803d;
-            stroke-width: 3.5px;
-        }
-        .node-plain-white .node-shape {
-            fill: #ffffff !important;
-            stroke: #cbd5e1 !important;
-        }
+        /* ===== WARNA SOLID FLAT + BORDER TEBAL HITAM (gaya Mubanan) ===== */
+        /* Warna & gradasi tiap generasi kini digambar langsung lewat SVG
+           <rect> bergradasi (grad-real-*) di dalam .node-shape (lihat
+           drawRealisticBattery()), jadi tidak perlu fill/stroke di sini lagi. */
         .node-founder text.name-life {
             font-size: 18px;
             font-weight: 900;
@@ -2258,7 +2213,8 @@
                                                     "spouse_life": "",
                                                     "type": "gen4",
                                                     "address": "",
-                                                    "extraName": "Alm.",
+                                                    "extraName": "",
+                                                    "slim": true,
                                                     "children": []
                                                 },
                                                 {
@@ -2268,7 +2224,8 @@
                                                     "spouse_life": "",
                                                     "type": "gen4",
                                                     "address": "",
-                                                    "extraName": "Alm.",
+                                                    "extraName": "",
+                                                    "slim": true,
                                                     "children": []
                                                 },
                                                 {
@@ -3162,7 +3119,8 @@
                                                             "spouse_life": "",
                                                             "type": "gen5",
                                                             "address": "",
-                                                            "extraName": "Alm.",
+                                                            "extraName": "",
+                                                            "slim": true,
                                                             "children": []
                                                         },
                                                         {
@@ -4691,6 +4649,7 @@
                                                             "spouse_life": "",
                                                             "type": "gen4",
                                                             "address": "",
+                                                            "slim": true,
                                                             "children": []
                                                         },
                                                         {
@@ -4700,6 +4659,7 @@
                                                             "spouse_life": "",
                                                             "type": "gen4",
                                                             "address": "",
+                                                            "slim": true,
                                                             "children": []
                                                         },
                                                         {
@@ -7567,6 +7527,9 @@
     const height = window.innerHeight;
     const cardWidth = 240;
     const cardHeight = 60;
+    const slimCardHeight = 40; // tinggi ramping untuk kartu 1 baris (mis. Farath dengan gelar Alm./Almh.)
+    const sathoriWifeCardWidth = 150; // ramping khusus Isteri ke-1 & ke-2 (istri MOH. SATHORI)
+    const sathoriWifeCardHeight = 42; // pendek khusus Isteri ke-1 & ke-2 (istri MOH. SATHORI)
     const founderCardWidth = 280;
     const founderCardHeight = 76;
     const rootCardWidth = 260;
@@ -7629,6 +7592,151 @@
         lg.append('stop').attr('offset', '0%').attr('stop-color', g.c1);
         lg.append('stop').attr('offset', '100%').attr('stop-color', g.c2);
     });
+
+    // ====== GRADIENT GLOSSY 3D ALA "BATERAI" (gaya Mubanan.html) ======
+    // Tiap generasi dapat gradasi vertikal terang->gelap (bukan flat/solid),
+    // plus lapisan "gloss" (kilau) putih transparan di bagian atas shape,
+    // dan sebuah "nub" (terminal) metalik di sisi kanan seperti baterai asli.
+    function buildGlossyStops(baseHex) {
+        const base = d3.color(baseHex);
+        return {
+            light: base.brighter(1.6).formatHex(),
+            mid: base.brighter(0.6).formatHex(),
+            mid2: baseHex,
+            dark: base.darker(1.1).formatHex()
+        };
+    }
+    const GEN_REAL_BASE = {
+        wife:  '#93c5fd', // biru muda khusus Isteri/Suami (beda dari root, founder & semua gen)
+        gen1:  '#bbf7d0', // hijau muda
+        gen2:  '#f9a8d4', // pink
+        gen3:  '#fef08a', // kuning muda
+        gen4:  '#c5d9a8', // hijau pucat gaya casing baterai asli
+        gen5:  '#fed7aa', // oranye muda
+        gen6:  '#a5f3fc', // cyan muda
+        gen7:  '#fecdd3', // rose muda
+        gen8:  '#ddd6fe'  // violet muda
+    };
+    Object.entries(GEN_REAL_BASE).forEach(([type, baseHex]) => {
+        const col = buildGlossyStops(baseHex);
+        const lg = defs.append('linearGradient').attr('id', 'grad-real-' + type)
+            .attr('x1', '0%').attr('y1', '0%').attr('x2', '0%').attr('y2', '100%');
+        lg.append('stop').attr('offset', '0%').attr('stop-color', col.light);
+        lg.append('stop').attr('offset', '22%').attr('stop-color', col.mid);
+        lg.append('stop').attr('offset', '58%').attr('stop-color', col.mid2);
+        lg.append('stop').attr('offset', '88%').attr('stop-color', col.dark);
+        lg.append('stop').attr('offset', '100%').attr('stop-color', d3.color(col.dark).darker(0.5).formatHex());
+
+        const gloss = defs.append('linearGradient').attr('id', 'gloss-' + type)
+            .attr('x1', '0%').attr('y1', '0%').attr('x2', '0%').attr('y2', '100%');
+        gloss.append('stop').attr('offset', '0%').attr('stop-color', '#ffffff').attr('stop-opacity', 0.88);
+        gloss.append('stop').attr('offset', '32%').attr('stop-color', '#ffffff').attr('stop-opacity', 0.28);
+        gloss.append('stop').attr('offset', '68%').attr('stop-color', '#ffffff').attr('stop-opacity', 0);
+    });
+
+    // ROOT (MOH. SATHORI) - gradasi emas mengkilap
+    const rootRealGrad = defs.append('linearGradient').attr('id', 'grad-real-root')
+        .attr('x1', '0%').attr('y1', '0%').attr('x2', '0%').attr('y2', '100%');
+    [
+        { off: '0%', c: '#fefce8' },
+        { off: '30%', c: '#fde68a' },
+        { off: '65%', c: '#fbbf24' },
+        { off: '100%', c: '#b45309' }
+    ].forEach(s => rootRealGrad.append('stop').attr('offset', s.off).attr('stop-color', s.c));
+    const rootRealGloss = defs.append('linearGradient').attr('id', 'gloss-root')
+        .attr('x1', '0%').attr('y1', '0%').attr('x2', '0%').attr('y2', '100%');
+    rootRealGloss.append('stop').attr('offset', '0%').attr('stop-color', '#ffffff').attr('stop-opacity', 0.85);
+    rootRealGloss.append('stop').attr('offset', '28%').attr('stop-color', '#ffffff').attr('stop-opacity', 0.32);
+    rootRealGloss.append('stop').attr('offset', '65%').attr('stop-color', '#ffffff').attr('stop-opacity', 0);
+
+    // FOUNDER (H. ABDUL MUKTI) - gradasi khusus hijau - putih - merah (leluhur/pendiri)
+    const founderRealGrad = defs.append('linearGradient').attr('id', 'grad-real-founder')
+        .attr('x1', '0%').attr('y1', '0%').attr('x2', '100%').attr('y2', '0%');
+    [
+        { off: '0%', c: '#16a34a' },
+        { off: '50%', c: '#ffffff' },
+        { off: '100%', c: '#dc2626' }
+    ].forEach(s => founderRealGrad.append('stop').attr('offset', s.off).attr('stop-color', s.c));
+    const founderRealGloss = defs.append('linearGradient').attr('id', 'gloss-founder')
+        .attr('x1', '0%').attr('y1', '0%').attr('x2', '0%').attr('y2', '100%');
+    founderRealGloss.append('stop').attr('offset', '0%').attr('stop-color', '#ffffff').attr('stop-opacity', 0.85);
+    founderRealGloss.append('stop').attr('offset', '28%').attr('stop-color', '#ffffff').attr('stop-opacity', 0.32);
+    founderRealGloss.append('stop').attr('offset', '65%').attr('stop-color', '#ffffff').attr('stop-opacity', 0);
+
+    // metal base (dudukan nub) - abu-abu netral
+    const metalBaseReal = defs.append('linearGradient').attr('id', 'grad-metal-base')
+        .attr('x1', '0%').attr('y1', '0%').attr('x2', '100%').attr('y2', '0%');
+    [{off:'0%',c:'#475569'},{off:'20%',c:'#94a3b8'},{off:'45%',c:'#e2e8f0'},{off:'70%',c:'#94a3b8'},{off:'100%',c:'#334155'}]
+        .forEach(s => metalBaseReal.append('stop').attr('offset', s.off).attr('stop-color', s.c));
+
+    // metal nub (terminal baterai) - abu-abu netral
+    const metalNubReal = defs.append('linearGradient').attr('id', 'grad-metal-nub')
+        .attr('x1', '0%').attr('y1', '0%').attr('x2', '100%').attr('y2', '0%');
+    [{off:'0%',c:'#1e293b'},{off:'18%',c:'#64748b'},{off:'42%',c:'#f1f5f9'},{off:'68%',c:'#94a3b8'},{off:'100%',c:'#0f172a'}]
+        .forEach(s => metalNubReal.append('stop').attr('offset', s.off).attr('stop-color', s.c));
+
+    // Gambar 1 shape "baterai 3D glossy" lengkap: shadow + body gradasi + gloss + nub metal
+    function drawRealisticBattery(g, w, h, type) {
+        if (!w || !h) return;
+        const r = Math.min(22, Math.round(h * 0.42));
+        const nubBaseW = 8;
+        const nubBaseH = h * 0.68;
+        const nubW = 18;
+        const nubH = h * 0.48;
+
+        g.append('rect')
+            .attr('x', 1.5).attr('y', -h / 2 + 2)
+            .attr('width', w).attr('height', h).attr('rx', r)
+            .attr('fill', '#000').attr('opacity', 0.09);
+
+        g.append('rect')
+            .attr('class', 'real-body')
+            .attr('x', 0).attr('y', -h / 2).attr('width', w).attr('height', h).attr('rx', r)
+            .attr('fill', `url(#grad-real-${type})`)
+            .attr('stroke', '#1e293b').attr('stroke-width', 0.9).attr('stroke-opacity', 0.18);
+
+        g.append('rect')
+            .attr('x', r * 0.6).attr('y', -h / 2 + 2.5)
+            .attr('width', w - r * 1.2).attr('height', h * 0.36).attr('rx', r * 0.5)
+            .attr('fill', `url(#gloss-${type})`).attr('pointer-events', 'none');
+
+        g.append('rect')
+            .attr('x', w).attr('y', -nubBaseH / 2)
+            .attr('width', nubBaseW).attr('height', nubBaseH).attr('rx', 2.2)
+            .attr('fill', 'url(#grad-metal-base)').attr('stroke', '#64748b').attr('stroke-width', 0.6);
+
+        const nubG = g.append('g').attr('transform', `translate(${w + nubBaseW},0)`);
+        nubG.append('rect')
+            .attr('x', 0).attr('y', -nubH / 2).attr('width', nubW).attr('height', nubH).attr('rx', 5.5)
+            .attr('fill', 'url(#grad-metal-nub)').attr('stroke', '#334155').attr('stroke-width', 0.7);
+        nubG.append('rect')
+            .attr('x', 2.5).attr('y', -nubH / 2 + 2.5).attr('width', nubW - 5).attr('height', nubH * 0.38).attr('rx', 2.5)
+            .attr('fill', '#ffffff').attr('opacity', 0.58).attr('pointer-events', 'none');
+    }
+
+    // Shape polos (farath / plain white) - tanpa gradasi, tetap flat putih
+    function drawPlainShape(g, w, h) {
+        if (!w || !h) return;
+        const r = Math.min(14, h / 2, w / 2);
+        g.append('rect')
+            .attr('x', 0).attr('y', -h / 2).attr('width', w).attr('height', h).attr('rx', r)
+            .attr('fill', '#ffffff').attr('stroke', '#e5e7eb').attr('stroke-width', 1.2);
+    }
+
+    // SOFT WHITE - untuk kartu ramping 1 baris (mis. Farath bergelar Alm./Almh.)
+    const softWhiteGrad = defs.append('linearGradient').attr('id', 'grad-real-soft')
+        .attr('x1', '0%').attr('y1', '0%').attr('x2', '0%').attr('y2', '100%');
+    [
+        { off: '0%', c: '#ffffff' },
+        { off: '45%', c: '#fbfcfe' },
+        { off: '80%', c: '#eef2f7' },
+        { off: '100%', c: '#e2e8f0' }
+    ].forEach(s => softWhiteGrad.append('stop').attr('offset', s.off).attr('stop-color', s.c));
+    const softWhiteGloss = defs.append('linearGradient').attr('id', 'gloss-soft')
+        .attr('x1', '0%').attr('y1', '0%').attr('x2', '0%').attr('y2', '100%');
+    softWhiteGloss.append('stop').attr('offset', '0%').attr('stop-color', '#ffffff').attr('stop-opacity', 0.9);
+    softWhiteGloss.append('stop').attr('offset', '32%').attr('stop-color', '#ffffff').attr('stop-opacity', 0.25);
+    softWhiteGloss.append('stop').attr('offset', '68%').attr('stop-color', '#ffffff').attr('stop-opacity', 0);
 
     const gContainer = svg.append("g");
     if (isMobileEarly) {
@@ -7720,9 +7828,9 @@
             maxY = -Infinity;
         list.forEach(d => {
             const w = (d.data.name === 'H. ABDUL MUKTI') ? founderCardWidth :
-                (d.data.name === 'MOH. SATHORI') ? rootCardWidth : cardWidth;
+                (d.data.name === 'MOH. SATHORI') ? rootCardWidth : getCardW(d);
             const h = (d.data.name === 'H. ABDUL MUKTI') ? founderCardHeight :
-                (d.data.name === 'MOH. SATHORI') ? rootCardHeight : cardHeight + getCardExtraHeight(d);
+                (d.data.name === 'MOH. SATHORI') ? rootCardHeight : getCardH(d);
             minX = Math.min(minX, d.x - h / 2);
             maxX = Math.max(maxX, d.x + h / 2);
             minY = Math.min(minY, d.y);
@@ -7999,6 +8107,28 @@
     function getCardExtraHeight(d) {
         return getCardRowCount(d) >= 3 ? extraNameHeight : 0;
     }
+    // Tinggi kartu final: kartu "slim" (mis. Farath bergelar Alm./Almh. yang
+    // sudah dijadikan 1 baris) pakai tinggi ramping, kartu lain seperti biasa.
+    function getCardH(d) {
+        if (isSathoriWife(d)) return sathoriWifeCardHeight;
+        if (d.data.slim) return slimCardHeight;
+        return cardHeight + getCardExtraHeight(d);
+    }
+
+    // Isteri ke-1 & Isteri ke-2 (istri MOH. SATHORI) -> shape ramping & pendek
+    function isSathoriWife(d) {
+        return !!d.data && (d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2');
+    }
+    // Murthosiyah & Rusilah (istri H. ABDUL MUKTI) -> label "ISTERI KE-N" digeser
+    // ke kiri, masuk ke celah antara shape Abdul Mukti dan shape mereka sendiri,
+    // supaya tidak menumpuk di dalam kartu.
+    function isFounderWife(d) {
+        return !!d.data && (d.data.name === 'Murthosiyah' || d.data.name === 'Rusilah');
+    }
+    function getCardW(d) {
+        if (isSathoriWife(d)) return sathoriWifeCardWidth;
+        return cardWidth;
+    }
 
     // ============================================================
     // UPDATE VISUALISASI
@@ -8014,7 +8144,7 @@
         const rootNode = nodes.find(d => d.depth === 0);
         if (rootNode && rootNode.children) {
             const wifeOffsetX = 60;
-            const wifeGapVert = cardHeight + extraNameHeight + 24;
+            const wifeGapVert = sathoriWifeCardHeight + 24;
             const wife1 = rootNode.children.find(c => c.data.name === 'Isteri ke-1');
             const wife2 = rootNode.children.find(c => c.data.name === 'Isteri ke-2');
 
@@ -8086,22 +8216,31 @@
                 }
             });
 
-        nodeEnter.append('path')
+        nodeEnter.append('g')
             .attr('class', 'node-shape')
-            .attr('d', d => {
-                let w = cardWidth, h = cardHeight + getCardExtraHeight(d);
+            .each(function(d) {
+                let w = getCardW(d), h = getCardH(d);
                 if (d.data.name === 'H. ABDUL MUKTI') { w = founderCardWidth; h = founderCardHeight; }
                 else if (d.data.name === 'MOH. SATHORI') { w = rootCardWidth; h = rootCardHeight; }
-                return batteryPath(w, h);
-            })
-            .style("box-shadow", "0 4px 6px rgba(0,0,0,0.1)");
+
+                const isFarath = /farath/i.test(d.data.name || '');
+                if (isFarath) {
+                    drawRealisticBattery(d3.select(this), w, h, 'soft');
+                    return;
+                }
+                let type = d.data.type || 'gen3';
+                if (d.data.name === 'H. ABDUL MUKTI') type = 'founder';
+                else if (d.data.name === 'MOH. SATHORI') type = 'root';
+                else if (!Object.prototype.hasOwnProperty.call(GEN_REAL_BASE, type)) type = 'gen3';
+                drawRealisticBattery(d3.select(this), w, h, type);
+            });
 
         // ===== INDIKATOR "+" (menandakan masih ada cabang/anak di bawahnya) =====
         const toggleIndicator = nodeEnter.append('g')
             .attr('class', 'toggle-indicator')
             .attr('transform', d => {
                 const w = (d.data.name === 'H. ABDUL MUKTI') ? founderCardWidth :
-                    (d.data.name === 'MOH. SATHORI') ? rootCardWidth : cardWidth;
+                    (d.data.name === 'MOH. SATHORI') ? rootCardWidth : getCardW(d);
                 return `translate(${w + 10},0)`;
             })
             .style('display', d => (d.children || d._children) ? null : 'none');
@@ -8119,26 +8258,26 @@
 
         twinBadge.each(function(d) {
             const w = (d.data.name === 'H. ABDUL MUKTI') ? founderCardWidth :
-                (d.data.name === 'MOH. SATHORI') ? rootCardWidth : cardWidth;
+                (d.data.name === 'MOH. SATHORI') ? rootCardWidth : getCardW(d);
             const h = (d.data.name === 'H. ABDUL MUKTI') ? founderCardHeight :
                 (d.data.name === 'MOH. SATHORI') ? rootCardHeight :
-                cardHeight + getCardExtraHeight(d);
+                getCardH(d);
             const topY = -h / 2;
-            const baseY = topY + 14;
+            const baseY = topY + 7;
             const g = d3.select(this);
 
             g.append('text')
-                .attr('x', w - 14)
+                .attr('x', w - 30)
                 .attr('y', baseY)
                 .attr('text-anchor', 'middle')
-                .style('font-size', '46px')
+                .style('font-size', '23px')
                 .text('🧕');
 
             g.append('text')
-                .attr('x', w + 26)
+                .attr('x', w - 10)
                 .attr('y', baseY)
                 .attr('text-anchor', 'middle')
-                .style('font-size', '46px')
+                .style('font-size', '23px')
                 .text('🧕');
         });
 
@@ -8150,10 +8289,10 @@
 
         flowerBadge.each(function(d) {
             const w = (d.data.name === 'H. ABDUL MUKTI') ? founderCardWidth :
-                (d.data.name === 'MOH. SATHORI') ? rootCardWidth : cardWidth;
+                (d.data.name === 'MOH. SATHORI') ? rootCardWidth : getCardW(d);
             const h = (d.data.name === 'H. ABDUL MUKTI') ? founderCardHeight :
                 (d.data.name === 'MOH. SATHORI') ? rootCardHeight :
-                cardHeight + getCardExtraHeight(d);
+                getCardH(d);
             const topY = -h / 2;
             const g = d3.select(this);
 
@@ -8236,13 +8375,13 @@
             .attr('x', d => {
                 if (d.data.name === 'H. ABDUL MUKTI') return founderCardWidth / 2;
                 if (d.data.name === 'MOH. SATHORI') return rootCardWidth / 2;
-                if (d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return cardWidth / 2 + 5;
+                if (d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return sathoriWifeCardWidth / 2 + 5;
                 return TEXT_PAD_X;
             })
             .attr('y', d => {
                 if (d.data.name === 'H. ABDUL MUKTI') return -9;
                 if (d.data.name === 'MOH. SATHORI') return 2;
-                if (d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return 5;
+                if (d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return 0;
                 return getRowCenters(d).name;
             })
             .attr('text-anchor', d => {
@@ -8271,7 +8410,7 @@
             .each(function(d) {
                 const maxWidth = (d.data.name === 'H. ABDUL MUKTI') ? founderCardWidth - TEXT_PAD_X * 2 :
                     (d.data.name === 'MOH. SATHORI') ? rootCardWidth - TEXT_PAD_X * 2 :
-                    cardWidth - TEXT_PAD_X * 2;
+                    getCardW(d) - TEXT_PAD_X * 2;
                 const maxFontSize = (d.data.name === 'H. ABDUL MUKTI') ? 24 :
                     (d.data.name === 'MOH. SATHORI') ? 20 : 16;
                 const minFontSize = (d.data.name === 'H. ABDUL MUKTI') ? 14 :
@@ -8362,10 +8501,11 @@
             .style('font-size', d => {
                 if (d.data.name === 'H. ABDUL MUKTI') return '11px';
                 if (d.data.name === 'MOH. SATHORI') return '10px';
+                if (isFounderWife(d)) return '12px';
                 return '9px';
             })
             .style('font-weight', '600')
-            .style('fill', '#8b5cf6')
+            .style('fill', d => isFounderWife(d) ? '#000000' : '#8b5cf6')
             .text(d => {
                 if (d.data.name === 'H. ABDUL MUKTI' || d.data.name === 'MOH. SATHORI' || d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return '';
                 const wifeOrder = getSpouseOrderForWife(d);
@@ -8392,7 +8532,7 @@
             .attr('x', d => {
                 if (d.data.name === 'H. ABDUL MUKTI') return founderCardWidth / 2;
                 if (d.data.name === 'MOH. SATHORI') return rootCardWidth / 2;
-                if (d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return cardWidth / 2 + 5;
+                if (d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return sathoriWifeCardWidth / 2 + 5;
                 return TEXT_PAD_X;
             })
             .attr('y', d => {
@@ -8455,7 +8595,7 @@
             .remove();
 
         nodeExit.selectAll('.node-shape')
-            .attr('d', batteryPath(0, 0));
+            .style('transform', 'scale(0.01)');
 
         const link = gContainer.selectAll('path.link')
             .data(links, d => d.target.id);
@@ -8489,7 +8629,7 @@
 
     function diagonal(s, d) {
         const w1 = (s.data && s.data.name === 'H. ABDUL MUKTI') ? founderCardWidth :
-            (s.data && s.data.name === 'MOH. SATHORI') ? rootCardWidth : cardWidth;
+            (s.data && s.data.name === 'MOH. SATHORI') ? rootCardWidth : getCardW(s);
         return `M ${s.y + w1} ${s.x}
                     C ${(s.y + w1 + d.y) / 2} ${s.x},
                       ${(s.y + w1 + d.y) / 2} ${d.x},
@@ -9509,7 +9649,7 @@
     function centerOnNode(node, dur) {
         dur = (dur === undefined) ? 750 : dur;
         const w = (node.data.name === 'H. ABDUL MUKTI') ? founderCardWidth :
-            (node.data.name === 'MOH. SATHORI') ? rootCardWidth : cardWidth;
+            (node.data.name === 'MOH. SATHORI') ? rootCardWidth : getCardW(node);
         const targetX = node.y + w / 2;
         const targetY = node.x;
         const curW = window.innerWidth;
@@ -9528,9 +9668,9 @@
     function centerBetweenNodes(nodeA, nodeB, dur) {
         dur = (dur === undefined) ? 750 : dur;
         const wA = (nodeA.data.name === 'H. ABDUL MUKTI') ? founderCardWidth :
-            (nodeA.data.name === 'MOH. SATHORI') ? rootCardWidth : cardWidth;
+            (nodeA.data.name === 'MOH. SATHORI') ? rootCardWidth : getCardW(nodeA);
         const wB = (nodeB.data.name === 'H. ABDUL MUKTI') ? founderCardWidth :
-            (nodeB.data.name === 'MOH. SATHORI') ? rootCardWidth : cardWidth;
+            (nodeB.data.name === 'MOH. SATHORI') ? rootCardWidth : getCardW(nodeB);
         const targetX = ((nodeA.y + wA / 2) + (nodeB.y + wB / 2)) / 2;
         const targetY = (nodeA.x + nodeB.x) / 2;
         const curW = window.innerWidth;
