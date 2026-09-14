@@ -8402,8 +8402,10 @@
         // baris paling bawah yang aktif (nama panggilan bila ada, kalau
         // tidak ada maka baris pasangan, kalau tidak ada juga maka baris nama).
         const SPECIAL_NODES = ['H. ABDUL MUKTI', 'MOH. SATHORI', 'Isteri ke-1', 'Isteri ke-2'];
-        const ROW_PITCH = 15; // jarak antar baris teks (nama utama -> pasangan -> panggilan, disamakan semua)
+        const ROW_PITCH = 15; // jarak antar baris nama utama -> nama pasangan
+        const ROW_PITCH_EXTRA = 12; // jarak nama pasangan -> nama panggilan (dikecilkan sedikit karena font nama panggilan lebih kecil (9px), biar jarak visualnya senada dengan baris di atasnya)
         function pitchBetween(a, b) {
+            if (a === 'second' && b === 'extra') return ROW_PITCH_EXTRA;
             return ROW_PITCH;
         }
         function getRowCenters(d) {
