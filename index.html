@@ -6,6 +6,50 @@
     <title>Silsilah Interaktif - Bani Mukti</title>
     <script src="https://d3js.org/d3.v7.min.js">
     </script>
+    <script>
+        // ===== ALAT DIAGNOSA (aktif hanya jika URL diakhiri ?debug=1) =====
+        // Menangkap error JS apa pun dan menampilkannya langsung di layar,
+        // supaya bisa di-screenshot dari HP untuk didiagnosa.
+        (function() {
+            if (!/[?&]debug=1/.test(location.search)) return;
+            const box = document.createElement('div');
+            box.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999999;' +
+                'background:#111;color:#0f0;font:11px monospace;padding:8px;' +
+                'max-height:45vh;overflow:auto;white-space:pre-wrap;word-break:break-all;';
+            box.textContent = 'DEBUG MODE AKTIF...\n';
+            document.addEventListener('DOMContentLoaded', () => document.body.appendChild(box));
+            function log(msg) { box.textContent += msg + '\n'; }
+            window.addEventListener('error', e => {
+                log('❌ JS ERROR: ' + e.message + ' (baris ' + e.lineno + ':' + e.colno + ')');
+            });
+            window.addEventListener('unhandledrejection', e => {
+                log('❌ PROMISE ERROR: ' + e.reason);
+            });
+            window.addEventListener('load', () => {
+                setTimeout(() => {
+                    log('d3 versi: ' + (window.d3 ? d3.version : 'GAGAL DIMUAT!'));
+                    const svgEl = document.querySelector('svg');
+                    log('SVG ditemukan: ' + (svgEl ? 'ya' : 'TIDAK ADA'));
+                    const grads = document.querySelectorAll('linearGradient');
+                    log('Jumlah <linearGradient> di DOM: ' + grads.length);
+                    const shapes = document.querySelectorAll('.node-shape rect.real-body');
+                    log('Jumlah shape body (rect.real-body): ' + shapes.length);
+                    let noFill = 0;
+                    shapes.forEach(r => {
+                        const cs = getComputedStyle(r);
+                        if (!r.getAttribute('fill') || cs.fill === 'none' || cs.fill === 'rgba(0, 0, 0, 0)') noFill++;
+                    });
+                    log('Shape body TANPA fill valid: ' + noFill + ' / ' + shapes.length);
+                    if (shapes.length) {
+                        const r0 = shapes[0];
+                        log('Contoh fill attr shape pertama: ' + r0.getAttribute('fill'));
+                        log('Contoh computed fill shape pertama: ' + getComputedStyle(r0).fill);
+                        log('User agent: ' + navigator.userAgent);
+                    }
+                }, 1200);
+            });
+        })();
+    </script>
     <style>
         * {
             box-sizing: border-box;
