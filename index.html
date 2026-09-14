@@ -7673,8 +7673,8 @@
 
         const gloss = defs.append('linearGradient').attr('id', 'gloss-' + type)
             .attr('x1', '0%').attr('y1', '0%').attr('x2', '0%').attr('y2', '100%');
-        gloss.append('stop').attr('offset', '0%').attr('stop-color', '#ffffff').attr('stop-opacity', 0.88);
-        gloss.append('stop').attr('offset', '32%').attr('stop-color', '#ffffff').attr('stop-opacity', 0.28);
+        gloss.append('stop').attr('offset', '0%').attr('stop-color', '#ffffff').attr('stop-opacity', 0.32);
+        gloss.append('stop').attr('offset', '32%').attr('stop-color', '#ffffff').attr('stop-opacity', 0.12);
         gloss.append('stop').attr('offset', '68%').attr('stop-color', '#ffffff').attr('stop-opacity', 0);
     });
 
@@ -8399,15 +8399,8 @@
         // baris paling bawah yang aktif (nama panggilan bila ada, kalau
         // tidak ada maka baris pasangan, kalau tidak ada juga maka baris nama).
         const SPECIAL_NODES = ['H. ABDUL MUKTI', 'MOH. SATHORI', 'Isteri ke-1', 'Isteri ke-2'];
-        const ROW_PITCH = 15; // jarak baris nama utama -> nama pasangan
-        // Jarak baris nama pasangan -> nama panggilan. Dibuat sedikit lebih
-        // rapat dari ROW_PITCH karena font nama panggilan lebih kecil
-        // (9px) daripada font nama pasangan (12px), sehingga kalau
-        // jarak-pusatnya disamakan, ruang kosong di antara keduanya
-        // terlihat lebih lebar daripada jarak nama utama -> nama pasangan.
-        const ROW_PITCH_EXTRA = 11;
+        const ROW_PITCH = 15; // jarak antar baris teks (nama utama -> pasangan -> panggilan, disamakan semua)
         function pitchBetween(a, b) {
-            if (a === 'second' && b === 'extra') return ROW_PITCH_EXTRA;
             return ROW_PITCH;
         }
         function getRowCenters(d) {
