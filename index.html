@@ -7675,6 +7675,13 @@
     [{off:'0%',c:'#1e293b'},{off:'18%',c:'#64748b'},{off:'42%',c:'#f1f5f9'},{off:'68%',c:'#94a3b8'},{off:'100%',c:'#0f172a'}]
         .forEach(s => metalNubReal.append('stop').attr('offset', s.off).attr('stop-color', s.c));
 
+    // Fix bug browser: fill="url(#id)" bisa gagal di-resolve (shape jadi
+    // transparan) saat halaman di-hosting (mis. GitHub Pages) walau normal
+    // saat file dibuka langsung. Solusinya: sertakan alamat halaman saat ini
+    // di depan fragment id, bukan cuma "#id" saja.
+    const PAGE_URL = location.href.split('#')[0];
+    function gradUrl(id) { return `url(${PAGE_URL}#${id})`; }
+
     // Gambar 1 shape "baterai 3D glossy" lengkap: shadow + body gradasi + gloss + nub metal
     function drawRealisticBattery(g, w, h, type) {
         if (!w || !h) return;
@@ -7692,23 +7699,23 @@
         g.append('rect')
             .attr('class', 'real-body')
             .attr('x', 0).attr('y', -h / 2).attr('width', w).attr('height', h).attr('rx', r)
-            .attr('fill', `url(#grad-real-${type})`)
+            .attr('fill', gradUrl(`grad-real-${type}`))
             .attr('stroke', '#1e293b').attr('stroke-width', 0.9).attr('stroke-opacity', 0.18);
 
         g.append('rect')
             .attr('x', r * 0.6).attr('y', -h / 2 + 2.5)
             .attr('width', w - r * 1.2).attr('height', h * 0.36).attr('rx', r * 0.5)
-            .attr('fill', `url(#gloss-${type})`).attr('pointer-events', 'none');
+            .attr('fill', gradUrl(`gloss-${type}`)).attr('pointer-events', 'none');
 
         g.append('rect')
             .attr('x', w).attr('y', -nubBaseH / 2)
             .attr('width', nubBaseW).attr('height', nubBaseH).attr('rx', 2.2)
-            .attr('fill', 'url(#grad-metal-base)').attr('stroke', '#64748b').attr('stroke-width', 0.6);
+            .attr('fill', gradUrl('grad-metal-base')).attr('stroke', '#64748b').attr('stroke-width', 0.6);
 
         const nubG = g.append('g').attr('transform', `translate(${w + nubBaseW},0)`);
         nubG.append('rect')
             .attr('x', 0).attr('y', -nubH / 2).attr('width', nubW).attr('height', nubH).attr('rx', 5.5)
-            .attr('fill', 'url(#grad-metal-nub)').attr('stroke', '#334155').attr('stroke-width', 0.7);
+            .attr('fill', gradUrl('grad-metal-nub')).attr('stroke', '#334155').attr('stroke-width', 0.7);
         nubG.append('rect')
             .attr('x', 2.5).attr('y', -nubH / 2 + 2.5).attr('width', nubW - 5).attr('height', nubH * 0.38).attr('rx', 2.5)
             .attr('fill', '#ffffff').attr('opacity', 0.58).attr('pointer-events', 'none');
