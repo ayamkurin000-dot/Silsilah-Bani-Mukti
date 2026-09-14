@@ -7751,11 +7751,14 @@
             .attr('fill', '#000').attr('opacity', 0.09)
             .attr('clip-path', clipRef);
 
+        const isFounderOrRoot = (type === 'root' || type === 'founder');
         g.append('rect')
             .attr('class', 'real-body')
             .attr('x', 0).attr('y', -h / 2).attr('width', w).attr('height', h)
             .attr('fill', gradUrl(`grad-real-${type}`))
-            .attr('stroke', '#000000').attr('stroke-width', 1).attr('stroke-opacity', 1)
+            .attr('stroke', isFounderOrRoot ? '#000000' : '#1e293b')
+            .attr('stroke-width', isFounderOrRoot ? 1 : 0.9)
+            .attr('stroke-opacity', isFounderOrRoot ? 1 : 0.18)
             .attr('clip-path', clipRef);
 
         // Kilau dibuat selebar & serata penuh badan shape (x=0, width=w),
