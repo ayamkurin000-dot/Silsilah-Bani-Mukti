@@ -9935,49 +9935,57 @@
         draw();
     })();
     </script>
-<!-- WIDGET REKAP KETURUNAN GEN1 - FINAL V5 - BANI ABDUL MUKTI -->
+<!-- WIDGET REKAP KETURUNAN GEN1 - FINAL V6 - +CANGGAH+WARENG -->
 <style>
 #rekapGen1Fab{position:fixed;right:16px;bottom:16px;z-index:9999;font-family:'Segoe UI',sans-serif}
 #rekapGen1Btn{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#0f766e,#115e59);color:#fff;border:none;box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-#rekapGen1Panel{position:fixed;right:16px;bottom:80px;width:92vw;max-width:400px;max-height:75vh;background:#fffdf7;border-radius:18px;box-shadow:0 16px 40px rgba(0,0,0,.25);border:1px solid #e7d5b0;overflow:hidden;display:none;flex-direction:column;z-index:9999}
+#rekapGen1Panel{position:fixed;right:16px;bottom:80px;width:95vw;max-width:520px;max-height:78vh;background:#fffdf7;border-radius:18px;box-shadow:0 16px 40px rgba(0,0,0,.25);border:1px solid #e7d5b0;overflow:hidden;display:none;flex-direction:column;z-index:9999}
 #rekapGen1Panel.open{display:flex}
 #rekapGen1Header{background:linear-gradient(135deg,#fef3c7,#fde68a);padding:12px 14px;border-bottom:1px solid #e7d5b0;display:flex;justify-content:space-between;align-items:center;gap:8px}
 #rekapGen1Header>div{min-width:0;flex:1;overflow:hidden}
 #rekapGen1Header h4{font-size:clamp(10px,3.2vw,12.5px);font-weight:800;color:#78350f;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;line-height:1.2;text-transform:uppercase}
 #rekapGen1Header small{font-size:10px;color:#92400e;display:block;line-height:1.3;white-space:normal}
-#rekapGen1TableWrap{overflow-y:auto;flex:1}
-#rekapGen1Table{width:100%;border-collapse:collapse;font-size:12px}
-#rekapGen1Table th{position:sticky;top:0;background:#fffbeb;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#92400e;padding:8px 6px;text-align:left;border-bottom:1px solid #fde68a}
-#rekapGen1Table td{padding:8px 6px;border-bottom:1px solid #fef3c7}
+#rekapGen1TableWrap{overflow:auto;flex:1;-webkit-overflow-scrolling:touch}
+#rekapGen1Table{width:100%;border-collapse:collapse;font-size:12px;min-width:480px}
+#rekapGen1Table th{position:sticky;top:0;background:#fffbeb;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#92400e;padding:8px 6px;text-align:center;border-bottom:1px solid #fde68a;white-space:nowrap}
+#rekapGen1Table th:nth-child(2){text-align:left;min-width:110px;position:sticky;left:0;z-index:2}
+#rekapGen1Table td{padding:8px 6px;border-bottom:1px solid #fef3c7;text-align:center}
+#rekapGen1Table td:nth-child(2){text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;font-size:clamp(10px,2.9vw,12px);position:sticky;left:0;background:#fffdf7;z-index:1}
+#rekapGen1Table tr:nth-child(even) td:nth-child(2){background:#fffbeb}
 #rekapGen1Table tr:nth-child(even){background:#fffbeb}
 #rekapGen1Table .rank{font-weight:800;color:#0f766e;text-align:center}
-#rekapGen1Table td:nth-child(2){white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;font-size:clamp(10px,2.9vw,12px)}
 #rekapGen1Table td:nth-child(2) b{white-space:nowrap;font-size:inherit}
 #rekapGen1Footer{padding:10px 12px;background:#fffbeb;font-size:11px;color:#78350f;border-top:1px solid #fde68a;line-height:1.4}
-@media(max-width:380px){#rekapGen1Table td:nth-child(2){max-width:95px}#rekapGen1Panel{max-width:94vw}}
-@media(min-width:768px){#rekapGen1Fab{right:24px;bottom:24px}#rekapGen1Panel{right:24px;bottom:88px;max-width:440px}}
+#rekapGen1Hint{font-size:9px;color:#a16207;padding:4px 12px;background:#fef3c7;text-align:center}
+@media(max-width:380px){#rekapGen1Table{min-width:520px}#rekapGen1Panel{max-width:96vw}}
+@media(min-width:768px){#rekapGen1Fab{right:24px;bottom:24px}#rekapGen1Panel{right:24px;bottom:88px;max-width:560px}}
 </style>
 <div id="rekapGen1Fab"><button id="rekapGen1Btn" title="Urutan Keturunan">👨‍👩‍👧‍👦</button></div>
 <div id="rekapGen1Panel">
 <div id="rekapGen1Header"><div><h4>URUTAN BERDASARKAN JUMLAH KETURUNAN</h4><small><b>Selisih jumlah</b> bisa saja disebabkan karena ada anggota keluarga yang <b>belum masuk</b></small></div><button id="rekapGen1Close" style="background:#fff;border:1px solid #e7d5b0;border-radius:8px;padding:4px 8px;cursor:pointer;flex-shrink:0;">✕</button></div>
-<div id="rekapGen1TableWrap"><table id="rekapGen1Table"><thead><tr><th>#</th><th>Nama Anak</th><th>Anak</th><th>Cucu</th><th>Cicit</th><th>Jumlah</th></tr></thead><tbody id="rekapGen1Body"></tbody></table></div>
+<div id="rekapGen1Hint">← geser tabel ke kanan untuk lihat Canggah & Wareng →</div>
+<div id="rekapGen1TableWrap"><table id="rekapGen1Table"><thead><tr><th>#</th><th>Nama Anak</th><th>Anak</th><th>Cucu</th><th>Cicit</th><th>Canggah</th><th>Wareng</th><th>Jumlah</th></tr></thead><tbody id="rekapGen1Body"></tbody></table></div>
 <div id="rekapGen1Footer">Memuat...</div>
 </div>
 <script>
 (function(){
-function findBaniNode(data, keyword){
+function findBaniNode(data, keywords){
   if(!data) return null;
-  if((data.name||'').toUpperCase().includes(keyword)) return data;
-  const stack = [data];
+  const kws = Array.isArray(keywords) ? keywords : [keywords];
+  for(let kw of kws){
+    if((data.name||'').toUpperCase().includes(kw.toUpperCase())) return data;
+  }
+  const stack=[data];
   while(stack.length){
-    const cur = stack.pop();
-    if((cur.name||'').toUpperCase().includes(keyword)) return cur;
+    const cur=stack.pop();
+    for(let kw of kws){
+      if((cur.name||'').toUpperCase().includes(kw.toUpperCase())) return cur;
+    }
     (cur.children||[]).forEach(ch=>stack.push(ch));
   }
   return data;
 }
 function getRealChildren(node){
-  // jika anak bertype wife, maka ambil cucu dari wife sebagai anak sebenarnya
   let out=[];
   (node.children||[]).forEach(c=>{
     if((c.type||'')==='wife'){
@@ -9993,36 +10001,44 @@ function hitungRekap(effectiveRoot){
   let rows = gen1.map(c=>{
     const gen2 = getRealChildren(c);
     const jmlAnak = gen2.length;
-    let jmlCucu = 0, jmlCicit = 0;
+    let jmlCucu=0, jmlCicit=0, jmlCanggah=0, jmlWareng=0;
     gen2.forEach(g2=>{
       const g3 = getRealChildren(g2);
       jmlCucu += g3.length;
       g3.forEach(g3n=>{
-        jmlCicit += getRealChildren(g3n).length;
+        const g4 = getRealChildren(g3n);
+        jmlCicit += g4.length;
+        g4.forEach(g4n=>{
+          const g5 = getRealChildren(g4n);
+          jmlCanggah += g5.length;
+          g5.forEach(g5n=>{
+            jmlWareng += getRealChildren(g5n).length;
+          });
+        });
       });
     });
-    return { nama: c.name, anak: jmlAnak, cucu: jmlCucu, cicit: jmlCicit, total: jmlAnak+jmlCucu+jmlCicit };
+    return { nama: c.name, anak: jmlAnak, cucu: jmlCucu, cicit: jmlCicit, canggah: jmlCanggah, wareng: jmlWareng, total: jmlAnak+jmlCucu+jmlCicit+jmlCanggah+jmlWareng };
   });
   rows.sort((a,b)=> b.total - a.total);
   return rows;
 }
 function hitungRoot(effectiveRoot){
-  const anak = getRealChildren(effectiveRoot).length;
+  const anak=getRealChildren(effectiveRoot).length;
   let cucu=0, buyut=0, canggah=0, wareng=0, gantungSiwur=0;
   getRealChildren(effectiveRoot).forEach(gen1=>{
-    const gen2 = getRealChildren(gen1);
-    cucu += gen2.length;
+    const gen2=getRealChildren(gen1);
+    cucu+=gen2.length;
     gen2.forEach(g2=>{
-      const g3 = getRealChildren(g2);
-      buyut += g3.length;
+      const g3=getRealChildren(g2);
+      buyut+=g3.length;
       g3.forEach(g3n=>{
-        const g4 = getRealChildren(g3n);
-        canggah += g4.length;
+        const g4=getRealChildren(g3n);
+        canggah+=g4.length;
         g4.forEach(g4n=>{
-          const g5 = getRealChildren(g4n);
-          wareng += g5.length;
+          const g5=getRealChildren(g4n);
+          wareng+=g5.length;
           g5.forEach(g5n=>{
-            gantungSiwur += getRealChildren(g5n).length;
+            gantungSiwur+=getRealChildren(g5n).length;
           });
         });
       });
@@ -10033,13 +10049,19 @@ function hitungRoot(effectiveRoot){
 function renderRekap(){
   try{
     if(typeof treeData==='undefined') return;
-    const effectiveRoot = findBaniNode(treeData, 'ABDUL MUKTI');
-    const rows = hitungRekap(effectiveRoot);
-    const tbody = document.getElementById('rekapGen1Body');
-    tbody.innerHTML = rows.map((r,i)=>`<tr><td class="rank">${i+1}</td><td><b>${r.nama}</b></td><td style="text-align:center;font-weight:700;">${r.anak}</td><td style="text-align:center;font-weight:700;">${r.cucu}</td><td style="text-align:center;font-weight:700;">${r.cicit}</td><td style="text-align:center;font-weight:800;background:#fef3c7;">${r.total}</td></tr>`).join('');
-    const root = hitungRoot(effectiveRoot);
+    // cari bani - prioritas Abdul Mukti, lalu Isbadar, lalu Mubanan
+    let effectiveRoot = findBaniNode(treeData, ['ABDUL MUKTI','ISBADAR','MUBANAN']);
+    if(!effectiveRoot || effectiveRoot===treeData){
+      // jika rootnya MOH SATHORI tapi ada Abdul Mukti di dalam, tetap pakai Abdul Mukti
+      const alt = findBaniNode(treeData, 'ABDUL MUKTI');
+      if(alt && alt!==treeData) effectiveRoot = alt;
+    }
+    const rows=hitungRekap(effectiveRoot);
+    const tbody=document.getElementById('rekapGen1Body');
+    tbody.innerHTML=rows.map((r,i)=>`<tr><td class="rank">${i+1}</td><td><b>${r.nama}</b></td><td style="font-weight:700;">${r.anak||0}</td><td style="font-weight:700;">${r.cucu||0}</td><td style="font-weight:700;">${r.cicit||0}</td><td style="font-weight:700;color:#7c3aed;">${r.canggah||0}</td><td style="font-weight:700;color:#059669;">${r.wareng||0}</td><td style="font-weight:800;background:#fef3c7;">${r.total}</td></tr>`).join('');
+    const root=hitungRoot(effectiveRoot);
     let parts=[];if(root.anak>0)parts.push(root.anak+' Anak');if(root.cucu>0)parts.push(root.cucu+' Cucu');if(root.buyut>0)parts.push(root.buyut+' Buyut');if(root.canggah>0)parts.push(root.canggah+' Canggah');if(root.wareng>0)parts.push(root.wareng+' Wareng');if(root.gantungSiwur>0)parts.push(root.gantungSiwur+' Gantung Siwur');
-    const baniName = 'Bani Abdul Mukti';
+    const baniName = effectiveRoot.extraName ? ('Bani '+effectiveRoot.extraName.replace(/BANI/i,'').trim()) : (effectiveRoot.name.includes('MUKTI') ? 'Bani Abdul Mukti' : (effectiveRoot.name.includes('ISBADAR') ? 'Bani Isbadar' : 'Bani Mbah Kung'));
     document.getElementById('rekapGen1Footer').innerHTML=baniName+' : '+parts.join(', ');
   }catch(e){console.error(e);}
 }
@@ -10047,6 +10069,7 @@ const btn=document.getElementById('rekapGen1Btn');const panel=document.getElemen
 })();
 </script>
 <!-- END WIDGET -->
+
 
 </body>
 </html>
