@@ -9935,66 +9935,109 @@
         draw();
     })();
     </script>
-<!-- WIDGET REKAP KETURUNAN GEN1 - DRILL DOWN - STYLE ISBADAR/MUBANAN - BANI MUKTI -->
+<!-- WIDGET REKAP KETURUNAN GEN1 - FINAL ICON ONLY CENTERED + BIRU BISA KLIK HITAM KOSONG + DRILL DOWN -->
 <style>
-#rekapGen1Fab{position:fixed;right:16px;bottom:16px;z-index:9999;font-family:'Segoe UI',sans-serif}
-#rekapGen1Btn{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#0f766e,#115e59);color:#fff;border:none;box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-#rekapGen1Panel{position:fixed;right:16px;bottom:80px;width:92vw;max-width:400px;max-height:75vh;background:#fefcf6;border-radius:18px;box-shadow:0 16px 40px rgba(90,70,40,0.22), 0 4px 12px rgba(0,0,0,0.08);border:1.5px solid #d8c9a8;overflow:hidden;display:none;flex-direction:column;z-index:9999}
-#rekapGen1Panel.open{display:flex}
+#rekapGen1Fab{
+  position:fixed;
+  left:50%;
+  bottom:10px;
+  transform:translateX(-50%);
+  z-index:10001;
+  font-family:'Segoe UI',sans-serif;
+}
+#rekapGen1Btn{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#ffffff 0%, #ecfdf5 100%);
+  color:#065f46;
+  border:1.5px solid #6ee7b7;
+  box-shadow:0 8px 20px rgba(6,95,70,0.18), 0 3px 8px rgba(0,0,0,0.08);
+  font-size:22px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all 0.22s ease;
+}
+#rekapGen1Btn:hover{transform:translateY(-2px) scale(1.05);box-shadow:0 12px 28px rgba(6,95,70,0.24), 0 5px 12px rgba(0,0,0,0.10)}
+#rekapGen1Panel{
+  position:fixed;
+  left:50%;
+  bottom:64px;
+  transform:translateX(-50%);
+  width:92vw;
+  max-width:400px;
+  max-height:70vh;
+  background:#fefcf6;
+  border-radius:18px;
+  box-shadow:0 16px 40px rgba(90,70,40,0.22), 0 4px 12px rgba(0,0,0,0.08);
+  border:1.5px solid #d8c9a8;
+  overflow:hidden;
+  display:none;
+  flex-direction:column;
+  z-index:10002;
+}
+#rekapGen1Panel.open{display:flex;animation:rekapFade 0.22s ease}
+@keyframes rekapFade{from{opacity:0;transform:translate(-50%,10px) scale(0.98)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
 #rekapGen1Header{background:linear-gradient(135deg,#e8f5e9 0%, #dcedc8 45%, #f3e2c8 100%);padding:10px 12px;border-bottom:1.5px solid #c5d9b2;display:flex;justify-content:space-between;align-items:center;gap:8px}
 #rekapGen1Header>div{min-width:0;flex:1;overflow:hidden}
 #rekapGen1Header h4{font-size:12px;font-weight:900;color:#2e5939;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;line-height:1.2;text-transform:uppercase;letter-spacing:0.4px}
 #rekapGen1Header small{font-size:8.5px;color:#6b7f5e;display:block;line-height:1.25;white-space:normal;font-weight:500;margin-top:2px}
 #rekapGen1Breadcrumb{display:flex;align-items:center;gap:6px;margin-bottom:2px}
-#rekapBackBtn{background:#ffffff;border:1px solid #a7d7b5;border-radius:8px;padding:3px 7px;font-size:10px;font-weight:800;color:#2e5939;cursor:pointer;display:none;align-items:center;gap:4px}
+#rekapBackBtn{background:#ffffff;border:1px solid #a7d7b5;border-radius:8px;padding:3px 7px;font-size:10px;font-weight:800;color:#2e5939;cursor:pointer;display:none}
 #rekapBackBtn.show{display:inline-flex}
-#rekapBackBtn:hover{background:#e8f5e9}
-#rekapGen1TableWrap{overflow:auto;flex:1;-webkit-overflow-scrolling:touch;background:#ffffff;position:relative}
+#rekapGen1TableWrap{overflow:auto;flex:1;-webkit-overflow-scrolling:touch;background:#ffffff}
 #rekapGen1Table{width:100%;min-width:440px;border-collapse:collapse;font-size:11px}
 #rekapGen1Table th{position:sticky;top:0;background:#e8f5e9;font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:#2e5939;padding:7px 3px;text-align:center;border-bottom:1.5px solid #c5d9b2;z-index:2;white-space:nowrap;font-weight:800}
-#rekapGen1Table td{padding:6px 3px;border-bottom:1px solid #e8dcc3;text-align:center;font-size:11px;color:#3d4a3a;transition:background 0.15s}
+#rekapGen1Table td{padding:6px 3px;border-bottom:1px solid #e8dcc3;text-align:center;font-size:11px;color:#3d4a3a}
 #rekapGen1Table tr:nth-child(even){background:#f5f9ef}
 #rekapGen1Table tr:nth-child(odd){background:#ffffff}
-#rekapGen1Table tr.clickable{cursor:pointer}
-#rekapGen1Table tr.clickable:hover td{background:#dcedc8 !important}
-#rekapGen1Table tr.clickable td:nth-child(2){color:#0f766e}
 #rekapGen1Table .rank{font-weight:800;color:#4a7a4a;text-align:center}
 #rekapGen1Table th:nth-child(1), #rekapGen1Table td:nth-child(1){position:sticky;left:0;z-index:4;background:#f8eeda;min-width:22px;max-width:26px;width:24px;padding:6px 2px;font-size:10px;color:#7a5a32;border-right:1px solid #d8c9a8}
 #rekapGen1Table tr:nth-child(even) td:nth-child(1){background:#f0e6cc !important}
-#rekapGen1Table th:nth-child(2), #rekapGen1Table td:nth-child(2){position:sticky;left:24px;z-index:4;background:#ffffff;min-width:76px;max-width:88px;width:82px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10.5px;text-align:left;padding:6px 4px;color:#2e3d2a;font-weight:650;border-right:1.5px solid #d8c9a8}
+#rekapGen1Table th:nth-child(2), #rekapGen1Table td:nth-child(2){position:sticky;left:24px;z-index:4;min-width:76px;max-width:88px;width:82px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10.5px;text-align:left;padding:6px 4px;font-weight:650;border-right:1.5px solid #d8c9a8}
 #rekapGen1Table thead th:nth-child(2){background:#e8f5e9}
-#rekapGen1Table tr:nth-child(even) td:nth-child(2){background:#f5f9ef !important}
-#rekapGen1Table tr.clickable:nth-child(even) td:nth-child(2){background:#f5f9ef !important}
-#rekapGen1Table tr.clickable:hover td:nth-child(2){background:#dcedc8 !important}
 #rekapGen1Table th:nth-child(n+3), #rekapGen1Table td:nth-child(n+3){min-width:36px;max-width:46px;width:40px;padding:6px 2px}
-#rekapGen1Table td.hasChild::after{content:'›';float:right;color:#0f766e;font-weight:900;margin-left:2px}
+/* WARNA TEKS - BIRU KALO ADA KETURUNAN BISA DIKLIK, HITAM KALO KOSONG */
+#rekapGen1Table tr.clickable td:nth-child(2){background:#ffffff !important}
+#rekapGen1Table tr.clickable:nth-child(even) td:nth-child(2){background:#f5f9ef !important}
+#rekapGen1Table tr.clickable td:nth-child(2) b{color:#2563eb !important} /* BIRU - siap diklik */
+#rekapGen1Table tr.clickable:hover td{background:#dbeafe !important}
+#rekapGen1Table tr.clickable:hover td:nth-child(2){background:#dbeafe !important}
+#rekapGen1Table tr.clickable:hover td:nth-child(2) b{color:#1d4ed8 !important}
+#rekapGen1Table tr:not(.clickable) td:nth-child(2) b{color:#1e293b !important} /* HITAM - kosong */
+#rekapGen1Table td.hasChild::after{content:'›';float:right;color:#2563eb;font-weight:900;margin-left:3px}
 #rekapGen1Footer{padding:8px 10px;background:linear-gradient(90deg,#e8f5e9,#f3e2c8);font-size:10px;color:#4a5a3a;border-top:1.5px solid #c5d9b2;line-height:1.3;font-weight:600}
-@media(max-width:380px){#rekapGen1Table{min-width:380px}#rekapGen1Table th:nth-child(2), #rekapGen1Table td:nth-child(2){min-width:68px;max-width:78px;width:72px;font-size:10px}#rekapGen1Panel{max-width:96vw;left:2vw;right:2vw}}
-@media(min-width:768px){#rekapGen1Fab{right:24px;bottom:24px}#rekapGen1Panel{right:24px;bottom:88px;max-width:560px;width:520px}#rekapGen1Table{min-width:480px}#rekapGen1Table th:nth-child(2), #rekapGen1Table td:nth-child(2){min-width:110px;max-width:130px;width:120px;font-size:12px}}
+@media(max-width:380px){
+  #rekapGen1Panel{max-width:96vw;bottom:60px}
+  #rekapGen1Table{min-width:380px}
+  #rekapGen1Table th:nth-child(2), #rekapGen1Table td:nth-child(2){min-width:68px;max-width:78px;width:72px;font-size:10px}
+  #rekapGen1Btn{width:44px;height:44px;font-size:20px}
+}
+@media(min-width:768px){
+  #rekapGen1Fab{bottom:12px}
+  #rekapGen1Panel{bottom:66px;max-width:560px;width:520px}
+  #rekapGen1Table{min-width:480px}
+  #rekapGen1Table th:nth-child(2), #rekapGen1Table td:nth-child(2){min-width:110px;max-width:130px;width:120px;font-size:12px}
+}
 </style>
-<div id="rekapGen1Fab"><button id="rekapGen1Btn" title="Jumlah Keturunan">👨‍👩‍👧‍👦</button></div>
+<div id="rekapGen1Fab"><button id="rekapGen1Btn" title="Jumlah Keturunan - Klik untuk lihat, biru bisa diklik">👨‍👩‍👧‍👦</button></div>
 <div id="rekapGen1Panel">
-<div id="rekapGen1Header"><div><div id="rekapGen1Breadcrumb"><button id="rekapBackBtn">‹ Kembali</button></div><h4 id="rekapTitle">JUMLAH KETURUNAN</h4><small><b>Klik nama</b> untuk lihat rincian • <b>Selisih</b> karena ada yang <b>belum masuk</b></small></div><button id="rekapGen1Close" style="background:#fff;border:1px solid #d8c9a8;border-radius:8px;padding:4px 8px;cursor:pointer;flex-shrink:0;color:#2e5939;font-weight:800">✕</button></div>
+<div id="rekapGen1Header"><div><div id="rekapGen1Breadcrumb"><button id="rekapBackBtn">‹ Kembali</button></div><h4 id="rekapTitle">JUMLAH KETURUNAN</h4><small><span style="color:#2563eb;font-weight:800">Biru = bisa diklik</span> • <span style="color:#1e293b;font-weight:800">Hitam = kosong</span> • Selisih karena ada yang belum masuk</small></div><button id="rekapGen1Close" style="background:#fff;border:1px solid #d8c9a8;border-radius:8px;padding:4px 8px;cursor:pointer;flex-shrink:0;color:#2e5939;font-weight:800">✕</button></div>
 <div id="rekapGen1TableWrap"><table id="rekapGen1Table"><thead><tr><th>#</th><th>NAMA ANAK</th><th>ANAK</th><th>CUCU</th><th>BUYUT</th><th>CANGGAH</th><th>WARENG</th></tr></thead><tbody id="rekapGen1Body"></tbody></table></div>
 <div id="rekapGen1Footer">Memuat...</div>
 </div>
 <script>
 (function(){
-let currentRoot = null;
-let historyStack = [];
-
-function findBaniNode(data, keywords){
-  if(!data) return null;
-  const kws = Array.isArray(keywords) ? keywords : [keywords];
-  for(let kw of kws){
-    if((data.name||'').toUpperCase().includes(kw.toUpperCase())) return data;
-  }
+let currentRoot=null;let historyStack=[];
+function findBaniNode(data,keywords){
+  const kws=Array.isArray(keywords)?keywords:[keywords];
+  for(let kw of kws){ if((data.name||'').toUpperCase().includes(kw.toUpperCase())) return data; }
   const stack=[data];
   while(stack.length){
     const cur=stack.pop();
-    for(let kw of kws){
-      if((cur.name||'').toUpperCase().includes(kw.toUpperCase())) return cur;
-    }
+    for(let kw of kws){ if((cur.name||'').toUpperCase().includes(kw.toUpperCase())) return cur; }
     (cur.children||[]).forEach(ch=>stack.push(ch));
   }
   return data;
@@ -10002,43 +10045,34 @@ function findBaniNode(data, keywords){
 function getRealChildren(node){
   let out=[];
   (node.children||[]).forEach(c=>{
-    if((c.type||'')==='wife'){
-      (c.children||[]).forEach(g=>out.push(g));
-    }else{
-      out.push(c);
-    }
+    if((c.type||'')==='wife'){ (c.children||[]).forEach(g=>out.push(g)); } else { out.push(c); }
   });
   return out;
 }
 function hitungRekap(effectiveRoot){
-  const gen1 = getRealChildren(effectiveRoot);
-  let rows = gen1.map(c=>{
-    const gen2 = getRealChildren(c);
-    const jmlAnak = gen2.length;
-    let jmlCucu=0, jmlBuyut=0, jmlCanggah=0, jmlWareng=0;
+  const gen1=getRealChildren(effectiveRoot);
+  return gen1.map(c=>{
+    const gen2=getRealChildren(c);
+    let jmlCucu=0,jmlBuyut=0,jmlCanggah=0,jmlWareng=0;
     gen2.forEach(g2=>{
-      const g3 = getRealChildren(g2);
-      jmlCucu += g3.length;
+      const g3=getRealChildren(g2);
+      jmlCucu+=g3.length;
       g3.forEach(g3n=>{
-        const g4 = getRealChildren(g3n);
-        jmlBuyut += g4.length;
+        const g4=getRealChildren(g3n);
+        jmlBuyut+=g4.length;
         g4.forEach(g4n=>{
-          const g5 = getRealChildren(g4n);
-          jmlCanggah += g5.length;
-          g5.forEach(g5n=>{
-            jmlWareng += getRealChildren(g5n).length;
-          });
+          const g5=getRealChildren(g4n);
+          jmlCanggah+=g5.length;
+          g5.forEach(g5n=>{ jmlWareng+=getRealChildren(g5n).length; });
         });
       });
     });
-    return { node: c, nama: c.name, anak: jmlAnak, cucu: jmlCucu, buyut: jmlBuyut, canggah: jmlCanggah, wareng: jmlWareng };
+    return {node:c,nama:c.name,anak:gen2.length,cucu:jmlCucu,buyut:jmlBuyut,canggah:jmlCanggah,wareng:jmlWareng,hasChild:getRealChildren(c).length>0};
   });
-  /* Urutan asli silsilah - tidak ranking */
-  return rows;
 }
 function hitungRoot(effectiveRoot){
   const anak=getRealChildren(effectiveRoot).length;
-  let cucu=0, buyut=0, canggah=0, wareng=0, gantungSiwur=0;
+  let cucu=0,buyut=0,canggah=0,wareng=0,gantungSiwur=0;
   getRealChildren(effectiveRoot).forEach(gen1=>{
     const gen2=getRealChildren(gen1);
     cucu+=gen2.length;
@@ -10051,97 +10085,61 @@ function hitungRoot(effectiveRoot){
         g4.forEach(g4n=>{
           const g5=getRealChildren(g4n);
           wareng+=g5.length;
-          g5.forEach(g5n=>{
-            gantungSiwur+=getRealChildren(g5n).length;
-          });
+          g5.forEach(g5n=>{ gantungSiwur+=getRealChildren(g5n).length; });
         });
       });
     });
   });
-  return {anak, cucu, buyut, canggah, wareng, gantungSiwur};
+  return {anak,cucu,buyut,canggah,wareng,gantungSiwur};
 }
 function renderRekap(){
   try{
     if(typeof treeData==='undefined') return;
-    if(!currentRoot){
-      currentRoot = findBaniNode(treeData, ['ABDUL MUKTI']);
-    }
+    if(!currentRoot) currentRoot=findBaniNode(treeData,['ABDUL MUKTI']);
     const rows=hitungRekap(currentRoot);
+    const isRoot=historyStack.length===0;
+    document.getElementById('rekapTitle').textContent=isRoot?'JUMLAH KETURUNAN':'KETURUNAN - '+(currentRoot.name.replace(/\(.*\)/,'').substring(0,24).toUpperCase());
+    const backBtn=document.getElementById('rekapBackBtn');
+    if(isRoot) backBtn.classList.remove('show');
+    else{ backBtn.classList.add('show'); backBtn.textContent=historyStack.length===1?'‹ Kembali ke Bani Mukti':'‹ '+(historyStack[historyStack.length-1].name.replace(/\(.*\)/,'').substring(0,14)); }
     const tbody=document.getElementById('rekapGen1Body');
-    const isRoot = historyStack.length===0;
-    // Title
-    const titleEl = document.getElementById('rekapTitle');
-    if(isRoot){
-      titleEl.textContent = 'JUMLAH KETURUNAN';
-    }else{
-      let shortName = (currentRoot.name||'').replace(/\(.*\)/,'').trim();
-      if(shortName.length>22) shortName = shortName.substring(0,22)+'…';
-      titleEl.textContent = 'KETURUNAN - ' + shortName.toUpperCase();
-    }
-    // Back btn
-    const backBtn = document.getElementById('rekapBackBtn');
-    if(isRoot){
-      backBtn.classList.remove('show');
-    }else{
-      backBtn.classList.add('show');
-      backBtn.textContent = '‹ ' + (historyStack[historyStack.length-1].name ? historyStack[historyStack.length-1].name.replace(/\(.*\)/,'').substring(0,14) : 'Kembali');
-      if(historyStack.length===1) backBtn.textContent = '‹ Kembali ke Bani Mukti';
-    }
-    // Render rows
     tbody.innerHTML=rows.map((r,i)=>{
-      const hasChild = getRealChildren(r.node).length>0;
-      const cls = hasChild ? 'clickable' : '';
-      const td2cls = hasChild ? 'hasChild' : '';
-      return `<tr class="${cls}" data-idx="${i}"><td class="rank">${i+1}</td><td class="${td2cls}" title="${r.nama}"><b>${r.nama}</b></td><td>${r.anak||0}</td><td>${r.cucu||0}</td><td>${r.buyut||0}</td><td>${r.canggah||0}</td><td>${r.wareng||0}</td></tr>`;
+      const cls=r.hasChild?'clickable':'';
+      const tdCls=r.hasChild?'hasChild':'';
+      return `<tr class="${cls}" data-idx="${i}"><td class="rank">${i+1}</td><td class="${tdCls}" title="${r.nama} - ${r.hasChild?'Klik untuk lihat keturunan':'Tidak ada keturunan'}"><b>${r.nama}</b></td><td>${r.anak||0}</td><td>${r.cucu||0}</td><td>${r.buyut||0}</td><td>${r.canggah||0}</td><td>${r.wareng||0}</td></tr>`;
     }).join('');
-    // Attach click
     tbody.querySelectorAll('tr.clickable').forEach(tr=>{
       tr.addEventListener('click',()=>{
-        const idx = parseInt(tr.getAttribute('data-idx'));
-        const realChildren = getRealChildren(currentRoot);
-        const nextNode = realChildren[idx];
+        const idx=parseInt(tr.getAttribute('data-idx'));
+        const nextNode=getRealChildren(currentRoot)[idx];
         if(nextNode && getRealChildren(nextNode).length>0){
           historyStack.push(currentRoot);
-          currentRoot = nextNode;
+          currentRoot=nextNode;
           renderRekap();
-          // scroll top
           document.getElementById('rekapGen1TableWrap').scrollTop=0;
         }
       });
     });
-    const rootCounts=hitungRoot(currentRoot);
+    const rc=hitungRoot(currentRoot);
     let parts=[];
-    if(rootCounts.anak>0) parts.push(rootCounts.anak+' Anak');
-    if(rootCounts.cucu>0) parts.push(rootCounts.cucu+' Cucu');
-    if(rootCounts.buyut>0) parts.push(rootCounts.buyut+' Buyut');
-    if(rootCounts.canggah>0) parts.push(rootCounts.canggah+' Canggah');
-    if(rootCounts.wareng>0) parts.push(rootCounts.wareng+' Wareng');
-    if(rootCounts.gantungSiwur>0) parts.push(rootCounts.gantungSiwur+' Gantung Siwur');
-    const baniName = isRoot ? 'Bani Abdul Mukti' : (currentRoot.name.includes('MAIMUNAH') ? 'Bani Hj. Maimunah' : 'Keturunan ' + currentRoot.name.replace(/\(.*\)/,'').trim());
-    document.getElementById('rekapGen1Footer').innerHTML=baniName+' : '+parts.join(', ')+(isRoot?'':` • Total ${rootCounts.anak+rootCounts.cucu+rootCounts.buyut+rootCounts.canggah+rootCounts.wareng} jiwa`);
+    if(rc.anak>0) parts.push(rc.anak+' Anak');
+    if(rc.cucu>0) parts.push(rc.cucu+' Cucu');
+    if(rc.buyut>0) parts.push(rc.buyut+' Buyut');
+    if(rc.canggah>0) parts.push(rc.canggah+' Canggah');
+    if(rc.wareng>0) parts.push(rc.wareng+' Wareng');
+    const baniName=isRoot?'Bani Abdul Mukti':(currentRoot.name.toUpperCase().includes('MAIMUNAH')?'Bani Hj. Maimunah':'Keturunan '+currentRoot.name.replace(/\(.*\)/,'').trim());
+    document.getElementById('rekapGen1Footer').innerHTML=baniName+' : '+parts.join(', ')+(isRoot?'':` • Total ${rc.anak+rc.cucu+rc.buyut+rc.canggah+rc.wareng} jiwa`);
   }catch(e){console.error(e);}
 }
 const btn=document.getElementById('rekapGen1Btn');
 const panel=document.getElementById('rekapGen1Panel');
-const closeBtn=document.getElementById('rekapGen1Close');
-const backBtn=document.getElementById('rekapBackBtn');
-btn.addEventListener('click',()=>{
-  panel.classList.toggle('open');
-  if(panel.classList.contains('open')) renderRekap();
-});
-closeBtn.addEventListener('click',()=>panel.classList.remove('open'));
-backBtn.addEventListener('click',()=>{
-  if(historyStack.length>0){
-    currentRoot = historyStack.pop();
-    renderRekap();
-  }
-});
-window.addEventListener('load',()=>setTimeout(()=>{ if(!currentRoot) currentRoot=findBaniNode(treeData, ['ABDUL MUKTI']); },800));
-let lastHash='';
-setInterval(()=>{try{const h=JSON.stringify((treeData.children||[]).map(c=>(c.children||[]).length));if(h!==lastHash){lastHash=h; if(panel.classList.contains('open')) renderRekap();}}catch(e){}},1500);
+document.getElementById('rekapGen1Close').addEventListener('click',()=>panel.classList.remove('open'));
+document.getElementById('rekapBackBtn').addEventListener('click',()=>{ if(historyStack.length>0){ currentRoot=historyStack.pop(); renderRekap(); } });
+btn.addEventListener('click',()=>{ panel.classList.toggle('open'); if(panel.classList.contains('open')) renderRekap(); });
+window.addEventListener('load',()=>setTimeout(()=>{ if(!currentRoot) currentRoot=findBaniNode(treeData,['ABDUL MUKTI']); },800));
 })();
 </script>
-<!-- END WIDGET DRILL DOWN -->
+<!-- END WIDGET ICON ONLY + BIRU HITAM -->
 
 
 
