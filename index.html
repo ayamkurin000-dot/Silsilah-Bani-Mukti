@@ -1168,9 +1168,12 @@
             font-weight: 700;
             fill: #14532d;
         }
-        .node.search-highlight .node-shape:not(.glow-aura) {
+        .node.search-highlight .node-shape .real-body {
             stroke: #f59e0b !important;
-            stroke-width: 4px !important;
+            stroke-width: 4.5px !important;
+            stroke-opacity: 1 !important;
+        }
+        .node.search-highlight {
             animation: search-pulse 1.3s ease-in-out 2;
         }
         @keyframes search-pulse {
@@ -1178,11 +1181,20 @@
                 filter: drop-shadow(0 0 0px rgba(245, 158, 11, 0.95));
             }
             50% {
-                filter: drop-shadow(0 0 18px rgba(245, 158, 11, 0.95)) brightness(1.08);
+                filter: drop-shadow(0 0 22px rgba(245, 158, 11, 0.95)) drop-shadow(0 0 8px rgba(245, 158, 11, 0.85)) brightness(1.08);
             }
             100% {
                 filter: drop-shadow(0 0 0px rgba(245, 158, 11, 0.95));
             }
+        }
+        /* Overlay untuk memastikan seluruh shape termasuk nub baterai ikut ke-highlight */
+        .search-highlight-overlay {
+            fill: none;
+            stroke: #f59e0b;
+            stroke-width: 4.5px;
+            stroke-linejoin: round;
+            pointer-events: none;
+            filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.9));
         }
         .node-founder-shape .node-shape {
             width: 280px !important;
@@ -9955,9 +9967,33 @@
         gContainer.selectAll('g.node')
             .filter(d => d.id === node.id)
             .classed('search-highlight', true)
-            .each(function() {
+            .each(function(d) {
                 const el = this;
-                setTimeout(() => d3.select(el).classed('search-highlight', false), 2700);
+                const g = d3.select(el);
+                // Hapus overlay lama jika ada
+                g.selectAll('.search-highlight-overlay').remove();
+                
+                // Hitung ukuran full shape termasuk nub baterai
+                let w = getCardW(d), h = getCardH(d);
+                if (d.data.name === 'H. ABDUL MUKTI') { w = founderCardWidth; h = founderCardHeight; }
+                else if (d.data.name === 'MOH. SATHORI') { w = rootCardWidth; h = rootCardHeight; }
+                const r = Math.min(22, Math.round(h * 0.42));
+                const totalW = w + 8 + 18; // w + nubBaseW + nubW (full baterai)
+                
+                // Buat overlay rect yang mengelilingi SELURUH shape (bukan separo)
+                g.select('.node-shape').append('rect')
+                    .attr('class', 'search-highlight-overlay')
+                    .attr('x', -3)
+                    .attr('y', -h/2 - 3)
+                    .attr('width', totalW + 6)
+                    .attr('height', h + 6)
+                    .attr('rx', r + 3)
+                    .attr('ry', r + 3);
+                
+                setTimeout(() => {
+                    d3.select(el).classed('search-highlight', false);
+                    g.selectAll('.search-highlight-overlay').remove();
+                }, 2700);
             });
     }
 
