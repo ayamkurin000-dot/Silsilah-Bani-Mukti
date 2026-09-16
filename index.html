@@ -10565,8 +10565,8 @@ function renderRekap(){
     if(rc.canggah>0) parts.push(rc.canggah+' Canggah');
     if(rc.wareng>0) parts.push(rc.wareng+' Wareng');
     const baniName=isRoot?'Abdul Mukti':(currentRoot.name.toUpperCase().includes('MAIMUNAH')?'Hj. Maimunah':currentRoot.name.replace(/\(.*\)/,'').trim());
-    document.getElementById('rekapGen1Footer').innerHTML='<b style="font-weight:900;color:#2e5939">'+baniName+'</b> : '+parts.join(', ')+(isRoot?'':` • Total ${rc.anak+rc.cucu+rc.buyut+rc.canggah+rc.wareng} jiwa`);
-    // AUTO-FIT / AUTO-SHRINK untuk kolom angka
+        document.getElementById('rekapGen1Footer').innerHTML='<b style="font-weight:900;color:#2e5939">'+baniName+'</b> : '+parts.join(', ')+(isRoot?'':` • Total ${rc.anak+rc.cucu+rc.buyut+rc.canggah+rc.wareng} jiwa`);
+    // AUTO-FIT / AUTO-SHRINK hanya untuk kolom ANAK, CUCU, BUYUT, CANGGAH, WARENG (tetap 28px)
     requestAnimationFrame(()=>{
       const tds = tbody.querySelectorAll('td:nth-child(n+3)');
       tds.forEach(td=>{
@@ -10583,6 +10583,7 @@ function renderRekap(){
         }
       });
     });
+
   }catch(e){console.error(e);}
 }
 const btn=document.getElementById('rekapGen1Btn');
