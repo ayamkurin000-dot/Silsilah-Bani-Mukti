@@ -551,7 +551,8 @@
                 #panel-switcher {
             position: fixed;
             bottom: 10px;
-            right: 165px;
+            left: 14px;
+            right: auto;
             z-index: 10000;
             background: #ffffffee;
             border: 1px solid #e2e8f0;
@@ -679,7 +680,8 @@
                 #panel-switcher {
             position: fixed;
             bottom: 10px;
-            right: 165px;
+            left: 14px;
+            right: auto;
             z-index: 10000;
             background: #ffffffee;
             border: 1px solid #e2e8f0;
@@ -923,7 +925,8 @@
                     #panel-switcher {
             position: fixed;
             bottom: 10px;
-            right: 165px;
+            left: 14px;
+            right: auto;
             z-index: 10000;
             background: #ffffffee;
             border: 1px solid #e2e8f0;
@@ -996,7 +999,8 @@
                     #panel-switcher {
             position: fixed;
             bottom: 10px;
-            right: 165px;
+            left: 14px;
+            right: auto;
             z-index: 10000;
             background: #ffffffee;
             border: 1px solid #e2e8f0;
@@ -1168,12 +1172,9 @@
             font-weight: 700;
             fill: #14532d;
         }
-        .node.search-highlight .node-shape .real-body {
+        .node.search-highlight .node-shape:not(.glow-aura) {
             stroke: #f59e0b !important;
-            stroke-width: 4.5px !important;
-            stroke-opacity: 1 !important;
-        }
-        .node.search-highlight {
+            stroke-width: 4px !important;
             animation: search-pulse 1.3s ease-in-out 2;
         }
         @keyframes search-pulse {
@@ -1181,20 +1182,11 @@
                 filter: drop-shadow(0 0 0px rgba(245, 158, 11, 0.95));
             }
             50% {
-                filter: drop-shadow(0 0 22px rgba(245, 158, 11, 0.95)) drop-shadow(0 0 8px rgba(245, 158, 11, 0.85)) brightness(1.08);
+                filter: drop-shadow(0 0 18px rgba(245, 158, 11, 0.95)) brightness(1.08);
             }
             100% {
                 filter: drop-shadow(0 0 0px rgba(245, 158, 11, 0.95));
             }
-        }
-        /* Overlay untuk memastikan seluruh shape termasuk nub baterai ikut ke-highlight */
-        .search-highlight-overlay {
-            fill: none;
-            stroke: #f59e0b;
-            stroke-width: 4.5px;
-            stroke-linejoin: round;
-            pointer-events: none;
-            filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.9));
         }
         .node-founder-shape .node-shape {
             width: 280px !important;
@@ -1375,7 +1367,7 @@
     <canvas id="cursor-fx"></canvas>
     <div id="credit-tag">DIBUAT OLEH: MANNIXS-21</div>
     <div id="panel-switcher">
-        <button id="tab-generasi" class="active" onclick="switchSide('generasi')">GENERASI</button>
+        <button id="tab-generasi" class="active" onclick="toggleGenerasiLegend()">GENERASI</button>
         <button id="tab-chat" onclick="switchSide('chat')">CHAT BANI<span id="chat-notif-badge" class="chat-notif-badge" style="display:none;">0</span></button>
     </div>
 
@@ -8924,14 +8916,99 @@
         toggleIcon.textContent = el.classList.contains('collapsed') ? '▼' : '▲';
     }
 
+    // ===== TOMBOL GENERASI POJOK KIRI BAWAH - AKTIF: show/hide GENERASI KE ATAS/BAWAH =====
+    function toggleGenerasiLegend() {
+        const gen = document.getElementById('gen-legend');
+        const toggleIcon = document.getElementById('gen-legend-toggle');
+        const tabGen = document.getElementById('tab-generasi');
+        const tabChat = document.getElementById('tab-chat');
+        const chat = document.getElementById('chat-panel');
+        
+        // Jika sedang di mode chat, balik dulu ke mode generasi
+        if (currentSide === 'chat') {
+            switchSide('generasi');
+            // Setelah switch, pastikan gen-legend terlihat
+            setTimeout(() => {
+                if (gen) {
+                    gen.style.display = 'block';
+                    gen.classList.remove('chat-hidden', 'collapsed');
+                    if (toggleIcon) toggleIcon.textContent = '▲';
+                    if (tabGen) tabGen.classList.add('active');
+                }
+            }, 100);
+            return;
+        }
+        
+        // Mode generasi: toggle show/hide dengan 3 state: expanded -> collapsed -> hidden -> expanded
+        if (!gen) return;
+        
+        const isHidden = gen.style.display === 'none' || gen.classList.contains('chat-hidden');
+        const isCollapsed = gen.classList.contains('collapsed');
+        
+        if (isHidden) {
+            // Hidden -> Show expanded
+            gen.style.display = 'block';
+            gen.classList.remove('chat-hidden', 'collapsed');
+            if (toggleIcon) toggleIcon.textContent = '▲';
+            if (tabGen) tabGen.classList.add('active');
+            tabGen.textContent = 'GENERASI';
+            localStorage.setItem('gen_legend_state', 'expanded');
+        } else if (!isCollapsed) {
+            // Expanded -> Collapsed (minimize jadi title saja)
+            gen.classList.add('collapsed');
+            if (toggleIcon) toggleIcon.textContent = '▼';
+            tabGen.textContent = 'GENERASI ▼';
+            localStorage.setItem('gen_legend_state', 'collapsed');
+        } else {
+            // Collapsed -> Hidden (sembunyikan total)
+            gen.style.display = 'none';
+            gen.classList.add('chat-hidden');
+            gen.classList.remove('collapsed');
+            if (toggleIcon) toggleIcon.textContent = '▲';
+            tabGen.textContent = 'GENERASI ▶';
+            tabGen.classList.remove('active');
+            localStorage.setItem('gen_legend_state', 'hidden');
+        }
+    }
+
+    function restoreGenLegendState() {
+        const state = localStorage.getItem('gen_legend_state') || 'expanded';
+        const gen = document.getElementById('gen-legend');
+        const toggleIcon = document.getElementById('gen-legend-toggle');
+        const tabGen = document.getElementById('tab-generasi');
+        if (!gen) return;
+        if (state === 'hidden') {
+            gen.style.display = 'none';
+            gen.classList.add('chat-hidden');
+            if (tabGen) { tabGen.classList.remove('active'); tabGen.textContent = 'GENERASI ▶'; }
+        } else if (state === 'collapsed') {
+            gen.style.display = 'block';
+            gen.classList.remove('chat-hidden');
+            gen.classList.add('collapsed');
+            if (toggleIcon) toggleIcon.textContent = '▼';
+            if (tabGen) { tabGen.classList.add('active'); tabGen.textContent = 'GENERASI ▼'; }
+        } else {
+            gen.style.display = 'block';
+            gen.classList.remove('chat-hidden', 'collapsed');
+            if (toggleIcon) toggleIcon.textContent = '▲';
+            if (tabGen) { tabGen.classList.add('active'); tabGen.textContent = 'GENERASI'; }
+        }
+    }
+
+
+
+
     // ===== Auto-minimize jendela "GENERASI KE ATAS/BAWAH" saat user berinteraksi dengan bagan =====
     // (ketuk/tap, geser/pan, zoom, dsb) supaya bagan silsilah jadi lebih terbuka/lega.
     function minimizeGenLegend() {
         const el = document.getElementById('gen-legend');
         if (!el || el.classList.contains('collapsed')) return;
         const toggleIcon = document.getElementById('gen-legend-toggle');
+        const tabGen = document.getElementById('tab-generasi');
         el.classList.add('collapsed');
         if (toggleIcon) toggleIcon.textContent = '▼';
+        if (tabGen) tabGen.textContent = 'GENERASI ▼';
+        localStorage.setItem('gen_legend_state', 'collapsed');
     }
 
     // =====================================================================
@@ -8964,7 +9041,7 @@
         }
     }
     // Init panel sesuai localStorage
-    setTimeout(() => switchSide(currentSide), 100);
+    setTimeout(() => { switchSide(currentSide); setTimeout(restoreGenLegendState, 150); }, 100);
 
     // Klik di luar area chat -> otomatis kembali ke tampilan diagram (generasi)
     document.addEventListener('click', function(e) {
@@ -9967,33 +10044,9 @@
         gContainer.selectAll('g.node')
             .filter(d => d.id === node.id)
             .classed('search-highlight', true)
-            .each(function(d) {
+            .each(function() {
                 const el = this;
-                const g = d3.select(el);
-                // Hapus overlay lama jika ada
-                g.selectAll('.search-highlight-overlay').remove();
-                
-                // Hitung ukuran full shape termasuk nub baterai
-                let w = getCardW(d), h = getCardH(d);
-                if (d.data.name === 'H. ABDUL MUKTI') { w = founderCardWidth; h = founderCardHeight; }
-                else if (d.data.name === 'MOH. SATHORI') { w = rootCardWidth; h = rootCardHeight; }
-                const r = Math.min(22, Math.round(h * 0.42));
-                const totalW = w + 8 + 18; // w + nubBaseW + nubW (full baterai)
-                
-                // Buat overlay rect yang mengelilingi SELURUH shape (bukan separo)
-                g.select('.node-shape').append('rect')
-                    .attr('class', 'search-highlight-overlay')
-                    .attr('x', -3)
-                    .attr('y', -h/2 - 3)
-                    .attr('width', totalW + 6)
-                    .attr('height', h + 6)
-                    .attr('rx', r + 3)
-                    .attr('ry', r + 3);
-                
-                setTimeout(() => {
-                    d3.select(el).classed('search-highlight', false);
-                    g.selectAll('.search-highlight-overlay').remove();
-                }, 2700);
+                setTimeout(() => d3.select(el).classed('search-highlight', false), 2700);
             });
     }
 
