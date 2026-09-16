@@ -5363,7 +5363,7 @@
                                                             ]
                                                         },
                                                         {
-                                                            "name": "Muhammad August Zurzi dan Fatari",
+                                                            "name": "Muhammad August Zurzi Danfatari",
                                                             "life": "1978 - 1987",
                                                             "spouse": "",
                                                             "spouse_life": "",
@@ -7687,6 +7687,7 @@
     const rootCardWidth = 260;
     const rootCardHeight = 68;
     const extraNameHeight = 18;
+    const SPECIAL_NODES_TOP = ['H. ABDUL MUKTI', 'MOH. SATHORI', 'Isteri ke-1', 'Isteri ke-2'];
 
     // Menghasilkan path SVG berbentuk baterai (rounded rect + terminal/nub di kanan)
     function batteryPath(w, h) {
@@ -8281,12 +8282,13 @@
         const hasExtra = d.data.extraName && !isRedundantAlmTitle(d);
         const hasSecond = !!getSpouseOrderForWife(d) || hasSpouseLineTop(d);
         let n = 1;
+        if (nameLifeWraps(d)) n++; // nama panjang memakai 2 baris
         if (hasSecond) n++;
         if (hasExtra) n++;
         return n;
     }
     function getCardExtraHeight(d) {
-        return getCardRowCount(d) >= 3 ? extraNameHeight : 0;
+        return Math.max(0, getCardRowCount(d) - 2) * extraNameHeight;
     }
     // Tinggi kartu final: kartu "slim" (mis. Farath bergelar Alm./Almh. yang
     // sudah dijadikan 1 baris) pakai tinggi ramping, kartu lain seperti biasa.
@@ -8309,6 +8311,66 @@
     function getCardW(d) {
         if (isSathoriWife(d)) return sathoriWifeCardWidth;
         return cardWidth;
+    }
+
+    // Format tahun hidup: jika lahir diketahui tapi wafat belum (pola "19xx - ...."),
+    // tampilkan hanya tahun lahirnya saja. Jika wafat diketahui tapi lahir belum
+    // (pola ".... - 19xx"), atau keduanya diketahui, biarkan format apa adanya.
+    function formatLifeSpan(life) {
+        if (!life) return life;
+        const m = life.match(/^\s*(\d{3,4})\s*-\s*\.+\s*$/);
+        if (m) return m[1];
+        return life;
+    }
+
+    // ===== Wrap nama panjang jadi 2 baris (agar tidak keluar dari shape) =====
+    function measureWidth(text, fontSize, fontWeight) {
+        const canvas = measureWidth._canvas || (measureWidth._canvas = document.createElement('canvas'));
+        const ctx = canvas.getContext('2d');
+        ctx.font = fontWeight + ' ' + fontSize + 'px "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+        return ctx.measureText((text || '').toUpperCase()).width;
+    }
+    function getNameLifeLabel(d) {
+        let lifeStr = d.data.life ? ` (${formatLifeSpan(d.data.life)})` : '';
+        return `${d.data.name}${lifeStr}`;
+    }
+    // Cari titik pemisah kata yang membuat 2 baris paling seimbang panjangnya.
+    function bestSplit(text) {
+        const words = text.split(' ');
+        if (words.length < 2) return { line1: text, line2: '' };
+        let bestI = 1, bestDiff = Infinity;
+        for (let i = 1; i < words.length; i++) {
+            const line1 = words.slice(0, i).join(' ');
+            const line2 = words.slice(i).join(' ');
+            const diff = Math.abs(line1.length - line2.length);
+            if (diff < bestDiff) { bestDiff = diff; bestI = i; }
+        }
+        return { line1: words.slice(0, bestI).join(' '), line2: words.slice(bestI).join(' ') };
+    }
+    function fitTwoLines(line1, line2, maxWidth, minFontSize, maxFontSize, fontWeight) {
+        let fontSize = maxFontSize;
+        while (fontSize > minFontSize && (measureWidth(line1, fontSize, fontWeight) > maxWidth || measureWidth(line2, fontSize, fontWeight) > maxWidth)) {
+            fontSize -= 1;
+        }
+        return fontSize;
+    }
+    // Satu sumber kebenaran: dipakai baik untuk menghitung tinggi kartu,
+    // posisi baris (getRowCenters), maupun render teks -- supaya semuanya
+    // konsisten dan hasilnya presis rata atas-bawah. Return null jika nama
+    // muat dalam 1 baris (tidak perlu wrap).
+    function computeNameWrap(d) {
+        if (SPECIAL_NODES_TOP.includes(d.data.name)) return null;
+        const label = getNameLifeLabel(d);
+        if (!label.includes(' ')) return null;
+        const maxWidth = getCardW(d) - 14 * 2;
+        const minFontSize = 10, maxFontSize = 16;
+        if (measureWidth(label, minFontSize, 700) <= maxWidth) return null;
+        const split = bestSplit(label);
+        const fontSize = fitTwoLines(split.line1, split.line2, maxWidth, minFontSize, maxFontSize, 700);
+        return { line1: split.line1, line2: split.line2, fontSize, lineHeight: fontSize * 1.15 };
+    }
+    function nameLifeWraps(d) {
+        return computeNameWrap(d) !== null;
     }
 
     // ============================================================
@@ -8512,7 +8574,9 @@
         const SPECIAL_NODES = ['H. ABDUL MUKTI', 'MOH. SATHORI', 'Isteri ke-1', 'Isteri ke-2'];
         const ROW_PITCH = 15; // jarak antar baris nama utama -> nama pasangan
         const ROW_PITCH_EXTRA = 13; // jarak nama pasangan -> nama panggilan (disesuaikan lagi karena font nama panggilan dinaikkan jadi 11px, tetap lebih kecil dari nama pasangan 12px)
+        const NAME_WRAP_PITCH_DEFAULT = 13; // fallback jika lineHeight tak tersedia
         function pitchBetween(a, b) {
+            if (a === 'name1' && b === 'name2') return pitchBetween._wrapPitch || NAME_WRAP_PITCH_DEFAULT;
             if (a === 'second' && b === 'extra') return ROW_PITCH_EXTRA;
             return ROW_PITCH;
         }
@@ -8521,14 +8585,17 @@
             const hasExtra = d.data.extraName && !isRedundantAlmTitle(d);
             const wifeOrder = getSpouseOrderForWife(d);
             const hasSecond = !!wifeOrder || hasSpouseLine(d);
+            const wrapInfo = computeNameWrap(d);
 
-            const rows = ['name'];
+            // Nama yang di-wrap diperlakukan sebagai 2 "titik baris" (name1,
+            // name2), memakai mekanisme pemusatan yang sama persis dengan
+            // baris lain -> otomatis presisi rata atas-bawah, konsisten
+            // dengan kartu 2/3 baris yang sudah ada.
+            const rows = wrapInfo ? ['name1', 'name2'] : ['name'];
             if (hasSecond) rows.push('second');
             if (hasExtra) rows.push('extra');
 
-            // Posisi kumulatif tiap baris memakai jarak antar-pasangan baris
-            // (bisa berbeda per pasangan), lalu blok dipusatkan supaya kartu
-            // tetap rata tengah atas-bawah seperti sebelumnya.
+            pitchBetween._wrapPitch = wrapInfo ? wrapInfo.lineHeight : NAME_WRAP_PITCH_DEFAULT;
             const positions = [0];
             for (let i = 1; i < rows.length; i++) {
                 positions.push(positions[i - 1] + pitchBetween(rows[i - 1], rows[i]));
@@ -8537,20 +8604,11 @@
             const centerOffset = blockH / 2;
             const centers = {};
             rows.forEach((key, i) => { centers[key] = positions[i] - centerOffset; });
+            if (wrapInfo) centers.name = (centers.name1 + centers.name2) / 2;
             // Alamat sejajar dengan baris paling bawah yang aktif
-            const addressRowKey = hasExtra ? 'extra' : (hasSecond ? 'second' : 'name');
+            const addressRowKey = hasExtra ? 'extra' : (hasSecond ? 'second' : (wrapInfo ? 'name2' : 'name'));
             centers.address = centers[addressRowKey];
             return centers;
-        }
-
-        // Format tahun hidup: jika lahir diketahui tapi wafat belum (pola "19xx - ...."),
-        // tampilkan hanya tahun lahirnya saja. Jika wafat diketahui tapi lahir belum
-        // (pola ".... - 19xx"), atau keduanya diketahui, biarkan format apa adanya.
-        function formatLifeSpan(life) {
-            if (!life) return life;
-            const m = life.match(/^\s*(\d{3,4})\s*-\s*\.+\s*$/);
-            if (m) return m[1];
-            return life;
         }
 
         function autoFitText(textEl, maxWidth, minFontSize, maxFontSize) {
@@ -8602,14 +8660,30 @@
                 return `${d.data.name}${lifeStr}`;
             })
             .each(function(d) {
-                const maxWidth = (d.data.name === 'H. ABDUL MUKTI') ? founderCardWidth - TEXT_PAD_X * 2 :
-                    (d.data.name === 'MOH. SATHORI') ? rootCardWidth - TEXT_PAD_X * 2 :
-                    getCardW(d) - TEXT_PAD_X * 2;
+                const isSpecial = SPECIAL_NODES.includes(d.data.name);
                 const maxFontSize = (d.data.name === 'H. ABDUL MUKTI') ? 24 :
                     (d.data.name === 'MOH. SATHORI') ? 20 : 16;
                 const minFontSize = (d.data.name === 'H. ABDUL MUKTI') ? 14 :
                     (d.data.name === 'MOH. SATHORI') ? 12 : 10;
-                autoFitText(d3.select(this), maxWidth, minFontSize, maxFontSize);
+                const el = d3.select(this);
+                const wrapInfo = isSpecial ? null : computeNameWrap(d);
+                if (!wrapInfo) {
+                    const maxWidth = (d.data.name === 'H. ABDUL MUKTI') ? founderCardWidth - TEXT_PAD_X * 2 :
+                        (d.data.name === 'MOH. SATHORI') ? rootCardWidth - TEXT_PAD_X * 2 :
+                        getCardW(d) - TEXT_PAD_X * 2;
+                    autoFitText(el, maxWidth, minFontSize, maxFontSize);
+                    return;
+                }
+                // Nama terlalu panjang untuk 1 baris -> render sebagai 2 baris
+                // (name1/name2), memakai posisi Y yang SAMA dengan yang dipakai
+                // getRowCenters (bukan offset relatif dy), supaya blok teks
+                // selalu presisi rata atas-bawah, konsisten dgn baris lainnya.
+                const rc = getRowCenters(d);
+                el.style('font-size', wrapInfo.fontSize + 'px');
+                el.text(null);
+                const xPos = el.attr('x');
+                el.append('tspan').attr('x', xPos).attr('y', rc.name1).text(wrapInfo.line1);
+                el.append('tspan').attr('x', xPos).attr('y', rc.name2).text(wrapInfo.line2);
             });
 
         // ===== BARIS 3: Nama Panggilan (Extra Name) =====
