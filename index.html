@@ -1172,35 +1172,46 @@
             font-weight: 700;
             fill: #14532d;
         }
-                                .node.search-highlight .node-shape:not(.glow-aura) {
-            /* HAPUS stroke lama yang bikin separo kepotong clip-path - hanya glow */
-            filter: drop-shadow(0 0 14px rgba(245, 158, 11, 0.9)) brightness(1.05);
+                .node.search-highlight .node-shape:not(.glow-aura) {
+            /* Hapus stroke lama yang kepotong - hanya glow, ring yang full */
+            filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.95)) brightness(1.06);
         }
         @keyframes search-pulse {
             0% { filter: drop-shadow(0 0 0px rgba(245, 158, 11, 0.95)); }
-            50% { filter: drop-shadow(0 0 18px rgba(245, 158, 11, 0.95)) brightness(1.08); }
+            50% { filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.95)) brightness(1.1); }
             100% { filter: drop-shadow(0 0 0px rgba(245, 158, 11, 0.95)); }
         }
-        /* Animasi FULL keliling shape - menggantikan animasi separo lama */
+        /* Ring FULL keliling - bekerja di HP & desktop, tidak terpengaruh clip-path */
         .search-ring {
-            fill: none;
-            stroke: #f59e0b;
-            stroke-width: 3.5px;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            pointer-events: none;
-            stroke-dasharray: 24 16;
-            stroke-dashoffset: 0;
-            filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.95));
-            animation: search-travel 1s linear infinite, search-ring-appear 0.25s ease-out;
+            fill: none !important;
+            stroke: #f59e0b !important;
+            stroke-width: 4px !important;
+            stroke-linecap: round !important;
+            stroke-linejoin: round !important;
+            pointer-events: none !important;
+            stroke-dasharray: 28 18 !important;
+            stroke-dashoffset: 0 !important;
+            filter: drop-shadow(0 0 10px rgba(245, 158, 11, 1)) !important;
+            animation: search-travel 0.9s linear infinite !important;
+            -webkit-animation: search-travel 0.9s linear infinite !important;
+            will-change: stroke-dashoffset;
         }
         @keyframes search-travel {
             0% { stroke-dashoffset: 0; }
-            100% { stroke-dashoffset: -80; }
+            100% { stroke-dashoffset: -92; }
         }
-        @keyframes search-ring-appear {
-            from { opacity: 0; transform: scale(0.92); }
-            to { opacity: 1; transform: scale(1); }
+        @-webkit-keyframes search-travel {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: -92; }
+        }
+        /* Pastikan di HP tidak dimatikan oleh prefers-reduced-motion atau perfMode */
+        @media (max-width: 768px) {
+            .search-ring {
+                animation: search-travel 0.9s linear infinite !important;
+                -webkit-animation: search-travel 0.9s linear infinite !important;
+                display: block !important;
+                opacity: 1 !important;
+            }
         }
 
         }
