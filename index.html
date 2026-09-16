@@ -10525,9 +10525,10 @@
 #rekapGen1Header>div{min-width:0;flex:1;overflow:hidden}
 #rekapGen1Header h4{font-size:10px;font-weight:900;color:#2e5939;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;line-height:1.2;text-transform:uppercase;letter-spacing:0.4px}
 #rekapGen1Header small{font-size:7.5px;color:#6b7f5e;display:block;line-height:1.1;white-space:normal;font-weight:500;margin-top:2px}
-#rekapGen1Breadcrumb{display:flex;align-items:center;gap:6px;margin-bottom:2px}
-#rekapBackBtn{background:#ffffff;border:1px solid #a7d7b5;border-radius:8px;padding:3px 7px;font-size:10px;font-weight:800;color:#2e5939;cursor:pointer;display:none}
-#rekapBackBtn.show{display:inline-flex}
+#rekapGen1Breadcrumb{display:flex;align-items:center;gap:6px;margin-bottom:3px;min-width:0}
+#rekapBackBtn{background:linear-gradient(135deg,#34d399 0%, #16a34a 55%, #15803d 100%);border:none;border-radius:10px;padding:6px 12px;font-size:12.5px;font-weight:800;color:#ffffff;cursor:pointer;display:none;white-space:normal;text-align:left;line-height:1.25;box-shadow:0 3px 10px rgba(22,163,74,0.4), inset 0 1px 0 rgba(255,255,255,0.35);letter-spacing:0.2px;transition:transform 0.12s ease, box-shadow 0.12s ease}
+#rekapBackBtn.show{display:inline-block}
+#rekapBackBtn:active{transform:scale(0.96);box-shadow:0 1px 4px rgba(22,163,74,0.35)}
 #rekapGen1TableWrap{overflow:auto;flex:1;-webkit-overflow-scrolling:touch;background:#ffffff;max-height:calc(88vh - 68px)}
 #rekapGen1Table{
   width:100%;
@@ -10704,7 +10705,7 @@ function renderRekap(){
     document.getElementById('rekapTitle').textContent=isRoot?'JUMLAH KETURUNAN':'KETURUNAN - '+(currentRoot.name.replace(/\(.*\)/,'').substring(0,24).toUpperCase());
     const backBtn=document.getElementById('rekapBackBtn');
     if(isRoot) backBtn.classList.remove('show');
-    else{ backBtn.classList.add('show'); backBtn.textContent=historyStack.length===1?'‹ Kembali ke Bani Mukti':'‹ '+(historyStack[historyStack.length-1].name.replace(/\(.*\)/,'').substring(0,14)); }
+    else{ backBtn.classList.add('show'); backBtn.textContent=historyStack.length===1?'‹ Kembali ke Bani Mukti':'‹ Kembali ke '+(historyStack[historyStack.length-1].name.replace(/\(.*\)/,'').trim()); }
     const tbody=document.getElementById('rekapGen1Body');
     tbody.innerHTML=rows.map((r,i)=>{
       const cls=r.hasChild?'clickable':'';
