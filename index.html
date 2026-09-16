@@ -10398,11 +10398,17 @@
 #rekapGen1Table thead th:nth-child(2){background:#e8f5e9;text-align:center !important}
 #rekapGen1Table th:nth-child(n+3), #rekapGen1Table td:nth-child(n+3){
   width:28px !important;min-width:28px !important;max-width:28px !important;
-  padding:2px 1px;font-size:8.5px;line-height:1.1;height:22px;
+  padding:2px 0px;font-size:7.5px;line-height:1.05;height:22px;
   text-align:center;box-sizing:border-box;
   white-space:nowrap !important;
   overflow:hidden;
   text-overflow:clip;
+  letter-spacing:-0.2px;
+}
+#rekapGen1Table th:nth-child(n+3){
+  font-size:6.5px !important;
+  letter-spacing:-0.3px;
+  padding:2px 0px !important;
 }
 #rekapGen1Table tr:nth-child(even) td:nth-child(2){background:#f5f9ef !important}
 #rekapGen1Table tr.clickable td:nth-child(2){background:#ffffff !important}
@@ -10443,6 +10449,7 @@
   #rekapGen1Panel{max-width:96vw;bottom:52px;max-height:88vh}
   #rekapGen1Table{min-width:320px}
   #rekapGen1Table th:nth-child(2), #rekapGen1Table td:nth-child(2){width:100px !important;min-width:100px !important;max-width:100px !important;left:20px !important;font-size:8.5px}
+  #rekapGen1Table th:nth-child(n+3), #rekapGen1Table td:nth-child(n+3){width:26px !important;min-width:26px !important;max-width:26px !important;font-size:6px !important}
   #rekapGen1Btn{width:44px;height:44px;font-size:20px}
   #rekapGen1Fab{bottom:12px}
 }
@@ -10565,20 +10572,40 @@ function renderRekap(){
     if(rc.canggah>0) parts.push(rc.canggah+' Canggah');
     if(rc.wareng>0) parts.push(rc.wareng+' Wareng');
     const baniName=isRoot?'Abdul Mukti':(currentRoot.name.toUpperCase().includes('MAIMUNAH')?'Hj. Maimunah':currentRoot.name.replace(/\(.*\)/,'').trim());
-        document.getElementById('rekapGen1Footer').innerHTML='<b style="font-weight:900;color:#2e5939">'+baniName+'</b> : '+parts.join(', ')+(isRoot?'':` • Total ${rc.anak+rc.cucu+rc.buyut+rc.canggah+rc.wareng} jiwa`);
-    // AUTO-FIT / AUTO-SHRINK hanya untuk kolom ANAK, CUCU, BUYUT, CANGGAH, WARENG (tetap 28px)
+            document.getElementById('rekapGen1Footer').innerHTML='<b style="font-weight:900;color:#2e5939">'+baniName+'</b> : '+parts.join(', ')+(isRoot?'':` • Total ${rc.anak+rc.cucu+rc.buyut+rc.canggah+rc.wareng} jiwa`);
+    // AUTO-FIT / AUTO-SHRINK khusus kolom ANAK, CUCU, BUYUT, CANGGAH, WARENG termasuk header biar tidak numpuk di HP
     requestAnimationFrame(()=>{
-      const tds = tbody.querySelectorAll('td:nth-child(n+3)');
-      tds.forEach(td=>{
-        td.style.whiteSpace='nowrap';
-        td.style.overflow='hidden';
-        let fs = parseFloat(window.getComputedStyle(td).fontSize) || 8.5;
-        const minFs = 5.5;
-        td.style.fontSize = fs + 'px';
+      const cells = document.querySelectorAll('#rekapGen1Table th:nth-child(n+3), #rekapGen1Table td:nth-child(n+3)');
+      cells.forEach(el=>{
+        el.style.whiteSpace='nowrap';
+        el.style.overflow='hidden';
+        let isHeader = el.tagName === 'TH';
+        let fs = parseFloat(window.getComputedStyle(el).fontSize) || (isHeader ? 6.5 : 7.5);
+        const minFs = isHeader ? 4.2 : 5;
+        el.style.fontSize = fs + 'px';
         let tries=0;
-        while(td.scrollWidth > td.clientWidth + 0.5 && fs > minFs && tries<20){
-          fs -= 0.5;
-          td.style.fontSize = fs + 'px';
+        while(el.scrollWidth > el.clientWidth + 0.5 && fs > minFs && tries<30){
+          fs -= 0.3;
+          el.style.fontSize = fs.toFixed(1) + 'px';
+          tries++;
+        }
+      });
+    });
+
+    // AUTO-FIT / AUTO-SHRINK hanya untuk kolom ANAK, CUCU, BUYUT, CANGGAH, WARENG - termasuk header biar tidak numpuk di HP
+    requestAnimationFrame(()=>{
+      const cells = document.querySelectorAll('#rekapGen1Table th:nth-child(n+3), #rekapGen1Table td:nth-child(n+3)');
+      cells.forEach(el=>{
+        el.style.whiteSpace='nowrap';
+        el.style.overflow='hidden';
+        let isHeader = el.tagName === 'TH';
+        let fs = parseFloat(window.getComputedStyle(el).fontSize) || (isHeader ? 6.5 : 7.5);
+        const minFs = isHeader ? 4.5 : 5;
+        el.style.fontSize = fs + 'px';
+        let tries=0;
+        while(el.scrollWidth > el.clientWidth + 0.5 && fs > minFs && tries<30){
+          fs -= 0.3;
+          el.style.fontSize = fs.toFixed(1) + 'px';
           tries++;
         }
       });
