@@ -1172,54 +1172,34 @@
             font-weight: 700;
             fill: #14532d;
         }
-                .node.search-highlight .node-shape:not(.glow-aura) {
-            /* Hapus stroke lama yang kepotong - hanya glow, ring yang full */
-            animation: search-pulse 0.9s ease-in-out infinite;
-            -webkit-animation: search-pulse 0.9s ease-in-out infinite;
+        .node.search-highlight .node-shape:not(.glow-aura) {
+            animation: search-pulse 1.3s ease-in-out 2;
         }
         @keyframes search-pulse {
             0% { filter: drop-shadow(0 0 4px rgba(217, 70, 239, 0.9)) brightness(1.03); }
             50% { filter: drop-shadow(0 0 22px rgba(217, 70, 239, 1)) brightness(1.12); }
             100% { filter: drop-shadow(0 0 4px rgba(217, 70, 239, 0.9)) brightness(1.03); }
         }
-        @-webkit-keyframes search-pulse {
-            0% { filter: drop-shadow(0 0 4px rgba(217, 70, 239, 0.9)) brightness(1.03); }
-            50% { filter: drop-shadow(0 0 22px rgba(217, 70, 239, 1)) brightness(1.12); }
-            100% { filter: drop-shadow(0 0 4px rgba(217, 70, 239, 0.9)) brightness(1.03); }
-        }
         /* Ring FULL keliling - bekerja di HP & desktop, tidak terpengaruh clip-path */
         .search-ring {
-            fill: none !important;
-            stroke: #d946ef !important;
-            stroke-width: 4px !important;
-            stroke-linecap: round !important;
-            stroke-linejoin: round !important;
-            pointer-events: none !important;
-            stroke-dasharray: 28 18 !important;
-            stroke-dashoffset: 0 !important;
-            filter: drop-shadow(0 0 10px rgba(217, 70, 239, 1)) !important;
-            animation: search-travel 0.9s linear infinite !important;
-            -webkit-animation: search-travel 0.9s linear infinite !important;
-            will-change: stroke-dashoffset;
+            fill: none;
+            stroke: #f59e0b;
+            stroke-width: 3.2px;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            pointer-events: none;
+            stroke-dasharray: 22 14;
+            stroke-dashoffset: 0;
+            filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.9));
+            animation: search-travel 1.1s linear infinite, search-ring-appear 0.25s ease-out;
         }
         @keyframes search-travel {
             0% { stroke-dashoffset: 0; }
-            100% { stroke-dashoffset: -92; }
+            100% { stroke-dashoffset: -108; }
         }
-        @-webkit-keyframes search-travel {
-            0% { stroke-dashoffset: 0; }
-            100% { stroke-dashoffset: -92; }
-        }
-        /* Pastikan di HP tidak dimatikan oleh prefers-reduced-motion atau perfMode */
-        @media (max-width: 768px) {
-            .search-ring {
-                animation: search-travel 0.9s linear infinite !important;
-                -webkit-animation: search-travel 0.9s linear infinite !important;
-                display: block !important;
-                opacity: 1 !important;
-            }
-        }
-
+        @keyframes search-ring-appear {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
         }
         .node-founder-shape .node-shape {
             width: 280px !important;
@@ -1312,19 +1292,12 @@
                 transform: none !important;
                 filter: none !important;
             }
-            /* Hasil pencarian tetap harus kelihatan di HP, jadi glow-nya
-               dikembalikan khusus untuk shape yang sedang di-highlight.
-               Dipaksa statis (bukan animasi) karena animasi filter kalah
-               prioritas dari !important di atas. */
-            .node.search-highlight .node-shape:not(.glow-aura) {
-                filter: drop-shadow(0 0 18px rgba(217, 70, 239, 1)) brightness(1.12) !important;
-                animation: none !important;
-            }
-            .node.search-highlight {
-                transform-box: fill-box;
-                transform-origin: center;
-                animation: search-pulse-scale 0.9s ease-in-out infinite !important;
-            }
+            /* Hasil pencarian di HP memakai efek yang sama seperti desktop
+               (.search-highlight + .search-ring di atas, sudah ringan: bukan
+               infinite forever, tanpa filter blur !important yang dipaksa
+               menyala terus) -- TIDAK dikembalikan lagi ke versi glow berat
+               di sini, supaya filter:none !important pada .node-shape di atas
+               tetap berlaku dan tidak ada animasi infinite tambahan di HP. */
             /* Efek "ditekan" saat node diketuk dikembalikan lagi — animasi ini
                ringan (hanya jalan 0.32s sekali per tap, bukan tiap frame saat
                geser), jadi aman dipakai di HP. */
@@ -1347,10 +1320,6 @@
                layer-nya sendiri, tidak terhubung ke <g> pohon silsilah sama
                sekali — jadi tidak ikut dihitung ulang saat pohon digeser/zoom.
                Makanya dikembalikan lagi (tidak bikin berat). */
-        }
-        @keyframes search-pulse-scale {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.06); }
         }
         </style>
 </head>
@@ -8847,16 +8816,20 @@
             return centers;
         }
 
-        // Diganti dari getComputedTextLength() (memaksa reflow SVG per-node,
-        // bisa dipanggil puluhan kali per shape saat banyak node baru muncul
-        // sekaligus -- inilah penyebab utama delay/berat saat pencarian nama)
-        // menjadi pengukuran lewat <canvas> (measureWidth), yang tidak
-        // menyentuh layout DOM/SVG sama sekali sehingga jauh lebih ringan.
+        // Estimasi 1x ukur (bukan loop turun 1px demi 1px dari font terbesar)
+        // -- pakai rasio lebar linear, lalu koreksi maksimal beberapa langkah
+        // saja kalau meleset. Mengurangi jumlah pengukuran canvas per teks.
         function autoFitText(textEl, maxWidth, minFontSize, maxFontSize, fontWeight) {
+            fontWeight = fontWeight || 400;
             const text = textEl.node().textContent;
+            const wAtMax = measureWidth(text, maxFontSize, fontWeight);
             let fontSize = maxFontSize;
-            while (fontSize > minFontSize && measureWidth(text, fontSize, fontWeight || 400) > maxWidth) {
-                fontSize -= 1;
+            if (wAtMax > maxWidth && wAtMax > 0) {
+                fontSize = Math.floor(maxFontSize * maxWidth / wAtMax);
+                fontSize = Math.max(minFontSize, Math.min(maxFontSize, fontSize));
+                while (fontSize > minFontSize && measureWidth(text, fontSize, fontWeight) > maxWidth) {
+                    fontSize -= 1;
+                }
             }
             textEl.style('font-size', fontSize + 'px');
             return fontSize;
@@ -9091,22 +9064,37 @@
 
         const nodeUpdate = nodeEnter.merge(node);
 
-        nodeUpdate.transition()
-            .duration(duration)
-            .attr("transform", d => `translate(${d.y},${d.x})`);
+        // Catatan performa: .transition().duration(0) di D3 TETAP dijadwalkan
+        // lewat timer/requestAnimationFrame milik D3 (tidak sinkron), jadi
+        // walau durasinya 0 tetap ada jeda 1 frame (atau lebih, kalau banyak
+        // elemen) sebelum posisi akhir benar-benar diterapkan. Untuk kasus
+        // duration=0 (dipakai saat "lompat" ke hasil pencarian nama), atribut
+        // di-set langsung tanpa .transition() sama sekali -> benar-benar
+        // instan, tidak menunggu frame berikutnya.
+        if (duration === 0) {
+            nodeUpdate.attr("transform", d => `translate(${d.y},${d.x})`);
+        } else {
+            nodeUpdate.transition()
+                .duration(duration)
+                .attr("transform", d => `translate(${d.y},${d.x})`);
+        }
 
         nodeUpdate.select('.toggle-indicator')
             .style('display', d => (d.children || d._children) ? null : 'none');
         nodeUpdate.select('.toggle-icon')
             .attr('d', d => d._children ? 'M -4,0 L 4,0 M 0,-4 L 0,4' : 'M -4,0 L 4,0');
 
-        const nodeExit = node.exit().transition()
-            .duration(duration)
-            .attr("transform", d => `translate(${source.y},${source.x})`)
-            .remove();
+        if (duration === 0) {
+            node.exit().attr("transform", d => `translate(${source.y},${source.x})`).remove();
+        } else {
+            const nodeExit = node.exit().transition()
+                .duration(duration)
+                .attr("transform", d => `translate(${source.y},${source.x})`)
+                .remove();
 
-        nodeExit.selectAll('.node-shape')
-            .style('transform', 'scale(0.01)');
+            nodeExit.selectAll('.node-shape')
+                .style('transform', 'scale(0.01)');
+        }
 
         const link = gContainer.selectAll('path.link')
             .data(links, d => d.target.id);
@@ -9120,17 +9108,22 @@
 
         const linkUpdate = linkEnter.merge(link);
 
-        linkUpdate.transition()
-            .duration(duration)
-            .attr('d', d => diagonal(d.source, d.target));
+        if (duration === 0) {
+            linkUpdate.attr('d', d => diagonal(d.source, d.target));
+            link.exit().remove();
+        } else {
+            linkUpdate.transition()
+                .duration(duration)
+                .attr('d', d => diagonal(d.source, d.target));
 
-        link.exit().transition()
-            .duration(duration)
-            .attr('d', d => {
-                const o = { x: source.x, y: source.y };
-                return diagonal(o, o);
-            })
-            .remove();
+            link.exit().transition()
+                .duration(duration)
+                .attr('d', d => {
+                    const o = { x: source.x, y: source.y };
+                    return diagonal(o, o);
+                })
+                .remove();
+        }
 
         nodes.forEach(d => {
             d.x0 = d.x;
@@ -10255,7 +10248,15 @@
         const scale = Math.min(1, Math.max(0.6, currentK));
         const tx = curW / 2 - targetX * scale;
         const ty = headerOffset + (curH - headerOffset) / 2 - targetY * scale;
-        svg.transition().duration(dur).call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+        const targetTransform = d3.zoomIdentity.translate(tx, ty).scale(scale);
+        // dur=0 lewat .transition() tetap dijadwalkan via timer D3 (baru
+        // berlaku di frame berikutnya). Panggil zoom.transform langsung pada
+        // svg (bukan svg.transition()) supaya benar-benar diterapkan seketika.
+        if (dur === 0) {
+            zoom.transform(svg, targetTransform);
+        } else {
+            svg.transition().duration(dur).call(zoom.transform, targetTransform);
+        }
     }
 
     // Menggeser tampilan sehingga titik tengah antara dua shape (mis. Murthosiyah
@@ -10282,9 +10283,33 @@
         gContainer.selectAll('g.node')
             .filter(d => d.id === node.id)
             .classed('search-highlight', true)
-            .each(function() {
-                const el = this;
-                setTimeout(() => d3.select(el).classed('search-highlight', false), 2700);
+            .each(function(d) {
+                const g = d3.select(this);
+                // hapus ring lama jika ada
+                g.selectAll('.search-ring').remove();
+                const body = g.select('rect.real-body');
+                if (body.empty()) return;
+                const w = parseFloat(body.attr('width')) || 200;
+                const h = parseFloat(body.attr('height')) || 60;
+                const x = parseFloat(body.attr('x')) || 0;
+                const y = parseFloat(body.attr('y')) || -h/2;
+                const rx = parseFloat(body.attr('rx')) || Math.min(14, h/2, w/2);
+                const pad = 4;
+                // Ring yang mengelilingi full shape, tanpa clip-path jadi tidak terpotong separo
+                g.append('rect')
+                    .attr('class', 'search-ring')
+                    .attr('x', x - pad)
+                    .attr('y', y - pad)
+                    .attr('width', w + pad*2)
+                    .attr('height', h + pad*2)
+                    .attr('rx', rx + pad)
+                    .attr('ry', rx + pad)
+                    .attr('fill', 'none');
+                // hapus setelah 3.2 detik
+                setTimeout(() => {
+                    d3.select(this).classed('search-highlight', false);
+                    g.selectAll('.search-ring').transition().duration(300).style('opacity', 0).remove();
+                }, 3200);
             });
     }
 
