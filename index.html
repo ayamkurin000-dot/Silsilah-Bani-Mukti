@@ -10315,7 +10315,6 @@
     </script>
 <!-- WIDGET REKAP KETURUNAN GEN1 - FINAL ICON ONLY CENTERED + BIRU BISA KLIK HITAM KOSONG + DRILL DOWN -->
 <style>
-
 #rekapGen1Fab{
   position:fixed;
   left:50%;
@@ -10343,11 +10342,11 @@
 #rekapGen1Panel{
   position:fixed;
   left:50%;
-  bottom:52px;
+  bottom:64px;
   transform:translateX(-50%);
   width:92vw;
   max-width:400px;
-  max-height:88vh;
+  max-height:70vh;
   background:#fefcf6;
   border-radius:18px;
   box-shadow:0 16px 40px rgba(90,70,40,0.22), 0 4px 12px rgba(0,0,0,0.08);
@@ -10359,48 +10358,121 @@
 }
 #rekapGen1Panel.open{display:flex;animation:rekapFade 0.22s ease}
 @keyframes rekapFade{from{opacity:0;transform:translate(-50%,10px) scale(0.98)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
-#rekapGen1Header{background:linear-gradient(135deg,#e8f5e9 0%, #dcedc8 45%, #f3e2c8 100%);padding:6px 10px;border-bottom:1.5px solid #c5d9b2;display:flex;justify-content:space-between;align-items:center;gap:8px}
+#rekapGen1Header{background:linear-gradient(135deg,#e8f5e9 0%, #dcedc8 45%, #f3e2c8 100%);padding:10px 12px;border-bottom:1.5px solid #c5d9b2;display:flex;justify-content:space-between;align-items:center;gap:8px}
 #rekapGen1Header>div{min-width:0;flex:1;overflow:hidden}
-#rekapGen1Header h4{font-size:10px;font-weight:900;color:#2e5939;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;line-height:1.2;text-transform:uppercase;letter-spacing:0.4px}
-#rekapGen1Header small{font-size:7.5px;color:#6b7f5e;display:block;line-height:1.1;white-space:normal;font-weight:500;margin-top:2px}
+#rekapGen1Header h4{font-size:12px;font-weight:900;color:#2e5939;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;line-height:1.2;text-transform:uppercase;letter-spacing:0.4px}
+#rekapGen1Header small{font-size:8.5px;color:#6b7f5e;display:block;line-height:1.25;white-space:normal;font-weight:500;margin-top:2px}
 #rekapGen1Breadcrumb{display:flex;align-items:center;gap:6px;margin-bottom:2px}
 #rekapBackBtn{background:#ffffff;border:1px solid #a7d7b5;border-radius:8px;padding:3px 7px;font-size:10px;font-weight:800;color:#2e5939;cursor:pointer;display:none}
 #rekapBackBtn.show{display:inline-flex}
-#rekapGen1TableWrap{overflow:auto;flex:1;-webkit-overflow-scrolling:touch;background:#ffffff;max-height:calc(88vh - 68px)}
-#rekapGen1Table{width:100%;min-width:320px;border-collapse:collapse;font-size:11px;border-spacing:0}
-#rekapGen1Table th{position:sticky;top:0;background:#e8f5e9;font-size:8px;text-transform:uppercase;letter-spacing:.4px;color:#2e5939;padding:4px 2px;text-align:center;border-bottom:1px solid #c5d9b2;z-index:2;white-space:nowrap;font-weight:800;line-height:1.1}
-#rekapGen1Table td{padding:2px 1px;border-bottom:1px solid #e8dcc3;text-align:center;font-size:8.5px;color:#3d4a3a;height:22px;box-sizing:border-box;vertical-align:middle;line-height:1.1}
+#rekapGen1TableWrap{overflow:auto;flex:1;-webkit-overflow-scrolling:touch;background:#ffffff}
+#rekapGen1Table{width:100%;min-width:400px;border-collapse:collapse;font-size:11px}
+#rekapGen1Table th{position:sticky;top:0;background:#e8f5e9;font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:#2e5939;padding:7px 3px;text-align:center;border-bottom:1.5px solid #c5d9b2;z-index:2;white-space:nowrap;font-weight:800}
+#rekapGen1Table td{padding:6px 3px;border-bottom:1px solid #e8dcc3;text-align:center;font-size:11px;color:#3d4a3a}
 #rekapGen1Table tr:nth-child(even){background:#f5f9ef}
 #rekapGen1Table tr:nth-child(odd){background:#ffffff}
 #rekapGen1Table .rank{font-weight:800;color:#4a7a4a;text-align:center}
-#rekapGen1Table th:nth-child(1), #rekapGen1Table td:nth-child(1){position:sticky;left:0;z-index:4;background:#f8eeda;min-width:18px;max-width:22px;width:20px;padding:2px 1px;font-size:8.5px;color:#7a5a32;border-right:1px solid #d8c9a8;text-align:center;vertical-align:middle;height:22px;line-height:1.1}
-#rekapGen1Table tr:nth-child(even) td:nth-child(1){background:#f0e6cc !important}
-#rekapGen1Table th:nth-child(2), #rekapGen1Table td:nth-child(2){position:sticky;left:20px;z-index:4;min-width:100px;max-width:120px;width:110px;white-space:normal;overflow:hidden;font-size:9px;text-align:left;padding:2px 4px;font-weight:650;border-right:1.5px solid #d8c9a8;line-height:1.1;height:22px;vertical-align:middle;box-sizing:border-box}
+
+#rekapGen1Table{
+  table-layout:fixed !important;
+  width:100%;
+  min-width:320px;
+}
+#rekapGen1Table th:nth-child(1), #rekapGen1Table td:nth-child(1){
+  width:20px !important;
+  min-width:20px !important;
+  max-width:20px !important;
+  position:sticky;
+  left:0;
+  z-index:4;
+  background:#f8eeda;
+  padding:2px 1px;
+  font-size:8.5px;
+  color:#7a5a32;
+  border-right:1px solid #d8c9a8;
+  text-align:center;
+  vertical-align:middle;
+  height:22px;
+  line-height:1.1;
+  box-sizing:border-box;
+}
+#rekapGen1Table th:nth-child(2), #rekapGen1Table td:nth-child(2){
+  width:110px !important;
+  min-width:110px !important;
+  max-width:110px !important;
+  position:sticky;
+  left:20px !important;
+  z-index:4;
+  white-space:normal;
+  overflow:hidden;
+  font-size:9px;
+  text-align:left;
+  padding:2px 4px;
+  font-weight:650;
+  border-right:1.5px solid #d8c9a8;
+  line-height:1.1;
+  height:22px;
+  vertical-align:middle;
+  box-sizing:border-box;
+  background:#ffffff;
+}
+#rekapGen1Table thead th:nth-child(1){background:#f8eeda;text-align:center !important}
 #rekapGen1Table thead th:nth-child(2){background:#e8f5e9;text-align:center !important}
-#rekapGen1Table th:nth-child(n+3), #rekapGen1Table td:nth-child(n+3){min-width:24px;max-width:32px;width:28px;padding:2px 1px;font-size:8.5px;line-height:1.1;height:22px}
-/* Nama - 2 baris max, rata kiri tapi tengah atas-bawah */
-#rekapGen1Table td:nth-child(2) b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;white-space:normal;word-break:break-word;line-height:1.1;max-height:2.2em;text-align:left;margin:0;vertical-align:middle;font-size:9px}
+#rekapGen1Table th:nth-child(n+3), #rekapGen1Table td:nth-child(n+3){
+  width:28px !important;
+  min-width:28px !important;
+  max-width:28px !important;
+  padding:2px 1px;
+  font-size:8.5px;
+  line-height:1.1;
+  height:22px;
+  text-align:center;
+  box-sizing:border-box;
+}
+#rekapGen1Table tr:nth-child(even) td:nth-child(1){background:#f0e6cc !important}
+#rekapGen1Table tr:nth-child(even) td:nth-child(2){background:#f5f9ef !important}
+#rekapGen1Table tr.clickable td:nth-child(2){background:#ffffff !important}
+#rekapGen1Table tr.clickable:nth-child(even) td:nth-child(2){background:#f5f9ef !important}
+
+#rekapGen1Table tr:nth-child(even) td:nth-child(1){background:#f0e6cc !important}
+#rekapGen1Table thead th:nth-child(2){background:#e8f5e9}
+
+#rekapGen1Table td{height:36px;box-sizing:border-box;vertical-align:middle}
+#rekapGen1Table td:nth-child(2) b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;white-space:normal;word-break:break-word;line-height:1.15;max-height:2.3em}
+
 /* WARNA TEKS - BIRU KALO ADA KETURUNAN BISA DIKLIK, HITAM KALO KOSONG */
 #rekapGen1Table tr.clickable td:nth-child(2){background:#ffffff !important}
 #rekapGen1Table tr.clickable:nth-child(even) td:nth-child(2){background:#f5f9ef !important}
-#rekapGen1Table tr.clickable td:nth-child(2) b{color:#2563eb !important}
+#rekapGen1Table tr.clickable td:nth-child(2) b{color:#2563eb !important} /* BIRU - siap diklik */
 #rekapGen1Table tr.clickable:hover td{background:#dbeafe !important}
 #rekapGen1Table tr.clickable:hover td:nth-child(2){background:#dbeafe !important}
 #rekapGen1Table tr.clickable:hover td:nth-child(2) b{color:#1d4ed8 !important}
-#rekapGen1Table tr:not(.clickable) td:nth-child(2) b{color:#1e293b !important}
-/* FIX PANAH BIRU - sejajar tengah dengan nama */
+#rekapGen1Table tr:not(.clickable) td:nth-child(2) b{color:#1e293b !important} /* HITAM - kosong */
+
+#rekapGen1Footer{padding:8px 10px;background:linear-gradient(90deg,#e8f5e9,#f3e2c8);font-size:10px;color:#4a5a3a;border-top:1.5px solid #c5d9b2;line-height:1.3;font-weight:600}
+/* FIX LURUS HEADER & BARIS + PANAH TENGAH */
 #rekapGen1Table td.hasChild{
-  display:flex !important;
-  align-items:center !important;
-  justify-content:space-between !important;
-  gap:3px;
-  padding-right:14px !important;
+  display:table-cell !important;
   position:sticky !important;
   left:20px !important;
+  vertical-align:middle !important;
+  padding-right:14px !important;
 }
 #rekapGen1Table td.hasChild b{
-  flex:1;
-  min-width:0;
+  display:-webkit-box !important;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:normal;
+  word-break:break-word;
+  line-height:1.1;
+  max-height:2.2em;
+  text-align:left !important;
+  margin:auto 0 !important;
+  vertical-align:middle;
+  font-size:9px;
+  width:100%;
 }
 #rekapGen1Table td.hasChild::after{
   content:'›';
@@ -10408,20 +10480,26 @@
   font-weight:900;
   font-size:11px;
   line-height:1;
-  flex-shrink:0;
+  position:absolute !important;
+  right:3px;
+  top:50%;
+  transform:translateY(-50%) !important;
+  float:none !important;
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  margin-left:4px;
-  float:none !important;
-  position:static !important;
-  transform:none !important;
+  pointer-events:none;
 }
-#rekapGen1Footer{padding:5px 8px;background:linear-gradient(90deg,#e8f5e9,#f3e2c8);font-size:8.5px;color:#4a5a3a;border-top:1.5px solid #c5d9b2;line-height:1.15;font-weight:600}
+@media(min-width:768px){
+  #rekapGen1Fab{bottom:12px}
+  #rekapGen1Panel{bottom:66px;max-width:560px;width:520px}
+  #rekapGen1Table{min-width:420px}
+  }
+
 @media(max-width:380px){
   #rekapGen1Panel{max-width:96vw;bottom:52px;max-height:88vh}
   #rekapGen1Table{min-width:320px}
-  #rekapGen1Table th:nth-child(2), #rekapGen1Table td:nth-child(2){min-width:90px;max-width:110px;width:100px;font-size:8.5px}
+  #rekapGen1Table th:nth-child(2), #rekapGen1Table td:nth-child(2){width:100px !important;min-width:100px !important;max-width:100px !important;left:20px !important;font-size:8.5px}
   #rekapGen1Btn{width:44px;height:44px;font-size:20px}
   #rekapGen1Fab{bottom:12px}
 }
@@ -10429,7 +10507,11 @@
   #rekapGen1Fab{bottom:12px}
   #rekapGen1Panel{bottom:66px;max-width:560px;width:520px;max-height:80vh}
   #rekapGen1Table{min-width:340px}
-  #rekapGen1Table th:nth-child(2), #rekapGen1Table td:nth-child(2){min-width:110px;max-width:130px;width:120px;font-size:9.5px}
+  #rekapGen1Table th:nth-child(2), #rekapGen1Table td:nth-child(2){width:120px !important;min-width:120px !important;max-width:120px !important;left:20px !important;font-size:9.5px}
+}
+@media(max-height:800px){
+  #rekapGen1Panel{max-height:88vh;bottom:52px}
+  #rekapGen1TableWrap{max-height:calc(88vh - 68px);overflow:auto}
 }
 
 </style>
@@ -10541,7 +10623,7 @@ function renderRekap(){
     if(rc.canggah>0) parts.push(rc.canggah+' Canggah');
     if(rc.wareng>0) parts.push(rc.wareng+' Wareng');
     const baniName=isRoot?'Abdul Mukti':(currentRoot.name.toUpperCase().includes('MAIMUNAH')?'Hj. Maimunah':currentRoot.name.replace(/\(.*\)/,'').trim());
-    document.getElementById('rekapGen1Footer').innerHTML='<b style="font-weight:900;color:#2e5939">'+baniName+'</b> : '+parts.join(', ')+(isRoot?'':` • Total ${rc.anak+rc.cucu+rc.buyut+rc.canggah+rc.wareng} jiwa`);
+    document.getElementById('rekapGen1Footer').innerHTML=baniName+' : '+parts.join(', ')+(isRoot?'':` • Total ${rc.anak+rc.cucu+rc.buyut+rc.canggah+rc.wareng} jiwa`);
   }catch(e){console.error(e);}
 }
 const btn=document.getElementById('rekapGen1Btn');
