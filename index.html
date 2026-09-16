@@ -1174,7 +1174,8 @@
         }
         .node.search-highlight .node-shape:not(.glow-aura) {
             stroke: #f59e0b !important;
-            stroke-width: 4px !important;
+            stroke-width: 3px !important;
+            filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.85));
             animation: search-pulse 1.3s ease-in-out 2;
         }
         @keyframes search-pulse {
@@ -1188,6 +1189,28 @@
                 filter: drop-shadow(0 0 0px rgba(245, 158, 11, 0.95));
             }
         }
+        /* Ring yang mengelilingi full shape - animasi keliling, bukan separo */
+        .search-ring {
+            fill: none;
+            stroke: #f59e0b;
+            stroke-width: 3.2px;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            pointer-events: none;
+            stroke-dasharray: 22 14;
+            stroke-dashoffset: 0;
+            filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.9));
+            animation: search-travel 1.1s linear infinite, search-ring-appear 0.25s ease-out;
+        }
+        @keyframes search-travel {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: -108; }
+        }
+        @keyframes search-ring-appear {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
         .node-founder-shape .node-shape {
             width: 280px !important;
             height: 76px !important;
@@ -10225,9 +10248,33 @@
         gContainer.selectAll('g.node')
             .filter(d => d.id === node.id)
             .classed('search-highlight', true)
-            .each(function() {
-                const el = this;
-                setTimeout(() => d3.select(el).classed('search-highlight', false), 2700);
+            .each(function(d) {
+                const g = d3.select(this);
+                // hapus ring lama jika ada
+                g.selectAll('.search-ring').remove();
+                const body = g.select('rect.real-body');
+                if (body.empty()) return;
+                const w = parseFloat(body.attr('width')) || 200;
+                const h = parseFloat(body.attr('height')) || 60;
+                const x = parseFloat(body.attr('x')) || 0;
+                const y = parseFloat(body.attr('y')) || -h/2;
+                const rx = parseFloat(body.attr('rx')) || Math.min(14, h/2, w/2);
+                const pad = 4;
+                // Ring yang mengelilingi full shape, tanpa clip-path jadi tidak terpotong separo
+                g.append('rect')
+                    .attr('class', 'search-ring')
+                    .attr('x', x - pad)
+                    .attr('y', y - pad)
+                    .attr('width', w + pad*2)
+                    .attr('height', h + pad*2)
+                    .attr('rx', rx + pad)
+                    .attr('ry', rx + pad)
+                    .attr('fill', 'none');
+                // hapus setelah 3.2 detik
+                setTimeout(() => {
+                    d3.select(this).classed('search-highlight', false);
+                    g.selectAll('.search-ring').transition().duration(300).style('opacity', 0).remove();
+                }, 3200);
             });
     }
 
