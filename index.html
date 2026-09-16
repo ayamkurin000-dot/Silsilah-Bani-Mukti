@@ -1173,7 +1173,6 @@
             fill: #14532d;
         }
                 .node.search-highlight .node-shape:not(.glow-aura) {
-            /* Hapus stroke lama yang kepotong - hanya glow, ring yang full */
             filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.95)) brightness(1.06);
         }
         @keyframes search-pulse {
@@ -1181,7 +1180,6 @@
             50% { filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.95)) brightness(1.1); }
             100% { filter: drop-shadow(0 0 0px rgba(245, 158, 11, 0.95)); }
         }
-        /* Ring FULL keliling - bekerja di HP & desktop, tidak terpengaruh clip-path */
         .search-ring {
             fill: none !important;
             stroke: #f59e0b !important;
@@ -1204,13 +1202,15 @@
             0% { stroke-dashoffset: 0; }
             100% { stroke-dashoffset: -92; }
         }
-        /* Pastikan di HP tidak dimatikan oleh prefers-reduced-motion atau perfMode */
         @media (max-width: 768px) {
             .search-ring {
                 animation: search-travel 0.9s linear infinite !important;
                 -webkit-animation: search-travel 0.9s linear infinite !important;
                 display: block !important;
                 opacity: 1 !important;
+            }
+            .node.search-highlight .node-shape {
+                filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.95)) !important;
             }
         }
 
