@@ -10646,10 +10646,13 @@ function findBaniNode(data,keywords){
   }
   return data;
 }
+function isFarathNode(n){
+  return /farath/i.test((n&&n.name)||'');
+}
 function getRealChildren(node){
   let out=[];
   (node.children||[]).forEach(c=>{
-    if((c.type||'')==='wife'){ (c.children||[]).forEach(g=>out.push(g)); } else { out.push(c); }
+    if((c.type||'')==='wife'){ (c.children||[]).forEach(g=>{ if(!isFarathNode(g)) out.push(g); }); } else { if(!isFarathNode(c)) out.push(c); }
   });
   return out;
 }
