@@ -1337,9 +1337,12 @@
             <button class="btn" onclick="resetZoom()">RESET</button>
             <button class="btn" onclick="showFeatureDisabledNotice()">BUKA SEMUA</button>
             <button class="btn" onclick="showFeatureDisabledNotice()">TUTUP SEMUA</button>
+            <button class="btn" id="lock-expand-btn" onclick="toggleLockExpand()" style="background:#64748b;">🔓 KUNCI: OFF</button>
             <button class="btn" id="perf-btn" onclick="togglePerf()" style="background:#64748b;">⚡ EFEK: ON</button>
         </div>
     </div>
+
+    <div id="lock-expand-toast" class="feature-disabled-toast">Mode kunci aktif: cabang lain tidak akan tertutup otomatis</div>
 
     <div id="feature-disabled-toast" class="feature-disabled-toast">Fitur sementara dinonaktifkan</div>
 
@@ -7827,14 +7830,43 @@
                                             ]
                                         },
                                         {
-                                            "name": "Farid Usmani",
-                                            "life": "1968 - ....",
-                                            "spouse": "",
-                                            "spouse_life": "",
+                                            "name": "H. Farid Usmani",
+                                            "life": "1968 - 2022",
+                                            "spouse": "Ana Latifatul Syamsiah",
+                                            "spouse_life": "1973 - ....",
                                             "type": "gen3",
                                             "address": "",
                                             "extraName": "Mas Farid",
-                                            "children": []
+                                            "flower": true,
+                                            "children": [
+                                                {
+                                                    "name": "Agus Rahmad Rakan Rizqallah",
+                                                    "life": "2002 - ....",
+                                                    "spouse": "",
+                                                    "spouse_life": "",
+                                                    "type": "gen4",
+                                                    "address": "",
+                                                    "children": []
+                                                },
+                                                {
+                                                    "name": "Dwi Hudan Aditya",
+                                                    "life": "2009 - ....",
+                                                    "spouse": "",
+                                                    "spouse_life": "",
+                                                    "type": "gen4",
+                                                    "address": "",
+                                                    "children": []
+                                                },
+                                                {
+                                                    "name": "Tertia Anindita Usman",
+                                                    "life": "2014 - ....",
+                                                    "spouse": "",
+                                                    "spouse_life": "",
+                                                    "type": "gen4",
+                                                    "address": "",
+                                                    "children": []
+                                                }
+                                            ]
                                         },
                                         {
                                             "name": "Oemi Chamnah",
@@ -8693,7 +8725,7 @@
                     d._children = d.children;
                     d.children = null;
                 } else if (d._children) {
-                    if (d.parent) {
+                    if (d.parent && lockExpandMode !== 'on') {
                         d.parent.children.forEach(sibling => {
                             if (sibling !== d) collapse(sibling);
                         });
@@ -10140,6 +10172,35 @@
     }
 
     let featureDisabledTimer = null;
+    let lockExpandMode = localStorage.getItem('lockExpandMode') || 'off';
+    let lockExpandTimer;
+    function applyLockExpandBtnStyle() {
+        const btn = document.getElementById('lock-expand-btn');
+        if (!btn) return;
+        if (lockExpandMode === 'on') {
+            btn.textContent = '🔒 KUNCI: ON';
+            btn.style.background = '#16a34a';
+        } else {
+            btn.textContent = '🔓 KUNCI: OFF';
+            btn.style.background = '#64748b';
+        }
+    }
+    function toggleLockExpand() {
+        lockExpandMode = lockExpandMode === 'on' ? 'off' : 'on';
+        localStorage.setItem('lockExpandMode', lockExpandMode);
+        applyLockExpandBtnStyle();
+        const toast = document.getElementById('lock-expand-toast');
+        if (toast) {
+            toast.textContent = lockExpandMode === 'on' ?
+                'Mode kunci AKTIF: klik shape lain tidak akan menutup cabang yang sudah terbuka' :
+                'Mode kunci NONAKTIF: klik shape akan menutup cabang saudara seperti biasa';
+            toast.classList.add('show');
+            clearTimeout(lockExpandTimer);
+            lockExpandTimer = setTimeout(() => toast.classList.remove('show'), 2400);
+        }
+    }
+    setTimeout(applyLockExpandBtnStyle, 400);
+
     function showFeatureDisabledNotice() {
         const toast = document.getElementById('feature-disabled-toast');
         if (!toast) return;
