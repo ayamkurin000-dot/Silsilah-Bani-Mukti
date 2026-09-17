@@ -8237,7 +8237,9 @@
     // Jaga-jaga untuk tap singkat yang tidak memicu event zoom (mis. klik cepat tanpa geser sama sekali)
     svg.on("pointerdown.genlegend", () => { minimizeGenLegend(); });
 
-    const tree = d3.tree().nodeSize([cardHeight + extraNameHeight + 10, cardWidth + 100]);
+    const tree = d3.tree()
+        .nodeSize([cardHeight + extraNameHeight + 4, cardWidth + 100])
+        .separation((a, b) => a.parent === b.parent ? 1 : 1.18);
 
     root = d3.hierarchy(treeData, d => d.children);
     root.x0 = height / 2;
