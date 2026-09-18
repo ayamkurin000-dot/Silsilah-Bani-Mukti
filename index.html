@@ -8207,9 +8207,29 @@
     // Jaga-jaga untuk tap singkat yang tidak memicu event zoom (mis. klik cepat tanpa geser sama sekali)
     svg.on("pointerdown.genlegend", () => { minimizeGenLegend(); });
 
+    // ===== Jarak antar shape (vertikal) - DIBUAT KONSISTEN BERDASARKAN TEPI KARTU,
+    // bukan jarak pusat-ke-pusat yang tetap. Karena tinggi kartu berbeda-beda
+    // mengikuti jumlah baris nyata (2 baris vs 3 baris, dsb - lihat getCardH()),
+    // kalau jarak pusat-ke-pusat dipaksa sama maka kartu tinggi bisa berimpitan
+    // sementara kartu pendek jadi kelihatan lebih renggang. Solusinya: hitung
+    // separation() dari tinggi kartu ASLI kedua node yang bertetangga, sehingga
+    // ruang kosong (gap) antar tepi kartu selalu sama besar untuk semua pasangan
+    // node, berapa pun jumlah barisnya.
+    const NODE_BASE_UNIT = cardHeight + extraNameHeight + 4; // satuan dasar yang dipakai nodeSize()
+    const SIBLING_EDGE_GAP = 14;   // jarak kosong antar tepi kartu untuk anak dari orang tua yang sama
+    const COUSIN_EXTRA_GAP = 22;   // tambahan jarak antar kelompok keluarga berbeda (sepupu/cabang lain)
+
     const tree = d3.tree()
-        .nodeSize([cardHeight + extraNameHeight + 4, cardWidth + 100])
-        .separation((a, b) => a.parent === b.parent ? 1 : 1.18);
+        .nodeSize([NODE_BASE_UNIT, cardWidth + 100])
+        .separation((a, b) => {
+            const ha = getCardH(a);
+            const hb = getCardH(b);
+            const sameParent = a.parent === b.parent;
+            const gap = sameParent ? SIBLING_EDGE_GAP : (SIBLING_EDGE_GAP + COUSIN_EXTRA_GAP);
+            // jarak pusat-ke-pusat minimum supaya tepi kartu tetap berjarak `gap` px,
+            // dinyatakan dalam satuan NODE_BASE_UNIT seperti yang diharapkan d3.tree
+            return (ha / 2 + hb / 2 + gap) / NODE_BASE_UNIT;
+        });
 
     root = d3.hierarchy(treeData, d => d.children);
     root.x0 = height / 2;
