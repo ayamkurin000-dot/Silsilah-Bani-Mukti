@@ -1486,7 +1486,7 @@
         <div class="chat-header">
             <span>💬 CHAT & SARAN BANI MUKTI</span>
             <span style="display:flex; align-items:center; gap:6px;">
-                <small id="chat-version" title="Versi kode chat" style="font-size:0.55rem; color:#94a3b8; font-weight:700; border:1px solid #cbd5e1; border-radius:6px; padding:1px 4px;">v5</small>
+                <small id="chat-version" title="Versi kode chat" style="font-size:0.55rem; color:#94a3b8; font-weight:700; border:1px solid #cbd5e1; border-radius:6px; padding:1px 4px;">v6</small>
                 <small id="chat-count">0 pesan</small>
             </span>
         </div>
@@ -9751,6 +9751,7 @@
 
     let chatUser = null;
     let replyToId = null;
+    let pendingReplyId = null; // tombol Balas yang ditekan saat belum login -> dilanjutkan setelah login
     let replyDraft = ''; // isi ketikan balasan inline (tetap aman saat chat di-render ulang)
     let profilePhotoMap = {}; // email -> photoUrl terbaru (biar pesan lama ikut update kalau foto profil diganti)
 
@@ -9933,6 +9934,7 @@
         if (form) form.style.display = 'flex';
     }
     function hideLoginForm() {
+        pendingReplyId = null;
         const guestBar = document.getElementById('chat-guest-bar');
         const form = document.getElementById('chat-login-form');
         if (form) form.style.display = 'none';
@@ -9975,6 +9977,12 @@
             // welcome disabled - fokus chat saja
         }
         renderMessages();
+        // Kalau tadi menekan Balas sebelum login, lanjutkan: buka kotak balasan di bingkai chat itu
+        if (pendingReplyId) {
+            const rid = pendingReplyId;
+            pendingReplyId = null;
+            replyMessage(rid);
+        }
     }
     function logoutChat() {
         if (!confirm('Keluar dari chat?')) return;
@@ -10453,7 +10461,7 @@
         if (mainTa) mainTa.placeholder = replyToId ? ('Membalas ' + visMap[replyToId].name + '... (ketik di sini atau di kotak balasan)') : 'Tulis pesan... (Enter kirim)';
     }
     function replyMessage(id) {
-        if (!chatUser) { showLoginForm(); return; }
+        if (!chatUser) { pendingReplyId = id; showLoginForm(); return; }
         const list = typeof getAllMessages === 'function' ? getAllMessages() : getMessages();
         const m = list.find(x=>x.id===id);
         if (!m) return;
