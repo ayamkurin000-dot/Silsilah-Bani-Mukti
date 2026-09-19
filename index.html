@@ -3583,6 +3583,7 @@
                                                         {
                                                             "name": "Asmaranda Farchan Hakim",
                                                             "life": "1987 - ....",
+                                                            "birthDate": "30-07-1987",
                                                             "spouse": "Fini",
                                                             "spouse_life": "",
                                                             "type": "gen5",
@@ -3609,8 +3610,9 @@
                                                             ]
                                                         },
                                                         {
-                                                            "name": "Rizky Rachmansyah B.",
+                                                            "name": "Rizky Rachmansyah Basnur",
                                                             "life": "1992 - ....",
+                                                            "birthDate": "22-06-1992",
                                                             "spouse": "Wiwin",
                                                             "spouse_life": "",
                                                             "type": "gen5",
@@ -3630,6 +3632,7 @@
                                                         {
                                                             "name": "Rico Pahlawan",
                                                             "life": "1995 - ....",
+                                                            "birthDate": "15-01-1995",
                                                             "spouse": "Sabihal Husni",
                                                             "spouse_life": "",
                                                             "type": "gen5",
@@ -3651,15 +3654,18 @@
                                                 {
                                                     "name": "Ramon Rizaldo",
                                                     "life": "1968 - ....",
+                                                    "birthDate": "05-03-1968",
                                                     "spouse": "Margie Subahagia Ningsih",
-                                                    "spouse_life": "",
+                                                    "spouse_life": "1975 - ....",
+                                                    "spouseBirthDate": "28-06-1975",
                                                     "type": "gen4",
                                                     "address": "",
                                                     "extraName": "Mas Rido",
                                                     "children": [
                                                         {
                                                             "name": "Luthfyyah Hanifah Amari",
-                                                            "life": "",
+                                                            "life": "2002 - ....",
+                                                            "birthDate": "23-08-2002",
                                                             "spouse": "",
                                                             "spouse_life": "",
                                                             "type": "gen5",
@@ -3668,7 +3674,8 @@
                                                         },
                                                         {
                                                             "name": "Muhammad Hanif Ihsan Amari",
-                                                            "life": "",
+                                                            "life": "2004 - ....",
+                                                            "birthDate": "06-12-2004",
                                                             "spouse": "",
                                                             "spouse_life": "",
                                                             "type": "gen5",
@@ -3677,7 +3684,8 @@
                                                         },
                                                         {
                                                             "name": "Muhammad Hafizh Rizqi Amari",
-                                                            "life": "",
+                                                            "life": "2014 - ....",
+                                                            "birthDate": "21-02-2014",
                                                             "spouse": "",
                                                             "spouse_life": "",
                                                             "type": "gen5",
@@ -8788,6 +8796,28 @@
         return life;
     }
 
+    // Jika orang punya birthDate lengkap (tanggal-bulan-tahun) yang tersimpan,
+    // tampilkan itu menggantikan tahun lahir singkat pada field "life".
+    // Contoh: life "1987 - ...." + birthDate "30-07-1987" -> "30-07-1987 - ...."
+    function getDisplayLife(d) {
+        const life = d.data.life;
+        if (!life) return '';
+        if (d.data.birthDate) {
+            return life.replace(/^\s*\d{3,4}\s*/, d.data.birthDate + ' ');
+        }
+        return formatLifeSpan(life);
+    }
+
+    // Sama seperti getDisplayLife tapi untuk pasangan (memakai spouseBirthDate)
+    function getDisplaySpouseLife(d) {
+        const life = d.data.spouse_life;
+        if (!life) return '';
+        if (d.data.spouseBirthDate) {
+            return life.replace(/^\s*\d{3,4}\s*/, d.data.spouseBirthDate + ' ');
+        }
+        return formatLifeSpan(life);
+    }
+
     // ===== Wrap nama panjang jadi 2 baris (agar tidak keluar dari shape) =====
     function measureWidth(text, fontSize, fontWeight) {
         const canvas = measureWidth._canvas || (measureWidth._canvas = document.createElement('canvas'));
@@ -8796,7 +8826,7 @@
         return ctx.measureText((text || '').toUpperCase()).width;
     }
     function getNameLifeLabel(d) {
-        let lifeStr = d.data.life ? ` (${formatLifeSpan(d.data.life)})` : '';
+        let lifeStr = d.data.life ? ` (${getDisplayLife(d)})` : '';
         return `${d.data.name}${lifeStr}`;
     }
     // Cari titik pemisah kata yang membuat 2 baris paling seimbang panjangnya.
@@ -9130,7 +9160,7 @@
                 if (d.data.name === 'H. ABDUL MUKTI' || d.data.name === 'MOH. SATHORI' || d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') {
                     return d.data.name;
                 }
-                let lifeStr = d.data.life ? ` (${formatLifeSpan(d.data.life)})` : '';
+                let lifeStr = d.data.life ? ` (${getDisplayLife(d)})` : '';
                 return `${d.data.name}${lifeStr}`;
             })
             .each(function(d) {
@@ -9313,7 +9343,7 @@
                 }
                 if (d.data.name === 'MOH. SATHORI' || d.data.name === 'Isteri ke-1' || d.data.name === 'Isteri ke-2') return '';
                 if (!hasSpouseLine(d)) return '';
-                let sLife = d.data.spouse_life ? ` (${formatLifeSpan(d.data.spouse_life)})` : '';
+                let sLife = d.data.spouse_life ? ` (${getDisplaySpouseLife(d)})` : '';
                 return `${d.data.spouse}${sLife}`;
             });
 
@@ -10199,13 +10229,12 @@
         function renderMessages() {
         const container = document.getElementById('chat-messages');
         if (!container) return;
-        let allMsgs = typeof getAllMessages === 'function' ? getAllMessages() : (typeof getMessages === 'function' ? getMessages() : []);
+        let msgs = typeof getAllMessages === 'function' ? getAllMessages() : (typeof getMessages === 'function' ? getMessages() : []);
         if (typeof updateChatNotifBadge === 'function') updateChatNotifBadge();
         // hapus sys messages biar fokus chat user saja
-        allMsgs = allMsgs.filter(m => !m.sys);
-        allMsgs.sort((a,b)=>a.ts-b.ts);
+        msgs = msgs.filter(m => !m.sys);
+        msgs.sort((a,b)=>a.ts-b.ts);
         // batasi 100 terakhir biar tidak macet
-        let msgs = allMsgs;
         if (msgs.length > 100) msgs = msgs.slice(msgs.length-100);
         if (msgs.length === 0) {
             container.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8; font-size:0.72rem;">Belum ada chat.<br>Tulis pesan pertama! 💬</div>';
@@ -10214,26 +10243,9 @@
             return;
         }
         const map = {};
-        allMsgs.forEach(m=>map[m.id]=m);
-
-        // ===== SUSUN BALASAN (REPLY) BERTINGKAT TEPAT DI BAWAH PESAN YANG DIBALAS =====
-        // Jadi balasan tidak lompat ke paling bawah urutan waktu, tapi nempel
-        // persis di bawah pesan induknya (mirip thread), seolah membalas pesan
-        // itu langsung, bukan membuka pesan/percakapan baru.
-        const idsInView = new Set(msgs.map(m=>m.id));
-        const childrenMap = {};
-        const roots = [];
+        (typeof getAllMessages === 'function' ? getAllMessages() : msgs).forEach(m=>map[m.id]=m);
+        let htmlOut = '';
         msgs.forEach(m=>{
-            if (m.parentId && map[m.parentId] && idsInView.has(m.parentId)) {
-                (childrenMap[m.parentId] = childrenMap[m.parentId] || []).push(m);
-            } else {
-                roots.push(m);
-            }
-        });
-        // urutkan balasan tiap induk berdasarkan waktu kirim
-        Object.keys(childrenMap).forEach(k => childrenMap[k].sort((a,b)=>a.ts-b.ts));
-
-        function renderMsgHtml(m, depth) {
             const isMe = chatUser && m.email && chatUser.email === m.email;
             const isAdmin = typeof isAdminUser === 'function' ? isAdminUser(chatUser) : false;
             let parentHtml = '';
@@ -10241,37 +10253,28 @@
                 const p = map[m.parentId];
                 parentHtml = `<div class="reply-preview">↳ ${escapeHtml(p.name)}: ${escapeHtml(p.text.slice(0,50))}</div>`;
             }
-            const indent = Math.min(depth, 4) * 18;
-            const indentStyle = indent > 0 ? `margin-left:${indent}px; border-left:2px solid #cbd5e1; padding-left:8px;` : '';
             // SIMPLE: avatar di kiri, nama + waktu relatif, bani di kanan
-            return `<div class="chat-msg ${m.parentId?'reply':''}" style="${indentStyle}${isMe?'border-color:#93c5fd; background:#eff6ff;':''}">
+            htmlOut += `<div class="chat-msg ${m.parentId?'reply':''}" style="${isMe?'border-color:#93c5fd; background:#eff6ff;':''}">
                 ${parentHtml}
                 <div style="display:flex; gap:8px; align-items:flex-start;">
                     ${renderAvatarHtml(m.name, m.email, getEffectivePhoto(m.email, m.photoUrl))}
                     <div style="flex:1; min-width:0;">
                         <div class="msg-head" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; gap:6px;">
-                            <span class="msg-name" style="font-weight:800; color:#0f172a; font-size:0.8rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:60%;">${escapeHtml(m.name)}</span>
+                            <span style="display:flex; align-items:baseline; gap:6px; min-width:0; flex:1; overflow:hidden;">
+                                <span class="msg-name" style="font-weight:800; color:#0f172a; font-size:0.8rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:60%;">${escapeHtml(m.name)}</span>
+                                <span class="msg-time-relative" data-ts="${m.ts}" title="${formatChatTime(m.ts)}" style="font-size:0.62rem; color:#94a3b8; font-weight:600; white-space:nowrap; flex-shrink:0;">${formatRelativeTime(m.ts)}</span>
+                            </span>
                             <span class="chat-bani-badge" style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:20px; font-size:0.65rem; font-weight:800; flex-shrink:0;">${escapeHtml(m.bani)}</span>
                         </div>
                         <div class="msg-text" style="color:#334155; font-size:0.82rem; line-height:1.4; white-space:pre-wrap; word-break:break-word;">${escapeHtml(m.text)}</div>${m.image ? `<div style="margin-top:8px;"><img src="${m.image}" style="max-width:220px; max-height:220px; border-radius:10px; border:1px solid #e2e8f0; cursor:pointer;" onclick="window.open(this.src, '_blank')"><div style="font-size:0.6rem; color:#64748b; margin-top:2px;">📎 ${escapeHtml(m.fileName||'file')}</div></div>` : ''}
-                        <div class="msg-actions" style="margin-top:6px; display:flex; justify-content:flex-end; align-items:center; gap:10px;">
+                        <div class="msg-actions" style="margin-top:6px; display:flex; gap:10px;">
                             <button onclick="replyMessage('${m.id}')" style="background:none; border:none; font-size:0.68rem; font-weight:700; color:#3b82f6; cursor:pointer;">↩️ Balas</button>
                             ${(isMe||isAdmin)?`<button onclick="deleteMessage('${m.id}')" style="background:none; border:none; font-size:0.68rem; font-weight:700; color:${isAdmin && !isMe ? '#7c3aed' : '#dc2626'}; cursor:pointer;">${isAdmin && !isMe ? '🛡️ Hapus' : '🗑️ Hapus'}</button>`:''}
-                            <span class="msg-time-relative" data-ts="${m.ts}" title="${formatChatTime(m.ts)}" style="font-size:0.62rem; color:#94a3b8; font-weight:600; white-space:nowrap; margin-left:auto;">${formatRelativeTime(m.ts)}</span>
                         </div>
                     </div>
                 </div>
             </div>`;
-        }
-
-        let htmlOut = '';
-        function renderThread(m, depth) {
-            htmlOut += renderMsgHtml(m, depth);
-            const kids = childrenMap[m.id] || [];
-            kids.forEach(k => renderThread(k, depth + 1));
-        }
-        roots.forEach(m => renderThread(m, 0));
-
+        });
         container.innerHTML = htmlOut;
         container.scrollTop = container.scrollHeight;
         const ce = document.getElementById('chat-count');
@@ -10279,7 +10282,7 @@
     }
     function replyMessage(id) {
         if (!chatUser) { showLoginForm(); return; }
-        const msgs = typeof getAllMessages === 'function' ? getAllMessages() : getMessages();
+        const msgs = getMessages();
         const m = msgs.find(x=>x.id===id);
         if (!m) return;
         replyToId = id;
