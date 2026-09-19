@@ -872,23 +872,19 @@
             border-left: 2px solid #94a3b8;
         }
         .chat-msg.is-reply-target { box-shadow: 0 0 0 2px #93c5fd; }
+        /* Balasan ala YouTube: masuk ke kanan, sejajar mulai dari teks chat induk, tanpa kotak sendiri */
         .thread-replies {
-            margin-top: 8px;
-            margin-left: 14px;
-            padding-left: 10px;
-            border-left: 2px solid #bfdbfe;
+            margin-top: 10px;
+            margin-left: 40px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
         .thread-reply {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
+            padding: 0;
             border-radius: 8px;
-            padding: 6px 8px;
         }
-        .thread-reply.is-me { background: #eff6ff; border-color: #bfdbfe; }
-        .thread-reply.is-reply-target { box-shadow: 0 0 0 2px #93c5fd; }
+        .thread-reply.is-reply-target { background: #dbeafe; box-shadow: 0 0 0 4px #dbeafe; }
         .thread-replies .msg-avatar {
             width: 26px !important;
             height: 26px !important;
@@ -896,9 +892,8 @@
             font-size: 0.62rem !important;
         }
         .inline-reply-box {
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px dashed #93c5fd;
+            margin-top: 10px;
+            margin-left: 40px;
             display: flex;
             flex-direction: column;
             gap: 6px;
