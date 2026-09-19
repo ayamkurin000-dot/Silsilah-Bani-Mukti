@@ -871,6 +871,85 @@
             margin-bottom: 5px;
             border-left: 2px solid #94a3b8;
         }
+        .chat-msg.is-reply-target { box-shadow: 0 0 0 2px #93c5fd; }
+        .thread-replies {
+            margin-top: 8px;
+            margin-left: 14px;
+            padding-left: 10px;
+            border-left: 2px solid #bfdbfe;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .thread-reply {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 6px 8px;
+        }
+        .thread-reply.is-me { background: #eff6ff; border-color: #bfdbfe; }
+        .thread-reply.is-reply-target { box-shadow: 0 0 0 2px #93c5fd; }
+        .thread-replies .msg-avatar {
+            width: 26px !important;
+            height: 26px !important;
+            min-width: 26px !important;
+            font-size: 0.62rem !important;
+        }
+        .inline-reply-box {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #93c5fd;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .inline-reply-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.68rem;
+            color: #1e40af;
+            font-weight: 700;
+        }
+        .inline-reply-label button {
+            background: none; border: none; color: #dc2626; font-weight: 800; cursor: pointer; font-size: 0.8rem;
+        }
+        .inline-reply-box textarea {
+            width: 100%;
+            box-sizing: border-box;
+            min-height: 54px;
+            max-height: 120px;
+            padding: 8px 10px;
+            border: 1px solid #93c5fd;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            resize: vertical;
+            outline: none;
+            font-family: inherit;
+            background: #ffffff;
+        }
+        .inline-reply-box textarea:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+        }
+        .inline-reply-actions { display: flex; gap: 6px; }
+        .inline-reply-actions button {
+            padding: 7px 12px;
+            border-radius: 8px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+            background: #f1f5f9;
+            color: #475569;
+        }
+        .inline-reply-actions button.send {
+            flex: 1;
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: #ffffff;
+        }
+        .inline-reply-actions button.send:hover { background: #2563eb; }
         #chat-input-area {
             padding: 10px;
             border-top: 1px solid #e2e8f0;
@@ -1493,10 +1572,6 @@
             </div>
 
             <div id="chat-input-area">
-                <div id="reply-preview" class="replying-to" style="display:none;">
-                    <span id="reply-text"></span>
-                    <button onclick="cancelReply()" style="background:none; border:none; color:#dc2626; font-weight:800; cursor:pointer;">✕</button>
-                </div>
                 <div id="file-preview" style="display:none; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; padding:8px; margin-bottom:6px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span id="file-preview-name" style="font-size:0.7rem; font-weight:700; color:#334155;"></span>
@@ -8798,14 +8873,24 @@
 
     // Jika orang punya birthDate lengkap (tanggal-bulan-tahun) yang tersimpan,
     // tampilkan itu menggantikan tahun lahir singkat pada field "life".
-    // Contoh: life "1987 - ...." + birthDate "30-07-1987" -> "30-07-1987 - ...."
+    // Contoh: life "1987 - ...." + birthDate "30-07-1987" -> "30-07-1987"
     function getDisplayLife(d) {
         const life = d.data.life;
         if (!life) return '';
         if (d.data.birthDate) {
-            return life.replace(/^\s*\d{3,4}\s*/, d.data.birthDate + ' ');
+            return combineBirthDate(d.data.birthDate, life);
         }
         return formatLifeSpan(life);
+    }
+
+    // Gabungkan tanggal lahir lengkap dengan sisa teks "life".
+    // Jika sisa teks hanya berisi " - ...." (wafat belum diketahui), tampilkan
+    // tanggal lahirnya saja: "30-07-1987". Jika tahun wafat diketahui, tetap
+    // ditampilkan: "30-07-1987 - 2020".
+    function combineBirthDate(birthDate, life) {
+        const rest = life.replace(/^\s*\d{3,4}\s*/, '');
+        if (/^[\s\-\.]*$/.test(rest)) return birthDate;
+        return birthDate + ' ' + rest;
     }
 
     // Sama seperti getDisplayLife tapi untuk pasangan (memakai spouseBirthDate)
@@ -8813,7 +8898,7 @@
         const life = d.data.spouse_life;
         if (!life) return '';
         if (d.data.spouseBirthDate) {
-            return life.replace(/^\s*\d{3,4}\s*/, d.data.spouseBirthDate + ' ');
+            return combineBirthDate(d.data.spouseBirthDate, life);
         }
         return formatLifeSpan(life);
     }
@@ -9668,6 +9753,7 @@
 
     let chatUser = null;
     let replyToId = null;
+    let replyDraft = ''; // isi ketikan balasan inline (tetap aman saat chat di-render ulang)
     let profilePhotoMap = {}; // email -> photoUrl terbaru (biar pesan lama ikut update kalau foto profil diganti)
 
     function getEffectivePhoto(email, fallbackPhoto) {
@@ -10185,15 +10271,18 @@
         btn.disabled = !(nameOk && baniOk);
     }
 
-    async function sendMessage() {
+    async function sendMessage(fromInline) {
+        const inline = fromInline === true; // true = dikirim dari kotak balasan di dalam bingkai chat
         if (!chatUser) { showLoginForm(); return; }
-        const input = document.getElementById('chat-input');
+        const input = document.getElementById(inline ? 'inline-reply-input' : 'chat-input');
+        if (!input) return;
         const text = input.value.trim();
-        if (!text && !pendingFileData) return;
-        if (text.length < 2 && !pendingFileData) { alert('Pesan terlalu pendek'); return; }
+        const useFile = !inline && !!pendingFileData;
+        if (!text && !useFile) return;
+        if (text.length < 2 && !useFile) { alert('Pesan terlalu pendek'); return; }
         const msg = {
             id: 'msg_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
-            parentId: replyToId,
+            parentId: inline ? replyToId : null,
             name: chatUser.name,
             email: chatUser.email,
             bani: chatUser.bani,
@@ -10203,7 +10292,7 @@
             text,
             ts: Date.now()
         };
-        if (pendingFileData) { msg.image = pendingFileData; msg.fileName = pendingFileName; }
+        if (useFile) { msg.image = pendingFileData; msg.fileName = pendingFileName; }
         if (typeof useFirebase !== 'undefined' && useFirebase && db && fsFns) {
             try {
                 const { id, ...msgData } = msg;
@@ -10220,15 +10309,41 @@
             saveMessages(arr);
         }
         input.value = '';
-        clearFilePreview();
-        cancelReply();
-        renderMessages();
-        // auto scroll
-        setTimeout(()=>{ const c=document.getElementById('chat-messages'); c.scrollTop=c.scrollHeight; }, 60);
+        if (inline) {
+            replyToId = null;
+            replyDraft = '';
+            renderMessages();
+        } else {
+            clearFilePreview();
+            renderMessages();
+            // auto scroll ke pesan terbaru
+            setTimeout(()=>{ const c=document.getElementById('chat-messages'); c.scrollTop=c.scrollHeight; }, 60);
+        }
     }
-        function renderMessages() {
+
+    // Cari pesan paling atas (induk) dari sebuah rantai balasan
+    function getThreadRootId(id, visMap) {
+        let cur = visMap[id], guard = 0;
+        while (cur && cur.parentId && visMap[cur.parentId] && guard++ < 50) cur = visMap[cur.parentId];
+        return cur ? cur.id : id;
+    }
+
+    function renderMessages() {
         const container = document.getElementById('chat-messages');
         if (!container) return;
+
+        // Simpan dulu ketikan balasan (dan fokusnya) supaya tidak hilang saat chat di-render ulang
+        const oldTa = document.getElementById('inline-reply-input');
+        let hadFocus = false, selS = 0, selE = 0;
+        if (oldTa) {
+            replyDraft = oldTa.value;
+            hadFocus = (document.activeElement === oldTa);
+            selS = oldTa.selectionStart; selE = oldTa.selectionEnd;
+        }
+        const prevScroll = container.scrollTop;
+        const wasAtBottom = (container.scrollHeight - prevScroll - container.clientHeight) < 80;
+        const firstRender = container.dataset.rendered !== '1';
+
         let msgs = typeof getAllMessages === 'function' ? getAllMessages() : (typeof getMessages === 'function' ? getMessages() : []);
         if (typeof updateChatNotifBadge === 'function') updateChatNotifBadge();
         // hapus sys messages biar fokus chat user saja
@@ -10237,25 +10352,41 @@
         // batasi 100 terakhir biar tidak macet
         if (msgs.length > 100) msgs = msgs.slice(msgs.length-100);
         if (msgs.length === 0) {
+            replyToId = null; replyDraft = '';
             container.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8; font-size:0.72rem;">Belum ada chat.<br>Tulis pesan pertama! 💬</div>';
+            container.dataset.rendered = '1';
             const ce = document.getElementById('chat-count');
             if (ce) ce.textContent = '0 pesan';
             return;
         }
-        const map = {};
-        (typeof getAllMessages === 'function' ? getAllMessages() : msgs).forEach(m=>map[m.id]=m);
-        let htmlOut = '';
+        const allMap = {};
+        (typeof getAllMessages === 'function' ? getAllMessages() : msgs).forEach(m=>allMap[m.id]=m);
+        const visMap = {};
+        msgs.forEach(m=>visMap[m.id]=m);
+        const isAdmin = typeof isAdminUser === 'function' ? isAdminUser(chatUser) : false;
+
+        // Kalau pesan yang sedang dibalas sudah hilang (dihapus) atau user sudah keluar -> tutup kotak balasan
+        if (replyToId && (!visMap[replyToId] || !chatUser)) { replyToId = null; replyDraft = ''; }
+        const replyRootId = replyToId ? getThreadRootId(replyToId, visMap) : null;
+
+        // Kelompokkan: pesan utama + balasan-balasannya (semua balasan masuk ke bingkai pesan utama)
+        const threads = {};
+        const tops = [];
         msgs.forEach(m=>{
+            const rid = getThreadRootId(m.id, visMap);
+            if (rid === m.id) tops.push(m);
+            else (threads[rid] = threads[rid] || []).push(m);
+        });
+
+        function itemHtml(m, isReply, rootId) {
             const isMe = chatUser && m.email && chatUser.email === m.email;
-            const isAdmin = typeof isAdminUser === 'function' ? isAdminUser(chatUser) : false;
             let parentHtml = '';
-            if (m.parentId && map[m.parentId]) {
-                const p = map[m.parentId];
-                parentHtml = `<div class="reply-preview">↳ ${escapeHtml(p.name)}: ${escapeHtml(p.text.slice(0,50))}</div>`;
+            // Tampilkan "membalas siapa" hanya bila bukan membalas pesan utama di bingkai yang sama
+            if (m.parentId && allMap[m.parentId] && (!isReply || m.parentId !== rootId)) {
+                const p = allMap[m.parentId];
+                parentHtml = `<div class="reply-preview">↳ ${escapeHtml(p.name)}: ${escapeHtml((p.text||'').slice(0,50))}</div>`;
             }
-            // SIMPLE: avatar di kiri, nama + waktu relatif, bani di kanan
-            htmlOut += `<div class="chat-msg ${m.parentId?'reply':''}" style="${isMe?'border-color:#93c5fd; background:#eff6ff;':''}">
-                ${parentHtml}
+            return `${parentHtml}
                 <div style="display:flex; gap:8px; align-items:flex-start;">
                     ${renderAvatarHtml(m.name, m.email, getEffectivePhoto(m.email, m.photoUrl))}
                     <div style="flex:1; min-width:0;">
@@ -10272,30 +10403,75 @@
                             ${(isMe||isAdmin)?`<button onclick="deleteMessage('${m.id}')" style="background:none; border:none; font-size:0.68rem; font-weight:700; color:${isAdmin && !isMe ? '#7c3aed' : '#dc2626'}; cursor:pointer;">${isAdmin && !isMe ? '🛡️ Hapus' : '🗑️ Hapus'}</button>`:''}
                         </div>
                     </div>
-                </div>
+                </div>`;
+        }
+
+        let htmlOut = '';
+        tops.forEach(m=>{
+            const isMe = chatUser && m.email && chatUser.email === m.email;
+            const replies = threads[m.id] || [];
+            let repliesHtml = '';
+            if (replies.length) {
+                repliesHtml = `<div class="thread-replies">` + replies.map(r=>{
+                    const rMe = chatUser && r.email && chatUser.email === r.email;
+                    return `<div class="thread-reply${rMe?' is-me':''}${r.id===replyToId?' is-reply-target':''}">${itemHtml(r, true, m.id)}</div>`;
+                }).join('') + `</div>`;
+            }
+            let composerHtml = '';
+            if (replyToId && m.id === replyRootId) {
+                composerHtml = `<div class="inline-reply-box">
+                    <div class="inline-reply-label"><span>↩️ Membalas <b>${escapeHtml(visMap[replyToId].name)}</b></span><button onclick="cancelReply()" title="Batal">✕</button></div>
+                    <textarea id="inline-reply-input" placeholder="Tulis balasan... (Enter kirim, Shift+Enter baris baru)"></textarea>
+                    <div class="inline-reply-actions"><button class="send" onclick="sendMessage(true)">KIRIM BALASAN</button><button onclick="cancelReply()">BATAL</button></div>
+                </div>`;
+            }
+            htmlOut += `<div class="chat-msg${m.id===replyToId?' is-reply-target':''}" id="thread-${m.id}" style="${isMe?'border-color:#93c5fd; background:#eff6ff;':''}">
+                ${itemHtml(m, false, m.id)}
+                ${repliesHtml}
+                ${composerHtml}
             </div>`;
         });
         container.innerHTML = htmlOut;
-        container.scrollTop = container.scrollHeight;
+        container.dataset.rendered = '1';
+
+        // Posisi scroll: ke bawah kalau pertama kali / user memang sedang di bawah, selain itu jangan digeser
+        if (firstRender || wasAtBottom || container.clientHeight === 0) container.scrollTop = container.scrollHeight;
+        else container.scrollTop = prevScroll;
+
+        const ta = document.getElementById('inline-reply-input');
+        if (ta) {
+            ta.value = replyDraft;
+            ta.addEventListener('input', ()=>{ replyDraft = ta.value; });
+            ta.addEventListener('keydown', (e)=>{
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(true); }
+                else if (e.key === 'Escape') { cancelReply(); }
+            });
+            if (hadFocus) {
+                ta.focus({ preventScroll: true });
+                try { ta.setSelectionRange(selS, selE); } catch(_) {}
+            }
+        }
         const ce = document.getElementById('chat-count');
         if (ce) ce.textContent = msgs.length + ' pesan';
     }
     function replyMessage(id) {
         if (!chatUser) { showLoginForm(); return; }
-        const msgs = getMessages();
-        const m = msgs.find(x=>x.id===id);
+        const list = typeof getAllMessages === 'function' ? getAllMessages() : getMessages();
+        const m = list.find(x=>x.id===id);
         if (!m) return;
         replyToId = id;
-        const preview = document.getElementById('reply-preview');
-        const txt = document.getElementById('reply-text');
-        txt.textContent = 'Membalas ' + m.name + ': ' + m.text.slice(0,50);
-        preview.style.display = 'flex';
-        document.getElementById('chat-input').focus();
+        renderMessages();
+        // kotak balasan muncul di dalam bingkai chat yang dibalas -> langsung fokus & tampilkan
+        const ta = document.getElementById('inline-reply-input');
+        if (ta) {
+            ta.focus({ preventScroll: true });
+            ta.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
     }
     function cancelReply() {
         replyToId = null;
-        const preview = document.getElementById('reply-preview');
-        if (preview) preview.style.display = 'none';
+        replyDraft = '';
+        if (typeof renderMessages === 'function') renderMessages();
     }
     async function deleteMessage(id) {
         if (!confirm('Hapus pesan ini?')) return;
