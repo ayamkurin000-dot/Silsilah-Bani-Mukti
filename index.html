@@ -1486,7 +1486,7 @@
         <div class="chat-header">
             <span>💬 CHAT & SARAN BANI MUKTI</span>
             <span style="display:flex; align-items:center; gap:6px;">
-                <small id="chat-version" title="Versi kode chat" style="font-size:0.55rem; color:#94a3b8; font-weight:700; border:1px solid #cbd5e1; border-radius:6px; padding:1px 4px;">v6</small>
+                <small id="chat-version" title="Versi kode chat" style="font-size:0.55rem; color:#94a3b8; font-weight:700; border:1px solid #cbd5e1; border-radius:6px; padding:1px 4px;">v7</small>
                 <small id="chat-count">0 pesan</small>
             </span>
         </div>
@@ -10288,8 +10288,7 @@
         if (text.length < 2 && !useFile) { alert('Pesan terlalu pendek'); return; }
         const msg = {
             id: 'msg_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
-            // Kalau tombol Balas sedang aktif, kirim dari kotak mana pun tetap jadi balasan (masuk bingkai yang dibalas)
-            parentId: replyToId || null,
+            parentId: inline ? replyToId : null,
             name: chatUser.name,
             email: chatUser.email,
             bani: chatUser.bani,
@@ -10317,8 +10316,7 @@
         }
         input.value = '';
         const wasReply = !!msg.parentId;
-        replyToId = null;
-        replyDraft = '';
+        if (inline) { replyToId = null; replyDraft = ''; }
         if (useFile) clearFilePreview();
         renderMessages();
         // auto scroll ke pesan terbaru (hanya untuk pesan baru, bukan balasan)
@@ -10330,6 +10328,12 @@
         let cur = visMap[id], guard = 0;
         while (cur && cur.parentId && visMap[cur.parentId] && guard++ < 50) cur = visMap[cur.parentId];
         return cur ? cur.id : id;
+    }
+
+    // Saat sedang membalas, kotak ketik bawah disembunyikan supaya hanya ada SATU kotak balasan (di dalam bingkai)
+    function syncInputArea() {
+        const area = document.getElementById('chat-input-area');
+        if (area) area.style.display = replyToId ? 'none' : '';
     }
 
     function renderMessages() {
@@ -10357,6 +10361,7 @@
         if (msgs.length > 100) msgs = msgs.slice(msgs.length-100);
         if (msgs.length === 0) {
             replyToId = null; replyDraft = '';
+            syncInputArea();
             container.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8; font-size:0.72rem;">Belum ada chat.<br>Tulis pesan pertama! 💬</div>';
             container.dataset.rendered = '1';
             const ce = document.getElementById('chat-count');
@@ -10457,8 +10462,7 @@
         }
         const ce = document.getElementById('chat-count');
         if (ce) ce.textContent = msgs.length + ' pesan';
-        const mainTa = document.getElementById('chat-input');
-        if (mainTa) mainTa.placeholder = replyToId ? ('Membalas ' + visMap[replyToId].name + '... (ketik di sini atau di kotak balasan)') : 'Tulis pesan... (Enter kirim)';
+        syncInputArea();
     }
     function replyMessage(id) {
         if (!chatUser) { pendingReplyId = id; showLoginForm(); return; }
