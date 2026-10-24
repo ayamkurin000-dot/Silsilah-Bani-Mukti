@@ -9132,6 +9132,43 @@
                 drawRealisticBattery(d3.select(this), w, h, type);
             });
 
+        // ===== NOMOR URUT ANAK: badge kecil di pojok kiri atas setiap kartu anak =====
+        // Nomor mengikuti urutan anak di dalam array children milik orang tua,
+        // sehingga tetap konsisten saat cabang dilipat atau dibuka.
+        const childOrderBadge = nodeEnter.filter(d => !!d.parent)
+            .append('g')
+            .attr('class', 'child-order-badge')
+            .style('pointer-events', 'none');
+
+        childOrderBadge.each(function(d) {
+            const w = (d.data.name === 'H. ABDUL MUKTI') ? founderCardWidth :
+                (d.data.name === 'MOH. SATHORI') ? rootCardWidth : getCardW(d);
+            const h = (d.data.name === 'H. ABDUL MUKTI') ? founderCardHeight :
+                (d.data.name === 'MOH. SATHORI') ? rootCardHeight : getCardH(d);
+            const siblings = (d.parent.data && Array.isArray(d.parent.data.children))
+                ? d.parent.data.children : [];
+            const index = siblings.indexOf(d.data);
+            const number = index >= 0 ? index + 1 : (d.parent.children || []).indexOf(d) + 1;
+            const badge = d3.select(this)
+                .attr('transform', `translate(9,${-h / 2 + 9})`);
+
+            badge.append('circle')
+                .attr('r', 8)
+                .attr('fill', '#1e3a8a')
+                .attr('stroke', '#ffffff')
+                .attr('stroke-width', 1.2)
+                .attr('opacity', 0.96);
+
+            badge.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('dominant-baseline', 'central')
+                .style('font-size', '9px')
+                .style('font-weight', '800')
+                .style('font-family', 'Arial, sans-serif')
+                .style('fill', '#ffffff')
+                .text(number);
+        });
+
         // ===== INDIKATOR "+" (menandakan masih ada cabang/anak di bawahnya) =====
         const toggleIndicator = nodeEnter.append('g')
             .attr('class', 'toggle-indicator')
