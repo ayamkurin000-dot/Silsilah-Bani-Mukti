@@ -130,8 +130,16 @@
             align-items: center;
             gap: 8px;
             flex: 1 1 auto;
-            max-width: 340px;
+            max-width: 440px;
             min-width: 150px;
+        }
+        #quran-btn {
+            background: #166534;
+            color: #ffffff;
+            white-space: nowrap;
+        }
+        #quran-btn:hover {
+            background: #14532d;
         }
         #search-container {
             position: relative;
@@ -1451,6 +1459,7 @@
                 <input type="text" id="search-input" placeholder="cari nama (min. 3 huruf)..." autocomplete="off">
                 <div id="search-results"></div>
             </div>
+            <button class="btn" id="quran-btn" onclick="window.location.href='https://ayamkurin000-dot.github.io/mushaf-alquran/'">QUR'AN</button>
             <button class="btn" id="wali9-btn" onclick="window.location.href='https://ayamkurin000-dot.github.io/Maulana-Ishaq/'">WALI 9</button>
         </div>
         <div class="controls">
