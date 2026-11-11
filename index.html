@@ -8661,6 +8661,7 @@
     }
 
     function fitToView(duration) {
+        if (window.innerWidth < 100 || window.innerHeight < 100) return; // jendela (PWA) belum selesai diukur
         const bbox = computeVisibleBBox();
         if (!isFinite(bbox.width) || !isFinite(bbox.height) || bbox.width <= 0 || bbox.height <= 0) return;
         const padding = 30;
@@ -8674,10 +8675,44 @@
         scale = Math.max(scale, 0.25);
         const tx = (curW - bbox.width * scale) / 2 - bbox.x * scale;
         const ty = headerOffset + (availH - bbox.height * scale) / 2 - bbox.y * scale;
-        svg.transition().duration(duration).call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+        const t = d3.zoomIdentity.translate(tx, ty).scale(scale);
+        if (!duration) {
+            // Tanpa animasi: terapkan LANGSUNG (sinkron). Dulu lewat transition 0 ms yang baru
+            // jalan di frame berikutnya, sehingga bisa terlewat/terputus saat halaman masih memuat.
+            svg.call(zoom.transform, t);
+        } else {
+            svg.transition().duration(duration).call(zoom.transform, t);
+        }
     }
 
     fitToView(0);
+
+    // ---- PERBAIKAN MODE PWA ----
+    // Di PWA / HP, ukuran jendela sering belum final saat script pertama jalan (bisa 0 atau
+    // salah), sehingga kartu mengecil/hilang dan tangan "Ketuk di sini" pindah ke pojok kiri atas.
+    // Solusi: ukur ulang & atur ulang tampilan awal tiap ukuran jendela berubah / halaman tampil
+    // kembali, sampai pengguna menyentuh layar untuk pertama kali.
+    let initialFitLocked = false;
+    function syncSvgSize() {
+        if (window.innerWidth < 100 || window.innerHeight < 100) return false;
+        svg.attr('width', window.innerWidth).attr('height', window.innerHeight);
+        return true;
+    }
+    function refitInitial() {
+        if (!syncSvgSize()) return;          // ukuran svg selalu ikut jendela (juga saat HP diputar)
+        if (initialFitLocked) return;        // tampilan awal dikunci setelah pengguna menyentuh layar
+        fitToView(0);
+        positionRootTapHint();
+        positionNuLogoSplash();
+    }
+    window.addEventListener('pointerdown', function () { initialFitLocked = true; }, { capture: true, passive: true });
+    window.addEventListener('wheel', function () { initialFitLocked = true; }, { capture: true, passive: true });
+    window.addEventListener('resize', refitInitial);
+    window.addEventListener('orientationchange', function () { setTimeout(refitInitial, 150); });
+    window.addEventListener('pageshow', refitInitial);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) refitInitial(); });
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', refitInitial);
+    [0, 150, 400, 900, 1600, 3000].forEach(function (ms) { setTimeout(refitInitial, ms); });
 
     // ============================================================
     // HINT AWAL: arahkan user untuk mengetuk shape H. ABDUL MUKTI (root)
@@ -8688,6 +8723,7 @@
         const founderShape = document.querySelector('.node-founder .node-shape');
         if (!founderShape) return;
         const rect = founderShape.getBoundingClientRect();
+        if (!rect.width || !rect.height) return; // belum terukur -> jangan taruh di pojok kiri atas
         hintEl.style.left = (rect.left + rect.width / 2) + 'px';
         hintEl.style.top = (rect.top - 8) + 'px';
         hintEl.style.display = 'flex';
