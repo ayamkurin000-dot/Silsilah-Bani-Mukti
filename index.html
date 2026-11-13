@@ -8451,6 +8451,7 @@
     // Lebar & posisi gelang hijau di ujung kanan kartu
     const BRACELET_W = 12;
     const BRACELET_RIGHT_GAP = 14;                       // jarak tepi kanan gelang ke ujung kartu
+    const KNOT_OFFSET = 16;                              // pusat simpul, di kanan ujung kartu
     const BRACELET_TEXT_RESERVE = BRACELET_W + BRACELET_RIGHT_GAP + 4; // ruang yang disisakan untuk teks
 
     // Gambar 1 kartu "kapsul 3D glossy" lengkap: bayangan + badan 1 warna + (gelang) + kilau.
@@ -8522,35 +8523,72 @@
             .attr('fill', gradUrl('capsule-gloss')).attr('pointer-events', 'none')
             .attr('clip-path', roundedClip(gInset, gy, gw, gh, gh / 2));
 
-        // GELANG HIJAU = tali yang mengikat kartu, menonjol keluar dari badan
-        // (atas & bawah). Warna SOLID + rect polos + clipPath (aman di HP).
-        if (hasBracelet) {
+        // GELANG TALI di ujung kanan kartu, menonjol keluar dari badan (atas & bawah):
+        //  - punya keturunan  -> HIJAU + tali memanjang ke kanan berujung SIMPUL (pengganti tanda "+")
+        //  - belum punya anak -> MERAH, tanpa tali simpul
+        // Semua isian = warna SOLID, rect polos + clipPath, garis = stroke (aman di HP).
+        {
+            const pal = hasBracelet
+                ? { base: '#16a34a', dark: '#14532d', light: '#86efac', line: '#052e16' }
+                : { base: '#dc2626', dark: '#7f1d1d', light: '#fca5a5', line: '#450a0a' };
             const bx = w - BRACELET_RIGHT_GAP - BRACELET_W;
             const out = 3.5;
             const by = -h / 2 - out, bh = h + out * 2;
             const bClip = roundedClip(bx, by, BRACELET_W, bh, 3.5);
             const bg = g.append('g').attr('class', 'bracelet').attr('pointer-events', 'none');
-            const fillRect = (x, y, rw, rh, color, op) => bg.append('rect')
-                .attr('x', x).attr('y', y).attr('width', rw).attr('height', rh)
-                .attr('fill', color).attr('opacity', op).attr('clip-path', bClip);
-            fillRect(bx - 1.5, -h / 2 + 1, BRACELET_W + 3, h, '#000000', 0.12); // bayangan (di luar klip, tipis)
-            bg.select('rect:last-child').attr('clip-path', null);
-            fillRect(bx, by, BRACELET_W, bh, '#16a34a', 1);              // badan tali
-            fillRect(bx, by, 3.5, bh, '#14532d', 0.55);                  // sisi kiri gelap
-            fillRect(bx + BRACELET_W - 3.5, by, 3.5, bh, '#14532d', 0.45); // sisi kanan gelap
-            fillRect(bx + 3.5, by, 3, bh, '#86efac', 0.75);              // tengah terang
-            fillRect(bx + 4, by, 1.6, bh, '#ffffff', 0.55);              // kilau tipis
-            // pilinan tali: satu <path> garis diagonal
+            const fillRect = (x, y, rw, rh, color, op, clip) => {
+                const el = bg.append('rect')
+                    .attr('x', x).attr('y', y).attr('width', rw).attr('height', rh)
+                    .attr('fill', color).attr('opacity', op);
+                if (clip !== false) el.attr('clip-path', bClip);
+                return el;
+            };
+
+            // ---- tali panjang + simpul (hanya kartu yang punya keturunan) ----
+            if (hasBracelet) {
+                const x0 = bx + BRACELET_W - 2;      // mulai dari gelang
+                const kx = w + KNOT_OFFSET;           // pusat simpul
+                const ropePath = `M ${x0},0 C ${x0 + 8},3 ${kx - 12},-3 ${kx - 3},0`;
+                const dot = (cx, cy, size, color, op) => bg.append('path')
+                    .attr('d', `M ${cx},${cy} L ${cx},${cy + 0.01}`).attr('fill', 'none')
+                    .attr('stroke', color).attr('stroke-width', size).attr('stroke-linecap', 'round')
+                    .attr('stroke-opacity', op === undefined ? 1 : op);
+                const strand = (d, size, color, op) => bg.append('path')
+                    .attr('d', d).attr('fill', 'none').attr('stroke', color)
+                    .attr('stroke-width', size).attr('stroke-linecap', 'round')
+                    .attr('stroke-opacity', op === undefined ? 1 : op);
+                // ujung tali yang menjuntai (di belakang simpul)
+                const tail1 = `M ${kx + 1},0 Q ${kx + 9},-3 ${kx + 15},-10`;
+                const tail2 = `M ${kx + 1},0 Q ${kx + 10},4 ${kx + 16},11`;
+                [tail1, tail2].forEach(d => { strand(d, 6.2, pal.line, 0.85); });
+                strand(ropePath, 6.2, pal.line, 0.85);
+                [tail1, tail2].forEach(d => { strand(d, 4, pal.base); strand(d, 1.2, pal.light, 0.8); });
+                strand(ropePath, 4, pal.base);
+                strand(ropePath, 1.3, pal.light, 0.8);
+                // simpul
+                dot(kx, 0, 14, pal.line, 0.9);
+                dot(kx, 0, 11, pal.base);
+                dot(kx - 1.5, -2, 4.5, pal.light, 0.85);
+                strand(`M ${kx - 4},-3 Q ${kx},1 ${kx + 4},-3`, 1.1, pal.line, 0.6);
+                strand(`M ${kx - 4},2 Q ${kx},6 ${kx + 4},2`, 1.1, pal.line, 0.6);
+            }
+
+            fillRect(bx - 1.5, -h / 2 + 1, BRACELET_W + 3, h, '#000000', 0.12, false); // bayangan
+            fillRect(bx, by, BRACELET_W, bh, pal.base, 1);                  // badan tali
+            fillRect(bx, by, 3.5, bh, pal.dark, 0.55);                      // sisi kiri gelap
+            fillRect(bx + BRACELET_W - 3.5, by, 3.5, bh, pal.dark, 0.45);   // sisi kanan gelap
+            fillRect(bx + 3.5, by, 3, bh, pal.light, 0.75);                 // tengah terang
+            fillRect(bx + 4, by, 1.6, bh, '#ffffff', 0.55);                 // kilau tipis
             let twist = '';
             for (let ty = by + 3; ty < by + bh - 2; ty += 5) {
                 twist += `M ${bx + 1},${ty + 3} L ${bx + BRACELET_W - 1},${ty} `;
             }
             bg.append('path').attr('d', twist).attr('fill', 'none')
-                .attr('stroke', '#052e16').attr('stroke-width', 1).attr('stroke-opacity', 0.5);
-            bg.append('rect') // garis tepi (stroke saja, tanpa isian)
+                .attr('stroke', pal.line).attr('stroke-width', 1).attr('stroke-opacity', 0.5);
+            bg.append('rect') // garis tepi (stroke saja)
                 .attr('x', bx).attr('y', by).attr('width', BRACELET_W).attr('height', bh)
                 .attr('rx', 3.5).attr('fill', 'none')
-                .attr('stroke', '#052e16').attr('stroke-width', 0.9).attr('stroke-opacity', 0.7);
+                .attr('stroke', pal.line).attr('stroke-width', 0.9).attr('stroke-opacity', 0.7);
         }
     }
 
@@ -9088,7 +9126,7 @@
         if (SPECIAL_NODES_TOP.includes(d.data.name)) return null;
         const label = getNameLifeLabel(d);
         if (!label.includes(' ')) return null;
-        const rightPad = (d.children || d._children) ? (BRACELET_W + BRACELET_RIGHT_GAP + 6) : 14; // ruang gelang hijau
+        const rightPad = BRACELET_W + BRACELET_RIGHT_GAP + 6; // ruang gelang (hijau/merah)
         const maxWidth = getCardW(d) - 14 - rightPad;
         const minFontSize = 10, maxFontSize = 16;
         if (measureWidth(label, minFontSize, 700) <= maxWidth) return null;
@@ -9317,7 +9355,7 @@
         // Batas kanan area teks: kartu yang punya gelang hijau menyisakan ruang ekstra
         // di ujung kanan supaya teks tidak menimpa gelang.
         const hasKids = d => !!(d.children || d._children);
-        const textRightPad = d => hasKids(d) ? (BRACELET_W + BRACELET_RIGHT_GAP + 6) : TEXT_PAD_X;
+        const textRightPad = d => (BRACELET_W + BRACELET_RIGHT_GAP + 6); // semua kartu punya gelang (hijau/merah)
 
         // ===== PENYERASI VERTIKAL (rata atas & bawah) =====
         // Urutan baris (dari atas ke bawah, sisi kiri kartu): nama utama →
@@ -9687,9 +9725,10 @@
     function diagonal(s, d) {
         const w1 = (s.data && s.data.name === 'H. ABDUL MUKTI') ? founderCardWidth :
             (s.data && s.data.name === 'MOH. SATHORI') ? rootCardWidth : getCardW(s);
-        return `M ${s.y + w1} ${s.x}
-                    C ${(s.y + w1 + d.y) / 2} ${s.x},
-                      ${(s.y + w1 + d.y) / 2} ${d.x},
+        const x1 = s.y + w1 + KNOT_OFFSET; // garis keluar dari simpul tali
+        return `M ${x1} ${s.x}
+                    C ${(x1 + d.y) / 2} ${s.x},
+                      ${(x1 + d.y) / 2} ${d.x},
                       ${d.y} ${d.x}`;
     }
 
