@@ -8519,16 +8519,32 @@
             bg.append('rect') // bayangan tali di badan
                 .attr('x', bx - 1.5).attr('y', -h / 2 + 1).attr('width', BRACELET_W + 3).attr('height', h)
                 .attr('rx', 3).attr('fill', '#000').attr('opacity', 0.12);
-            bg.append('rect')
-                .attr('x', bx).attr('y', -h / 2 - out).attr('width', BRACELET_W).attr('height', h + out * 2)
-                .attr('rx', 3.5).attr('fill', gradUrl('grad-bracelet'))
+            const by = -h / 2 - out, bh = h + out * 2;
+            // CATATAN: gelang SENGAJA memakai warna SOLID (tanpa gradasi/pattern url(#..))
+            // karena di sebagian HP Android isian url(#id) gagal & hanya garis tepi yang tampil.
+            bg.append('rect') // badan tali
+                .attr('x', bx).attr('y', by).attr('width', BRACELET_W).attr('height', bh)
+                .attr('rx', 3.5).attr('fill', '#16a34a')
                 .attr('stroke', '#052e16').attr('stroke-width', 0.9).attr('stroke-opacity', 0.7);
-            bg.append('rect')
-                .attr('x', bx).attr('y', -h / 2 - out).attr('width', BRACELET_W).attr('height', h + out * 2)
-                .attr('rx', 3.5).attr('fill', 'url(#rope-twist)');
-            bg.append('rect') // kilau tipis pada tali
-                .attr('x', bx + 2.5).attr('y', -h / 2 - out + 2).attr('width', 2).attr('height', h + out * 2 - 4)
-                .attr('rx', 1).attr('fill', '#ffffff').attr('opacity', 0.45);
+            bg.append('rect') // sisi kiri gelap (efek bulat)
+                .attr('x', bx + 0.5).attr('y', by + 1).attr('width', 3).attr('height', bh - 2)
+                .attr('rx', 1.5).attr('fill', '#14532d').attr('opacity', 0.55);
+            bg.append('rect') // sisi kanan gelap
+                .attr('x', bx + BRACELET_W - 3.5).attr('y', by + 1).attr('width', 3).attr('height', bh - 2)
+                .attr('rx', 1.5).attr('fill', '#14532d').attr('opacity', 0.45);
+            bg.append('rect') // bagian terang di tengah
+                .attr('x', bx + 3.5).attr('y', by + 1).attr('width', 3).attr('height', bh - 2)
+                .attr('rx', 1.5).attr('fill', '#86efac').attr('opacity', 0.75);
+            // pilinan tali: satu <path> berisi banyak garis diagonal
+            let twist = '';
+            for (let ty = by + 3; ty < by + bh - 2; ty += 5) {
+                twist += `M ${bx + 1},${ty + 3} L ${bx + BRACELET_W - 1},${ty} `;
+            }
+            bg.append('path').attr('d', twist).attr('fill', 'none')
+                .attr('stroke', '#052e16').attr('stroke-width', 1).attr('stroke-opacity', 0.5);
+            bg.append('rect') // kilau tipis
+                .attr('x', bx + 4).attr('y', by + 2).attr('width', 1.6).attr('height', bh - 4)
+                .attr('rx', 0.8).attr('fill', '#ffffff').attr('opacity', 0.55);
         }
     }
 
