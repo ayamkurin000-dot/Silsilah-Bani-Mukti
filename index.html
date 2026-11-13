@@ -8425,10 +8425,17 @@
 
     // GELANG HIJAU (penanda kartu yang punya keturunan) - bergradasi silinder juga
     const braceletGrad = defs.append('linearGradient').attr('id', 'grad-bracelet')
-        .attr('x1', '0%').attr('y1', '0%').attr('x2', '0%').attr('y2', '100%');
+        .attr('x1', '0%').attr('y1', '0%').attr('x2', '100%').attr('y2', '0%');
+    // pola pilinan tali (garis diagonal tipis)
+    const ropePat = defs.append('pattern').attr('id', 'rope-twist')
+        .attr('patternUnits', 'userSpaceOnUse').attr('width', 12).attr('height', 5);
+    ropePat.append('path').attr('d', 'M -1,4.2 L 13,0.8').attr('stroke', '#052e16')
+        .attr('stroke-width', 1).attr('opacity', 0.45).attr('fill', 'none');
+    ropePat.append('path').attr('d', 'M -1,2.6 L 13,-0.8').attr('stroke', '#bbf7d0')
+        .attr('stroke-width', 0.7).attr('opacity', 0.35).attr('fill', 'none');
     [
-        { off: '0%', c: '#14532d' }, { off: '16%', c: '#4ade80' }, { off: '45%', c: '#16a34a' },
-        { off: '82%', c: '#166534' }, { off: '100%', c: '#052e16' }
+        { off: '0%', c: '#14532d' }, { off: '25%', c: '#4ade80' }, { off: '50%', c: '#16a34a' },
+        { off: '80%', c: '#15803d' }, { off: '100%', c: '#052e16' }
     ].forEach(s => braceletGrad.append('stop').attr('offset', s.off).attr('stop-color', s.c));
 
     // Fix bug browser: fill="url(#id)" bisa gagal di-resolve (shape jadi
@@ -8438,9 +8445,8 @@
     const PAGE_URL = '';
     function gradUrl(id) { return `url(#${id})`; }
 
-    // Jari-jari ujung kapsul: bulat penuh (setengah tinggi) tapi dibatasi 30px
-    // supaya kartu yang tinggi (3-4 baris) tidak terlalu "gembung" & teks tidak terpotong.
-    const CAPSULE_MAX_R = 30;
+    // Sudut kartu: hampir kotak, hanya sedikit melengkung (maks 9px).
+    const CAPSULE_MAX_R = 9;
     function capsuleRadius(w, h) { return Math.min(CAPSULE_MAX_R, h / 2, w / 2); }
     // Lebar & posisi gelang hijau di ujung kanan kartu
     const BRACELET_W = 12;
@@ -8494,21 +8500,6 @@
             .attr('width', w - r).attr('height', rimH).attr('rx', rimH / 2)
             .attr('fill', gradUrl('capsule-rim')).attr('pointer-events', 'none');
 
-        // GELANG HIJAU di ujung kanan (hanya untuk kartu yang punya keturunan)
-        if (hasBracelet) {
-            const bx = w - BRACELET_RIGHT_GAP - BRACELET_W;
-            g.append('rect').attr('class', 'bracelet')
-                .attr('x', bx).attr('y', -h / 2).attr('width', BRACELET_W).attr('height', h)
-                .attr('fill', gradUrl('grad-bracelet'))
-                .attr('clip-path', clipRef);
-            [bx, bx + BRACELET_W].forEach(lx => {
-                g.append('rect')
-                    .attr('x', lx - 0.4).attr('y', -h / 2).attr('width', 0.8).attr('height', h)
-                    .attr('fill', '#052e16').attr('opacity', 0.45).attr('pointer-events', 'none')
-                    .attr('clip-path', clipRef);
-            });
-        }
-
         // Garis kilau putih memanjang di bagian atas (melintasi gelang juga)
         const gh = Math.max(5, Math.min(h * 0.24, 16));
         const gy = -h / 2 + Math.max(3, h * 0.07);
@@ -8518,6 +8509,27 @@
             .attr('x', gInset).attr('y', gy)
             .attr('width', Math.max(10, w - gInset * 2)).attr('height', gh).attr('rx', gh / 2)
             .attr('fill', gradUrl('capsule-gloss')).attr('pointer-events', 'none');
+
+        // GELANG HIJAU = tali yang mengikat kartu, dibuat menonjol keluar dari
+        // badan (atas & bawah) supaya terlihat melingkar. Tanpa clip-path.
+        if (hasBracelet) {
+            const bx = w - BRACELET_RIGHT_GAP - BRACELET_W;
+            const out = 3.5;
+            const bg = g.append('g').attr('class', 'bracelet').attr('pointer-events', 'none');
+            bg.append('rect') // bayangan tali di badan
+                .attr('x', bx - 1.5).attr('y', -h / 2 + 1).attr('width', BRACELET_W + 3).attr('height', h)
+                .attr('rx', 3).attr('fill', '#000').attr('opacity', 0.12);
+            bg.append('rect')
+                .attr('x', bx).attr('y', -h / 2 - out).attr('width', BRACELET_W).attr('height', h + out * 2)
+                .attr('rx', 3.5).attr('fill', gradUrl('grad-bracelet'))
+                .attr('stroke', '#052e16').attr('stroke-width', 0.9).attr('stroke-opacity', 0.7);
+            bg.append('rect')
+                .attr('x', bx).attr('y', -h / 2 - out).attr('width', BRACELET_W).attr('height', h + out * 2)
+                .attr('rx', 3.5).attr('fill', 'url(#rope-twist)');
+            bg.append('rect') // kilau tipis pada tali
+                .attr('x', bx + 2.5).attr('y', -h / 2 - out + 2).attr('width', 2).attr('height', h + out * 2 - 4)
+                .attr('rx', 1).attr('fill', '#ffffff').attr('opacity', 0.45);
+        }
     }
 
     // Shape polos (farath / plain white) - tanpa gradasi, tetap flat putih
