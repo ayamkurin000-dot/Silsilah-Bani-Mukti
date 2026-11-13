@@ -8493,58 +8493,64 @@
                 .attr('clip-path', clipRef);
         }
 
+        // PENTING: di sebagian HP Android, <rect> ber-"rx" yang punya isian (fill) gagal
+        // tampil (hanya garis tepi / ujung lengkungnya yang terlihat). Jadi semua
+        // elemen berisian di bawah ini berupa rect POLOS yang dibulatkan lewat <clipPath>.
+        function roundedClip(x, y, rw, rh, rr) {
+            const id = cid + '-c' + (__clipSeq++);
+            defs.append('clipPath').attr('id', id)
+                .append('rect').attr('x', x).attr('y', y).attr('width', rw).attr('height', rh).attr('rx', rr);
+            return `url(#${id})`;
+        }
+
         // Pantulan cahaya tipis di dasar kapsul
         const rimH = Math.max(4, h * 0.14);
+        const rimX = r * 0.5, rimY = h / 2 - rimH - 2, rimW = w - r;
         g.append('rect')
-            .attr('x', r * 0.5).attr('y', h / 2 - rimH - 2)
-            .attr('width', w - r).attr('height', rimH).attr('rx', rimH / 2)
-            .attr('fill', gradUrl('capsule-rim')).attr('pointer-events', 'none');
+            .attr('x', rimX).attr('y', rimY).attr('width', rimW).attr('height', rimH)
+            .attr('fill', gradUrl('capsule-rim')).attr('pointer-events', 'none')
+            .attr('clip-path', roundedClip(rimX, rimY, rimW, rimH, rimH / 2));
 
-        // Garis kilau putih memanjang di bagian atas (melintasi gelang juga)
+        // Garis kilau putih memanjang di bagian atas
         const gh = Math.max(5, Math.min(h * 0.24, 16));
         const gy = -h / 2 + Math.max(3, h * 0.07);
         const gInset = Math.max(8, r * 0.62);
+        const gw = Math.max(10, w - gInset * 2);
         g.append('rect')
             .attr('class', 'capsule-gloss')
-            .attr('x', gInset).attr('y', gy)
-            .attr('width', Math.max(10, w - gInset * 2)).attr('height', gh).attr('rx', gh / 2)
-            .attr('fill', gradUrl('capsule-gloss')).attr('pointer-events', 'none');
+            .attr('x', gInset).attr('y', gy).attr('width', gw).attr('height', gh)
+            .attr('fill', gradUrl('capsule-gloss')).attr('pointer-events', 'none')
+            .attr('clip-path', roundedClip(gInset, gy, gw, gh, gh / 2));
 
-        // GELANG HIJAU = tali yang mengikat kartu, dibuat menonjol keluar dari
-        // badan (atas & bawah) supaya terlihat melingkar. Tanpa clip-path.
+        // GELANG HIJAU = tali yang mengikat kartu, menonjol keluar dari badan
+        // (atas & bawah). Warna SOLID + rect polos + clipPath (aman di HP).
         if (hasBracelet) {
             const bx = w - BRACELET_RIGHT_GAP - BRACELET_W;
             const out = 3.5;
-            const bg = g.append('g').attr('class', 'bracelet').attr('pointer-events', 'none');
-            bg.append('rect') // bayangan tali di badan
-                .attr('x', bx - 1.5).attr('y', -h / 2 + 1).attr('width', BRACELET_W + 3).attr('height', h)
-                .attr('rx', 3).attr('fill', '#000').attr('opacity', 0.12);
             const by = -h / 2 - out, bh = h + out * 2;
-            // CATATAN: gelang SENGAJA memakai warna SOLID (tanpa gradasi/pattern url(#..))
-            // karena di sebagian HP Android isian url(#id) gagal & hanya garis tepi yang tampil.
-            bg.append('rect') // badan tali
-                .attr('x', bx).attr('y', by).attr('width', BRACELET_W).attr('height', bh)
-                .attr('rx', 3.5).attr('fill', '#16a34a')
-                .attr('stroke', '#052e16').attr('stroke-width', 0.9).attr('stroke-opacity', 0.7);
-            bg.append('rect') // sisi kiri gelap (efek bulat)
-                .attr('x', bx + 0.5).attr('y', by + 1).attr('width', 3).attr('height', bh - 2)
-                .attr('rx', 1.5).attr('fill', '#14532d').attr('opacity', 0.55);
-            bg.append('rect') // sisi kanan gelap
-                .attr('x', bx + BRACELET_W - 3.5).attr('y', by + 1).attr('width', 3).attr('height', bh - 2)
-                .attr('rx', 1.5).attr('fill', '#14532d').attr('opacity', 0.45);
-            bg.append('rect') // bagian terang di tengah
-                .attr('x', bx + 3.5).attr('y', by + 1).attr('width', 3).attr('height', bh - 2)
-                .attr('rx', 1.5).attr('fill', '#86efac').attr('opacity', 0.75);
-            // pilinan tali: satu <path> berisi banyak garis diagonal
+            const bClip = roundedClip(bx, by, BRACELET_W, bh, 3.5);
+            const bg = g.append('g').attr('class', 'bracelet').attr('pointer-events', 'none');
+            const fillRect = (x, y, rw, rh, color, op) => bg.append('rect')
+                .attr('x', x).attr('y', y).attr('width', rw).attr('height', rh)
+                .attr('fill', color).attr('opacity', op).attr('clip-path', bClip);
+            fillRect(bx - 1.5, -h / 2 + 1, BRACELET_W + 3, h, '#000000', 0.12); // bayangan (di luar klip, tipis)
+            bg.select('rect:last-child').attr('clip-path', null);
+            fillRect(bx, by, BRACELET_W, bh, '#16a34a', 1);              // badan tali
+            fillRect(bx, by, 3.5, bh, '#14532d', 0.55);                  // sisi kiri gelap
+            fillRect(bx + BRACELET_W - 3.5, by, 3.5, bh, '#14532d', 0.45); // sisi kanan gelap
+            fillRect(bx + 3.5, by, 3, bh, '#86efac', 0.75);              // tengah terang
+            fillRect(bx + 4, by, 1.6, bh, '#ffffff', 0.55);              // kilau tipis
+            // pilinan tali: satu <path> garis diagonal
             let twist = '';
             for (let ty = by + 3; ty < by + bh - 2; ty += 5) {
                 twist += `M ${bx + 1},${ty + 3} L ${bx + BRACELET_W - 1},${ty} `;
             }
             bg.append('path').attr('d', twist).attr('fill', 'none')
                 .attr('stroke', '#052e16').attr('stroke-width', 1).attr('stroke-opacity', 0.5);
-            bg.append('rect') // kilau tipis
-                .attr('x', bx + 4).attr('y', by + 2).attr('width', 1.6).attr('height', bh - 4)
-                .attr('rx', 0.8).attr('fill', '#ffffff').attr('opacity', 0.55);
+            bg.append('rect') // garis tepi (stroke saja, tanpa isian)
+                .attr('x', bx).attr('y', by).attr('width', BRACELET_W).attr('height', bh)
+                .attr('rx', 3.5).attr('fill', 'none')
+                .attr('stroke', '#052e16').attr('stroke-width', 0.9).attr('stroke-opacity', 0.7);
         }
     }
 
