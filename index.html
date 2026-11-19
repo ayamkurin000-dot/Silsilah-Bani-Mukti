@@ -154,6 +154,19 @@
         .theme-thumb { width: 100%; height: auto; display: block; background: #fdf8f0; border-radius: 8px; }
         .theme-name { font-size: 0.78rem; font-weight: 700; color: #0f172a; margin-top: 6px; }
         .theme-desc { font-size: 0.64rem; color: #64748b; margin-top: 2px; line-height: 1.3; }
+        #theme-lock {
+            background: #ffffff; width: min(100%, 340px); border-radius: 16px; padding: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+        }
+        #theme-pass {
+            width: 100%; font-size: 1.1rem; letter-spacing: 0.25em; text-align: center; padding: 10px;
+            border: 2px solid #cbd5e1; border-radius: 10px; outline: none; font-family: inherit;
+        }
+        #theme-pass:focus { border-color: #16a34a; }
+        #theme-pass.bad { border-color: #dc2626; animation: tpShake .3s; }
+        @keyframes tpShake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+        #theme-pass-err { min-height: 1.1em; font-size: 0.72rem; color: #dc2626; text-align: center; margin: 6px 0; }
+        .tp-enter { width: 100%; background: #16a34a; padding: 9px 0 !important; font-size: 0.8rem !important; }
         .tp-foot { font-size: 0.64rem; color: #94a3b8; text-align: center; margin-top: 12px; }
         .btn {
             background: #3b82f6;
@@ -1540,6 +1553,20 @@
     </div>
 
     <div id="theme-overlay" onclick="if(event.target===this)closeThemePanel()">
+        <div id="theme-lock" role="dialog" aria-label="Password pengaturan tema" style="display:none;">
+            <div class="tp-head">
+                <div>
+                    <div class="tp-title">🔒 PENGATURAN TEMA</div>
+                    <div class="tp-sub">Masukkan password untuk membuka menu ini</div>
+                </div>
+                <button type="button" class="tp-close" onclick="closeThemePanel()" aria-label="Tutup">✕</button>
+            </div>
+            <input type="password" id="theme-pass" inputmode="numeric" autocomplete="off" placeholder="Password" maxlength="12"
+                   onkeydown="if(event.key==='Enter')submitThemePass()">
+            <div id="theme-pass-err"></div>
+            <button type="button" class="btn tp-enter" onclick="submitThemePass()">MASUK</button>
+            <div class="tp-foot">Password hanya perlu dimasukkan sekali di browser ini.</div>
+        </div>
         <div id="theme-panel" role="dialog" aria-label="Pengaturan tema">
             <div class="tp-head">
                 <div>
@@ -9031,9 +9058,40 @@
             grid.appendChild(btn);
         });
     }
+    // Password menu tema: cukup dimasukkan sekali (disimpan di browser)
+    const THEME_PASS = '21', THEME_UNLOCK_KEY = 'bm-theme-unlocked';
+    let themeUnlockedMem = false;
+    function isThemeUnlocked() {
+        if (themeUnlockedMem) return true;
+        try { return localStorage.getItem(THEME_UNLOCK_KEY) === '1'; } catch (e) { return false; }
+    }
+    function showThemeView() {
+        const open = isThemeUnlocked();
+        document.getElementById('theme-panel').style.display = open ? '' : 'none';
+        document.getElementById('theme-lock').style.display = open ? 'none' : 'block';
+        if (open) buildThemeGrid();
+        else {
+            const inp = document.getElementById('theme-pass');
+            inp.value = ''; inp.classList.remove('bad');
+            document.getElementById('theme-pass-err').textContent = '';
+            setTimeout(() => inp.focus(), 50);
+        }
+    }
+    function submitThemePass() {
+        const inp = document.getElementById('theme-pass');
+        if (inp.value.trim() === THEME_PASS) {
+            themeUnlockedMem = true;
+            try { localStorage.setItem(THEME_UNLOCK_KEY, '1'); } catch (e) {}
+            showThemeView();
+        } else {
+            inp.classList.remove('bad'); void inp.offsetWidth; inp.classList.add('bad');
+            document.getElementById('theme-pass-err').textContent = 'Password salah, coba lagi.';
+            inp.value = ''; inp.focus();
+        }
+    }
     function openThemePanel() {
-        buildThemeGrid();
         document.getElementById('theme-overlay').classList.add('open');
+        showThemeView();
     }
     function closeThemePanel() {
         document.getElementById('theme-overlay').classList.remove('open');
