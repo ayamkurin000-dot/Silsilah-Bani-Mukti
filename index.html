@@ -8631,16 +8631,32 @@
         // Diletakkan di grup sendiri supaya bisa digambar ulang saat tema diganti.
         {
             const orn = g.append('g').attr('class', 'orn-layer').attr('pointer-events', 'none')
-                .attr('data-w', w).attr('data-h', h).attr('data-seed', seedKey || '');
-            drawOrnament(orn, w, h, seedKey);
+                .attr('data-w', w).attr('data-h', h).attr('data-seed', seedKey || '').attr('data-kids', hasBracelet ? '1' : '0');
+            drawOrnament(orn, w, h, seedKey, null, !!hasBracelet);
         }
 
         // BUAH APEL MERAH di ujung kanan kartu -- hanya untuk kartu yang PUNYA keturunan.
         // Digantung pada julur tanaman dari sudut kanan-atas kartu. Kartu tanpa keturunan: tanpa buah.
-        if (hasBracelet) drawApple(g, w, h);
+        // (Apel digambar di dalam lapisan ornamen -> tangkainya menyambung dengan batang tanaman tiap tema.)
     }
 
-    // Apel merah (path/ellipse berisi warna polos -> aman di HP). Pusatnya di (w + 4, 0);
+    // Titik ujung tangkai apel (tempat batang tanaman menyambung) untuk kartu selebar w.
+    function appleStalkPoint(w) { const s = 11.5; return { x: w + 6 + 0.8, y: -s * 1.2 }; }
+    // Julur batang menuju tangkai apel: LANJUTAN langsung dari ujung batang E (searah singgung tx,ty),
+    // jadi digambar dengan warna & tebal batang yang sama -> menyatu tanpa sambungan.
+    function appleTwigPts(E, tx, ty, w) {
+        const T = appleStalkPoint(w), L = Math.hypot(tx, ty) || 1;
+        const p1 = { x: E.x + tx / L * 9, y: E.y + ty / L * 9 };
+        const p2 = { x: T.x + 0.5, y: T.y - Math.min(9, Math.max(3, (T.y - E.y) * .5)) };
+        const out = [];
+        for (let i = 1; i <= 16; i++) {
+            const t = i / 16, u = 1 - t;
+            out.push({ x: u*u*u*E.x + 3*u*u*t*p1.x + 3*u*t*t*p2.x + t*t*t*T.x,
+                       y: u*u*u*E.y + 3*u*u*t*p1.y + 3*u*t*t*p2.y + t*t*t*T.y });
+        }
+        return out;
+    }
+    // Apel merah (path/ellipse berisi warna polos -> aman di HP). Pusatnya di (w + 6, 0);
     // garis penghubung ke anak dimulai dari sisi kanan apel (lihat KNOT_OFFSET).
     function drawApple(g, w, h) {
         const f = n => +n.toFixed(1);
@@ -8651,11 +8667,7 @@
             return `M${P(0, -.55)}C${P(.3, -1.0)} ${P(1.15, -.85)} ${P(1.1, .1)}C${P(1.05, .75)} ${P(.55, 1.1)} ${P(0, .95)}` +
                    `C${P(-.55, 1.1)} ${P(-1.05, .75)} ${P(-1.1, .1)}C${P(-1.15, -.85)} ${P(-.3, -1.0)} ${P(0, -.55)}Z`;
         };
-        const sx = w - 4, sy = top + 1, ex = ax + 0.8, ey = ay - s * 1.2;
-        // julur/ranting dari batang tanaman menuju tangkai apel
-        const twig = `M${f(sx)},${f(sy)}C${f(sx + 5)},${f(sy + 6)} ${f(ex + 3)},${f(ey - 6)} ${f(ex)},${f(ey)}`;
-        ag.append('path').attr('d', twig).attr('fill', 'none').attr('stroke', '#14532d').attr('stroke-width', 3.1).attr('stroke-linecap', 'round');
-        ag.append('path').attr('d', twig).attr('fill', 'none').attr('stroke', '#16a34a').attr('stroke-width', 1.8).attr('stroke-linecap', 'round');
+        const ex = ax + 0.8, ey = ay - s * 1.2;   // ujung tangkai (tempat julur tanaman menyambung)
         // bayangan
         ag.append('path').attr('d', body(ax + 0.9 * k, ay + 1.4 * k, 1)).attr('fill', '#000000').attr('fill-opacity', 0.2);
         // badan apel + kontur
@@ -9009,9 +9021,17 @@
     }
 
     // Gambar satu ornamen ke dalam grup g untuk kartu berukuran w x h (titik 0,0 = tengah-kiri kartu)
-    function drawOrnament(g, w, h, seedKey, themeId) {
+    function drawOrnament(g, w, h, seedKey, themeId, kids) {
         const id = themeId || ORN_THEME;
-        if (id === 'polos' || !w || !h) return;
+        if (!w || !h) return;
+        if (id === 'polos') {   // tanpa ornamen: hanya julur pendek + apel (bila punya keturunan)
+            if (kids) {
+                const E = { x: w - 3, y: -h / 2 + 1 }, P0 = { stemCols: ['#14532d', '#16a34a'] };
+                P0.stemD = ornStemD([E].concat(appleTwigPts(E, 1, 0, w)));
+                ornRender(g, P0); drawApple(g, w, h);
+            }
+            return;
+        }
         const rnd = ornRng(String(seedKey || 'x') + '|' + w + '|' + h);
         let model = id;
         if (id === 'campur') { const pool = ORN_THEMES.map(t => t.id).filter(k => ORN_MODELS[k]); model = pool[Math.floor(rnd() * pool.length)]; }
@@ -9025,7 +9045,13 @@
         };
         const ok = mk(12);
         ornRoutes(M, rnd, w, h, xr, top, bot).forEach((pts, ri) => {
-            P.stemD = (P.stemD || '') + ornStemD(pts);
+            // kartu beranak: batang utama diteruskan (satu jalur, satu warna) sampai ke tangkai apel
+            let stemPts = pts;
+            if (kids && ri === 0) {
+                const e = pts[pts.length - 1], q = pts[Math.max(0, pts.length - 3)];
+                stemPts = pts.concat(appleTwigPts(e, e.x - q.x, e.y - q.y, w));
+            }
+            P.stemD = (P.stemD || '') + ornStemD(stemPts);
             const lf = M.leaf, sc = ri ? 0.78 : 1;
             if (M.bamboo) {
                 let last = -1e9;
@@ -9055,13 +9081,14 @@
             }
         }
         ornRender(g, P);
+        if (kids) drawApple(g, w, h);
     }
 
     function redrawAllOrnaments() {
         gContainer.selectAll('g.orn-layer').each(function () {
             const el = d3.select(this);
             el.selectAll('*').remove();
-            drawOrnament(el, +this.getAttribute('data-w'), +this.getAttribute('data-h'), this.getAttribute('data-seed'));
+            drawOrnament(el, +this.getAttribute('data-w'), +this.getAttribute('data-h'), this.getAttribute('data-seed'), null, this.getAttribute('data-kids') === '1');
         });
     }
     function setOrnTheme(id) {
