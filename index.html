@@ -12114,5 +12114,85 @@ window.addEventListener('load',()=>setTimeout(()=>{ if(!currentRoot) currentRoot
   });
 })();
 </script>
+<!-- ANIMASI DAUN BERGUGURAN (besar, sedang, kecil) - kanvas ringan, tidak menghalangi sentuhan/klik -->
+<canvas id="leaf-fall" aria-hidden="true" style="position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:40"></canvas>
+<script>
+(function () {
+    var cv = document.getElementById('leaf-fall');
+    if (!cv || !cv.getContext) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { cv.style.display = 'none'; return; }
+    var ctx = cv.getContext('2d'), W = 0, H = 0, dpr = 1;
+    function resize() {
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        W = window.innerWidth; H = window.innerHeight;
+        cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // bentuk daun (panjang 1, tengah di pangkal): lonjong runcing ala daun bambu, & oval
+    var lens = new Path2D(); lens.moveTo(0, 0); lens.bezierCurveTo(.25, -.3, .7, -.27, 1, 0); lens.bezierCurveTo(.7, .27, .25, .3, 0, 0); lens.closePath();
+    var oval = new Path2D(); oval.moveTo(0, 0); oval.bezierCurveTo(.1, -.5, .75, -.5, 1, 0); oval.bezierCurveTo(.75, .5, .1, .5, 0, 0); oval.closePath();
+    var vein = new Path2D(); vein.moveTo(0, 0); vein.lineTo(.82, 0);
+
+    var COLORS = [
+        ['#22c55e', '#14532d'], ['#86efac', '#166534'], ['#a3e635', '#3f6212'],
+        ['#4ade80', '#14532d'], ['#bef264', '#4d7c0f'], ['#facc15', '#854d0e']   // sebagian menguning
+    ];
+    // tiga ukuran: besar (dekat, lebih cepat), sedang, kecil (jauh, lebih pelan)
+    var TIERS = [
+        { n: 4,  size: 38, vy: [38, 55], op: .95 },
+        { n: 7,  size: 23, vy: [28, 42], op: .85 },
+        { n: 12, size: 13, vy: [18, 30], op: .7 }
+    ];
+    var leaves = [];
+    function rnd(a, b) { return a + Math.random() * (b - a); }
+    function spawn(l, initial) {
+        var t = l.tier, c = COLORS[Math.floor(Math.random() * COLORS.length)];
+        l.x = rnd(-20, W + 20);
+        l.y = initial ? rnd(-H * .1, H) : -t.size * 2 - rnd(0, 80);
+        l.len = t.size * rnd(.85, 1.2);
+        l.vy = rnd(t.vy[0], t.vy[1]);
+        l.rot = rnd(0, 6.283); l.vr = rnd(-1.2, 1.2);
+        l.ph = rnd(0, 6.283); l.fw = rnd(.6, 1.4);          // fase & kecepatan goyang
+        l.amp = rnd(14, 38) * (t.size / 23 + .5);           // lebar ayunan kiri-kanan
+        l.flip = rnd(0, 6.283); l.vf = rnd(1.2, 2.6);       // efek daun terbalik (3D)
+        l.shape = Math.random() < .6 ? lens : oval;
+        l.fill = c[0]; l.line = c[1];
+    }
+    TIERS.forEach(function (t) { for (var i = 0; i < t.n; i++) { var l = { tier: t }; spawn(l, true); leaves.push(l); } });
+
+    var last = 0, running = true;
+    function frame(ts) {
+        if (!running) return;
+        var dt = Math.min(.05, (ts - last) / 1000 || .016); last = ts;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, W, H);
+        for (var i = 0; i < leaves.length; i++) {
+            var l = leaves[i];
+            l.y += l.vy * dt;
+            l.ph += l.fw * dt; l.rot += l.vr * dt; l.flip += l.vf * dt;
+            var sway = Math.sin(l.ph) * l.amp * dt * 1.6;      // ayunan halus + hanyut angin
+            l.x += sway + 6 * dt;
+            if (l.y > H + l.len * 2 || l.x > W + 60) { spawn(l, false); continue; }
+            ctx.save();
+            ctx.translate(l.x, l.y);
+            ctx.rotate(l.rot + Math.sin(l.ph) * .5);
+            ctx.scale(l.len, l.len * (.35 + .65 * Math.abs(Math.cos(l.flip))));
+            ctx.globalAlpha = l.tier.op;
+            ctx.fillStyle = l.fill; ctx.fill(l.shape);
+            ctx.lineWidth = 1.2 / l.len; ctx.strokeStyle = l.line; ctx.stroke(l.shape);
+            ctx.globalAlpha = l.tier.op * .6; ctx.stroke(vein);
+            ctx.restore();
+        }
+        requestAnimationFrame(frame);
+    }
+    document.addEventListener('visibilitychange', function () {
+        if (document.hidden) running = false;
+        else if (!running) { running = true; last = performance.now(); requestAnimationFrame(frame); }
+    });
+    requestAnimationFrame(frame);
+})();
+</script>
 </body>
 </html>
