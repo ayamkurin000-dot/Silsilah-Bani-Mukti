@@ -8449,7 +8449,7 @@
     const CAPSULE_MAX_R = 9;
     function capsuleRadius(w, h) { return Math.min(CAPSULE_MAX_R, h / 2, w / 2); }
     // Lebar & posisi gelang hijau di ujung kanan kartu
-    const BRACELET_W = 12;
+    const BRACELET_W = 15;                               // lebar area 2 lilitan tali
     const BRACELET_RIGHT_GAP = 14;                       // jarak tepi kanan gelang ke ujung kartu
     const KNOT_OFFSET = 30;                              // pusat simpul, di kanan ujung kartu
     const BRACELET_TEXT_RESERVE = BRACELET_W + BRACELET_RIGHT_GAP + 4; // ruang yang disisakan untuk teks
@@ -8524,9 +8524,10 @@
             .attr('clip-path', roundedClip(gInset, gy, gw, gh, gh / 2));
 
         // TALI PENGIKAT di ujung kanan kartu, menonjol keluar dari badan (atas & bawah):
-        //  - punya keturunan  -> tali HIJAU; dari tali pengikat itu, TALI YANG SAMA
-        //                        melengkung terus ke kanan menjadi SIMPUL (pengganti tanda "+")
-        //  - belum punya anak -> tali MERAH pengikat saja, tanpa simpul
+        //  - tali melilit kartu sebanyak 2 LILITAN (dua tali tegak berdampingan, agak miring)
+        //  - punya keturunan  -> tali HIJAU; ujung tali yang menjulur ke kanan diganti
+        //                        BUAH TOMAT MERAH (pengganti simpul / tanda "+")
+        //  - belum punya anak -> tali MERAH 2 lilitan saja, tanpa tomat
         // Semua digambar sebagai <path> bergaris (stroke) -> aman di HP.
         {
             const pal = hasBracelet
@@ -8535,12 +8536,14 @@
             const out = 4;                                           // tali menonjol keluar kartu
             const cx = w - BRACELET_RIGHT_GAP - BRACELET_W / 2;      // sumbu tali pengikat
             const topY = -h / 2 - out, botY = h / 2 + out;
-            const RW = 6.4;                                          // tebal tali
+            const RW = 5.0;                                          // tebal tali
+            const COIL_GAP = 4;                                      // jarak sumbu tiap lilitan dari tengah (2 lilitan: -4 & +4)
+            const SLANT = 2.2;                                       // kemiringan lilitan (efek melilit)
             const bg = g.append('g').attr('class', 'bracelet').attr('pointer-events', 'none');
             const f = n => n.toFixed(1);
 
             // bayangan lembut tali pada badan kartu (rect polos)
-            bg.append('rect').attr('x', cx - 4.5).attr('y', -h / 2 + 1.5).attr('width', 10).attr('height', h)
+            bg.append('rect').attr('x', cx - COIL_GAP - 4.5).attr('y', -h / 2 + 1.5).attr('width', COIL_GAP * 2 + 9).attr('height', h)
                 .attr('fill', '#000000').attr('opacity', 0.14);
 
             // ---- helper: gambar "tali beneran" sepanjang deretan titik ----
@@ -8583,14 +8586,26 @@
                 }
                 return res;
             };
+            // posisi x lilitan pada ketinggian y (miring tipis -> kesan tali melilit kartu)
+            const xAt = (cxi, y) => cxi + SLANT * (y / (h / 2 + out));
             // tali pengikat tegak: sedikit berkelok & berkerut mengikuti lekuk tali
-            const upright = (yFrom, yTo, phase) => {
+            const upright = (yFrom, yTo, phase, cxi) => {
                 const L = Math.abs(yTo - yFrom), N = Math.max(6, Math.round(L / 1.8)), res = [];
                 const waves = Math.max(2, L / 15);
                 for (let i = 0; i <= N; i++) {
-                    const t = i / N;
-                    res.push({ x: cx + 1.2 * Math.sin(2 * Math.PI * waves * t + phase) * Math.sin(Math.PI * Math.min(1, t * 1.4)),
-                               y: yFrom + (yTo - yFrom) * t });
+                    const t = i / N, y = yFrom + (yTo - yFrom) * t;
+                    res.push({ x: xAt(cxi, y) + 1.2 * Math.sin(2 * Math.PI * waves * t + phase) * Math.sin(Math.PI * Math.min(1, t * 1.4)),
+                               y: y });
+                }
+                return res;
+            };
+            // satu lilitan penuh dari atas ke bawah kartu (tanpa cabang)
+            const fullWrap = (cxi, phase) => {
+                const L = botY - topY, N = Math.max(8, Math.round(L / 1.8)), res = [];
+                const waves = Math.max(2, L / 15);
+                for (let i = 0; i <= N; i++) {
+                    const t = i / N, y = topY + L * t;
+                    res.push({ x: xAt(cxi, y) + 1.0 * Math.sin(2 * Math.PI * waves * t + phase), y: y });
                 }
                 return res;
             };
@@ -8612,34 +8627,50 @@
                 return res;
             };
 
+            const cxA = cx - COIL_GAP, cxB = cx + COIL_GAP;   // 2 lilitan: kiri (A) & kanan (B)
             if (hasBracelet) {
-                const kx = w + KNOT_OFFSET;                 // pusat simpul
+                const kx = w + KNOT_OFFSET;                 // pusat buah tomat
                 const R0 = 11;                              // jari-jari lengkung penyambung
-                // ujung tali menjuntai di belakang simpul
-                const t1 = wavy(kx + 2, 0, kx + 20, -11, 1.8, 1.0, 0.6);
-                const t2 = wavy(kx + 2, 0, kx + 21, 12, 1.8, 1.0, 2.4);
-                ropeAlong(t1, 4.2);
-                ropeAlong(t2, 4.2);
-                [[t1[t1.length - 1], -1], [t2[t2.length - 1], 1]].forEach(([e, sg]) => {
-                    let d = '';
-                    [-0.5, 0, 0.5].forEach(k => { d += `M ${f(e.x)},${f(e.y)} l 3.2,${f(sg * 2.6 + k * 2.6)} `; });
-                    bg.append('path').attr('d', d).attr('fill', 'none').attr('stroke', pal.base)
-                        .attr('stroke-width', 1.1).attr('stroke-linecap', 'round');
-                });
-                // SATU TALI: dari atas & bawah (melingkari kartu) keduanya melengkung
-                // mulus ke kanan dan menyatu menjadi tali yang menuju simpul.
-                const down = upright(botY, R0, 1.3).concat(bend({ x: cx, y: R0 }, { x: cx, y: 0 }, { x: cx + R0, y: 0 }));
-                const up = upright(topY, -R0, 0).concat(bend({ x: cx, y: -R0 }, { x: cx, y: 0 }, { x: cx + R0, y: 0 }));
-                const mid = wavy(cx + R0, 0, kx - 5, 0, 3.8, 1.5, 0);
-                // kontur semua bagian digambar lebih dulu, baru isiannya -> sambungan mulus (1 tali)
-                [down, up, mid].forEach(pp => ropeAlong(pp, RW, 'outline'));
-                [down, up, mid].forEach(pp => ropeAlong(pp, RW, 'body'));
-                // simpul: dua lilitan saling menyilang
-                ropeAlong(loop(kx + 1, 0.5, 6.8, 4.6, -0.55), 4.6);
-                ropeAlong(loop(kx, -0.5, 6.8, 4.8, 0.6), 4.8);
+                // LILITAN 1 (kiri): tali penuh melingkari kartu
+                const wrapA = fullWrap(cxA, 0.4);
+                // LILITAN 2 (kanan): dari atas & bawah melengkung mulus ke kanan, menyatu
+                // menjadi tali yang menjulur ke buah tomat (satu tali menerus)
+                const down = upright(botY, R0, 1.3, cxB).concat(bend({ x: xAt(cxB, R0), y: R0 }, { x: cxB, y: 0 }, { x: cxB + R0, y: 0 }));
+                const up = upright(topY, -R0, 0, cxB).concat(bend({ x: xAt(cxB, -R0), y: -R0 }, { x: cxB, y: 0 }, { x: cxB + R0, y: 0 }));
+                const mid = wavy(cxB + R0, 0, kx - 5, 0, 3.4, 1.5, 0);
+                // kontur semua bagian digambar lebih dulu, baru isiannya -> sambungan mulus
+                [wrapA, down, up, mid].forEach(pp => ropeAlong(pp, RW, 'outline'));
+                [wrapA, down, up, mid].forEach(pp => ropeAlong(pp, RW, 'body'));
+
+                // ---- BUAH TOMAT MERAH di ujung tali (hanya path/ellipse berisi warna polos) ----
+                const tx = kx + 1, ty = 0, trx = 9, tr_y = 8;
+                const fill = (el, c, op) => el.attr('fill', c).attr('fill-opacity', op == null ? 1 : op);
+                // bayangan
+                fill(bg.append('ellipse').attr('cx', tx + 0.9).attr('cy', ty + 1.4).attr('rx', trx).attr('ry', tr_y), '#000000', 0.2);
+                // badan tomat (merah) + kontur
+                fill(bg.append('ellipse').attr('cx', tx).attr('cy', ty).attr('rx', trx).attr('ry', tr_y), '#dc2626')
+                    .attr('stroke', '#7f1d1d').attr('stroke-width', 0.9);
+                // bayangan sisi bawah-kanan (volume)
+                fill(bg.append('ellipse').attr('cx', tx + 1.6).attr('cy', ty + 2.2).attr('rx', trx - 2.2).attr('ry', tr_y - 3.2), '#991b1b', 0.45);
+                // sisi terang atas-kiri
+                fill(bg.append('ellipse').attr('cx', tx - 0.9).attr('cy', ty - 0.9).attr('rx', trx - 2.4).attr('ry', tr_y - 2.6), '#ef4444', 0.85);
+                // kilau putih
+                fill(bg.append('ellipse').attr('cx', tx - 2.6).attr('cy', ty - 3.0).attr('rx', 2.6).attr('ry', 1.4)
+                    .attr('transform', `rotate(-28 ${f(tx - 2.6)} ${f(ty - 3.0)})`), '#ffffff', 0.62);
+                // kelopak hijau (calyx) di sisi kiri, tempat tali bertaut ke buah
+                const cxk = tx - trx + 2.2, cyk = ty, cpts = [];
+                for (let i = 0; i < 10; i++) {
+                    const ang = Math.PI + (i * Math.PI / 5) - Math.PI / 5 * 0; // satu daun menghadap kiri
+                    const rr = (i % 2 === 0) ? 6.2 : 2.2;
+                    cpts.push(f(cxk + rr * Math.cos(ang)) + ',' + f(cyk + rr * Math.sin(ang) * 0.95));
+                }
+                fill(bg.append('path').attr('d', 'M ' + cpts.join(' L ') + ' Z'), '#16a34a')
+                    .attr('stroke', '#14532d').attr('stroke-width', 0.7).attr('stroke-linejoin', 'round');
+                fill(bg.append('ellipse').attr('cx', cxk).attr('cy', cyk).attr('rx', 1.5).attr('ry', 1.5), '#14532d', 0.85);
             } else {
-                // belum punya keturunan: tali merah pengikat saja
-                ropeAlong(upright(topY, botY, 0.6), RW);
+                // belum punya keturunan: tali merah 2 lilitan saja (tanpa tomat)
+                ropeAlong(fullWrap(cxA, 0.4), RW);
+                ropeAlong(fullWrap(cxB, 1.7), RW);
             }
         }
     }
