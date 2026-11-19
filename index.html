@@ -8551,9 +8551,11 @@
     const CAPSULE_MAX_R = 9;
     function capsuleRadius(w, h) { return Math.min(CAPSULE_MAX_R, h / 2, w / 2); }
     // Lebar & posisi gelang hijau di ujung kanan kartu
-    const BRACELET_W = 15;                               // lebar area 2 lilitan tali
-    const BRACELET_RIGHT_GAP = 14;                       // jarak tepi kanan gelang ke ujung kartu
-    const KNOT_OFFSET = 30;                              // pusat simpul, di kanan ujung kartu
+    // (Tali pengikat di ujung kartu SUDAH DIHILANGKAN. Konstanta di bawah kini hanya mengatur
+    //  ruang kosong di tepi kanan kartu untuk julur tanaman & buah apel.)
+    const BRACELET_W = 0;
+    const BRACELET_RIGHT_GAP = 12;                       // ruang di ujung kanan kartu (tempat julur tanaman)
+    const KNOT_OFFSET = 13;                              // garis ke anak mulai dari sisi kanan buah apel
     const BRACELET_TEXT_RESERVE = BRACELET_W + BRACELET_RIGHT_GAP + 4; // ruang yang disisakan untuk teks
 
     // Gambar 1 kartu "kapsul 3D glossy" lengkap: bayangan + badan 1 warna + (gelang) + kilau.
@@ -8633,156 +8635,45 @@
             drawOrnament(orn, w, h, seedKey);
         }
 
-        // TALI PENGIKAT di ujung kanan kartu, menonjol keluar dari badan (atas & bawah):
-        //  - tali melilit kartu sebanyak 2 LILITAN (dua tali tegak berdampingan, agak miring)
-        //  - punya keturunan  -> tali HIJAU; ujung tali yang menjulur ke kanan diganti
-        //                        BUAH TOMAT MERAH (pengganti simpul / tanda "+")
-        //  - belum punya anak -> tali MERAH 2 lilitan saja, tanpa tomat
-        // Semua digambar sebagai <path> bergaris (stroke) -> aman di HP.
-        {
-            const pal = hasBracelet
-                ? { base: '#16a34a', dark: '#14532d', light: '#86efac', line: '#052e16' }
-                : { base: '#dc2626', dark: '#7f1d1d', light: '#fca5a5', line: '#450a0a' };
-            const out = 4;                                           // tali menonjol keluar kartu
-            const cx = w - BRACELET_RIGHT_GAP - BRACELET_W / 2;      // sumbu tali pengikat
-            const topY = -h / 2 - out, botY = h / 2 + out;
-            const RW = 5.0;                                          // tebal tali
-            const COIL_GAP = 4;                                      // jarak sumbu tiap lilitan dari tengah (2 lilitan: -4 & +4)
-            const SLANT = 2.2;                                       // kemiringan lilitan (efek melilit)
-            const bg = g.append('g').attr('class', 'bracelet').attr('pointer-events', 'none');
-            const f = n => n.toFixed(1);
+        // BUAH APEL MERAH di ujung kanan kartu -- hanya untuk kartu yang PUNYA keturunan.
+        // Digantung pada julur tanaman dari sudut kanan-atas kartu. Kartu tanpa keturunan: tanpa buah.
+        if (hasBracelet) drawApple(g, w, h);
+    }
 
-            // bayangan lembut tali pada badan kartu (rect polos)
-            bg.append('rect').attr('x', cx - COIL_GAP - 4.5).attr('y', -h / 2 + 1.5).attr('width', COIL_GAP * 2 + 9).attr('height', h)
-                .attr('fill', '#000000').attr('opacity', 0.14);
-
-            // ---- helper: gambar "tali beneran" sepanjang deretan titik ----
-            // kontur gelap + badan + serat pilinan diagonal (gelap & terang) + kilau tipis
-            const ropeAlong = (pts, rw, mode) => { // mode: 'outline' | 'body' | (kosong = keduanya)
-                const line = q => 'M ' + q.map(pt => f(pt.x) + ',' + f(pt.y)).join(' L ');
-                const n = pts.length;
-                const tan = i => {
-                    const a0 = pts[Math.max(0, i - 1)], b0 = pts[Math.min(n - 1, i + 1)];
-                    const dx = b0.x - a0.x, dy = b0.y - a0.y, L = Math.hypot(dx, dy) || 1;
-                    return { x: dx / L, y: dy / L };
-                };
-                const hatch = (shift) => {
-                    let d = '';
-                    for (let i = 1 + shift; i < n - 1; i += 2) {
-                        const t = tan(i), nx = -t.y, ny = t.x, hw = rw / 2 - 0.2, sk = rw * 0.5;
-                        d += `M ${f(pts[i].x + nx * hw - t.x * sk)},${f(pts[i].y + ny * hw - t.y * sk)} ` +
-                             `L ${f(pts[i].x - nx * hw + t.x * sk)},${f(pts[i].y - ny * hw + t.y * sk)} `;
-                    }
-                    return d;
-                };
-                const stroke = (d, size, color, op) => bg.append('path').attr('d', d).attr('fill', 'none')
-                    .attr('stroke', color).attr('stroke-width', size).attr('stroke-opacity', op)
-                    .attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
-                if (mode !== 'body') stroke(line(pts), rw + 2.2, pal.line, 0.9);   // kontur
-                if (mode === 'outline') return;
-                stroke(line(pts), rw, pal.base, 1);           // badan tali
-                stroke(hatch(0), 1.3, pal.dark, 0.75);        // pilinan / kerutan gelap
-                stroke(hatch(1), 0.9, pal.light, 0.6);        // pilinan terang
-                const hl = pts.map((pt, i) => { const t = tan(i); return { x: pt.x + t.y * rw * 0.22, y: pt.y - t.x * rw * 0.22 }; });
-                stroke(line(hl), 0.8, '#ffffff', 0.35);      // kilau
-            };
-            // kurva bergelombang (lekuk-lekuk) dari (x0,y0) ke (x1,y1); ujungnya menyatu di garis lurus
-            const wavy = (x0, y0, x1, y1, amp, waves, phase) => {
-                const L = Math.hypot(x1 - x0, y1 - y0), N = Math.max(6, Math.round(L / 1.8));
-                const ux = (x1 - x0) / L, uy = (y1 - y0) / L, nx = -uy, ny = ux, res = [];
-                for (let i = 0; i <= N; i++) {
-                    const t = i / N, o = amp * Math.sin(2 * Math.PI * waves * t + (phase || 0)) * Math.sin(Math.PI * Math.min(1, t * 1.6));
-                    res.push({ x: x0 + (x1 - x0) * t + nx * o, y: y0 + (y1 - y0) * t + ny * o });
-                }
-                return res;
-            };
-            // posisi x lilitan pada ketinggian y (miring tipis -> kesan tali melilit kartu)
-            const xAt = (cxi, y) => cxi + SLANT * (y / (h / 2 + out));
-            // tali pengikat tegak: sedikit berkelok & berkerut mengikuti lekuk tali
-            const upright = (yFrom, yTo, phase, cxi) => {
-                const L = Math.abs(yTo - yFrom), N = Math.max(6, Math.round(L / 1.8)), res = [];
-                const waves = Math.max(2, L / 15);
-                for (let i = 0; i <= N; i++) {
-                    const t = i / N, y = yFrom + (yTo - yFrom) * t;
-                    res.push({ x: xAt(cxi, y) + 1.2 * Math.sin(2 * Math.PI * waves * t + phase) * Math.sin(Math.PI * Math.min(1, t * 1.4)),
-                               y: y });
-                }
-                return res;
-            };
-            // satu lilitan penuh dari atas ke bawah kartu (tanpa cabang)
-            const fullWrap = (cxi, phase) => {
-                const L = botY - topY, N = Math.max(8, Math.round(L / 1.8)), res = [];
-                const waves = Math.max(2, L / 15);
-                for (let i = 0; i <= N; i++) {
-                    const t = i / N, y = topY + L * t;
-                    res.push({ x: xAt(cxi, y) + 1.0 * Math.sin(2 * Math.PI * waves * t + phase), y: y });
-                }
-                return res;
-            };
-            // lengkung mulus (kuadrat Bezier) -> menyambung tali tegak ke tali mendatar
-            const bend = (p0, c, p1) => {
-                const res = [], N = 10;
-                for (let i = 1; i <= N; i++) {
-                    const t = i / N, u = 1 - t;
-                    res.push({ x: u * u * p0.x + 2 * u * t * c.x + t * t * p1.x, y: u * u * p0.y + 2 * u * t * c.y + t * t * p1.y });
-                }
-                return res;
-            };
-            const loop = (lx, ly, rx, ry, rot) => {
-                const res = [], N = 36, c = Math.cos(rot), sn = Math.sin(rot);
-                for (let i = 0; i <= N; i++) {
-                    const a1 = i / N * Math.PI * 2, ex = rx * Math.cos(a1), ey = ry * Math.sin(a1);
-                    res.push({ x: lx + ex * c - ey * sn, y: ly + ex * sn + ey * c });
-                }
-                return res;
-            };
-
-            const cxA = cx - COIL_GAP, cxB = cx + COIL_GAP;   // 2 lilitan: kiri (A) & kanan (B)
-            if (hasBracelet) {
-                const kx = w + KNOT_OFFSET;                 // pusat buah tomat
-                const R0 = 11;                              // jari-jari lengkung penyambung
-                // LILITAN 1 (kiri): tali penuh melingkari kartu
-                const wrapA = fullWrap(cxA, 0.4);
-                // LILITAN 2 (kanan): dari atas & bawah melengkung mulus ke kanan, menyatu
-                // menjadi tali yang menjulur ke buah tomat (satu tali menerus)
-                const down = upright(botY, R0, 1.3, cxB).concat(bend({ x: xAt(cxB, R0), y: R0 }, { x: cxB, y: 0 }, { x: cxB + R0, y: 0 }));
-                const up = upright(topY, -R0, 0, cxB).concat(bend({ x: xAt(cxB, -R0), y: -R0 }, { x: cxB, y: 0 }, { x: cxB + R0, y: 0 }));
-                const mid = wavy(cxB + R0, 0, kx - 5, 0, 3.4, 1.5, 0);
-                // kontur semua bagian digambar lebih dulu, baru isiannya -> sambungan mulus
-                [wrapA, down, up, mid].forEach(pp => ropeAlong(pp, RW, 'outline'));
-                [wrapA, down, up, mid].forEach(pp => ropeAlong(pp, RW, 'body'));
-
-                // ---- BUAH TOMAT MERAH di ujung tali (hanya path/ellipse berisi warna polos) ----
-                const tx = kx + 1, ty = 0, trx = 9, tr_y = 8;
-                const fill = (el, c, op) => el.attr('fill', c).attr('fill-opacity', op == null ? 1 : op);
-                // bayangan
-                fill(bg.append('ellipse').attr('cx', tx + 0.9).attr('cy', ty + 1.4).attr('rx', trx).attr('ry', tr_y), '#000000', 0.2);
-                // badan tomat (merah) + kontur
-                fill(bg.append('ellipse').attr('cx', tx).attr('cy', ty).attr('rx', trx).attr('ry', tr_y), '#dc2626')
-                    .attr('stroke', '#7f1d1d').attr('stroke-width', 0.9);
-                // bayangan sisi bawah-kanan (volume)
-                fill(bg.append('ellipse').attr('cx', tx + 1.6).attr('cy', ty + 2.2).attr('rx', trx - 2.2).attr('ry', tr_y - 3.2), '#991b1b', 0.45);
-                // sisi terang atas-kiri
-                fill(bg.append('ellipse').attr('cx', tx - 0.9).attr('cy', ty - 0.9).attr('rx', trx - 2.4).attr('ry', tr_y - 2.6), '#ef4444', 0.85);
-                // kilau putih
-                fill(bg.append('ellipse').attr('cx', tx - 2.6).attr('cy', ty - 3.0).attr('rx', 2.6).attr('ry', 1.4)
-                    .attr('transform', `rotate(-28 ${f(tx - 2.6)} ${f(ty - 3.0)})`), '#ffffff', 0.62);
-                // kelopak hijau (calyx) di sisi kiri, tempat tali bertaut ke buah
-                const cxk = tx - trx + 2.2, cyk = ty, cpts = [];
-                for (let i = 0; i < 10; i++) {
-                    const ang = Math.PI + (i * Math.PI / 5) - Math.PI / 5 * 0; // satu daun menghadap kiri
-                    const rr = (i % 2 === 0) ? 6.2 : 2.2;
-                    cpts.push(f(cxk + rr * Math.cos(ang)) + ',' + f(cyk + rr * Math.sin(ang) * 0.95));
-                }
-                fill(bg.append('path').attr('d', 'M ' + cpts.join(' L ') + ' Z'), '#16a34a')
-                    .attr('stroke', '#14532d').attr('stroke-width', 0.7).attr('stroke-linejoin', 'round');
-                fill(bg.append('ellipse').attr('cx', cxk).attr('cy', cyk).attr('rx', 1.5).attr('ry', 1.5), '#14532d', 0.85);
-            } else {
-                // belum punya keturunan: tali merah 2 lilitan saja (tanpa tomat)
-                ropeAlong(fullWrap(cxA, 0.4), RW);
-                ropeAlong(fullWrap(cxB, 1.7), RW);
-            }
-        }
+    // Apel merah (path/ellipse berisi warna polos -> aman di HP). Pusatnya di (w + 4, 0);
+    // garis penghubung ke anak dimulai dari sisi kanan apel (lihat KNOT_OFFSET).
+    function drawApple(g, w, h) {
+        const f = n => +n.toFixed(1);
+        const s = 7.6, ax = w + 4, ay = 0, top = -h / 2;
+        const ag = g.append('g').attr('class', 'apple-fruit').attr('pointer-events', 'none');
+        const body = (cx, cy, k) => {
+            const P = (u, v) => f(cx + u * s * k) + ',' + f(cy + v * s * k);
+            return `M${P(0, -.55)}C${P(.3, -1.0)} ${P(1.15, -.85)} ${P(1.1, .1)}C${P(1.05, .75)} ${P(.55, 1.1)} ${P(0, .95)}` +
+                   `C${P(-.55, 1.1)} ${P(-1.05, .75)} ${P(-1.1, .1)}C${P(-1.15, -.85)} ${P(-.3, -1.0)} ${P(0, -.55)}Z`;
+        };
+        const sx = w - 4, sy = top + 1, ex = ax + 0.8, ey = ay - s * 1.2;
+        // julur/ranting dari batang tanaman menuju tangkai apel
+        const twig = `M${f(sx)},${f(sy)}C${f(sx + 5)},${f(sy + 6)} ${f(ex + 3)},${f(ey - 6)} ${f(ex)},${f(ey)}`;
+        ag.append('path').attr('d', twig).attr('fill', 'none').attr('stroke', '#14532d').attr('stroke-width', 3.1).attr('stroke-linecap', 'round');
+        ag.append('path').attr('d', twig).attr('fill', 'none').attr('stroke', '#16a34a').attr('stroke-width', 1.8).attr('stroke-linecap', 'round');
+        // bayangan
+        ag.append('path').attr('d', body(ax + 0.9, ay + 1.4, 1)).attr('fill', '#000000').attr('fill-opacity', 0.2);
+        // badan apel + kontur
+        ag.append('path').attr('d', body(ax, ay, 1)).attr('fill', '#dc2626').attr('stroke', '#7f1d1d').attr('stroke-width', 0.9).attr('stroke-linejoin', 'round');
+        // sisi gelap bawah-kanan (volume) & sisi terang atas-kiri
+        ag.append('path').attr('d', body(ax + 1.1, ay + 1.5, .78)).attr('fill', '#991b1b').attr('fill-opacity', 0.45);
+        ag.append('path').attr('d', body(ax - 0.9, ay - 0.9, .74)).attr('fill', '#ef4444').attr('fill-opacity', 0.85);
+        // kilau putih
+        ag.append('ellipse').attr('cx', ax - 3.2).attr('cy', ay - 2.6).attr('rx', 2.4).attr('ry', 1.3)
+            .attr('transform', `rotate(-35 ${f(ax - 3.2)} ${f(ay - 2.6)})`).attr('fill', '#ffffff').attr('fill-opacity', 0.65);
+        // lekuk atas tempat tangkai
+        ag.append('ellipse').attr('cx', ax).attr('cy', ay - s * .5).attr('rx', 1.8).attr('ry', 0.9).attr('fill', '#7f1d1d').attr('fill-opacity', 0.65);
+        // tangkai coklat + selembar daun
+        ag.append('path').attr('d', `M${f(ax)},${f(ay - s * .5)}Q${f(ax + .2)},${f(ay - s * .95)} ${f(ex)},${f(ey)}`)
+            .attr('fill', 'none').attr('stroke', '#78350f').attr('stroke-width', 1.3).attr('stroke-linecap', 'round');
+        const T = ornT(ex, ey + 1, -0.35), len = 7, wid = 2.8;
+        ag.append('path').attr('d', ornLens(T, 0, len, wid)).attr('fill', '#22c55e').attr('stroke', '#14532d').attr('stroke-width', 0.6).attr('stroke-linejoin', 'round');
+        ag.append('path').attr('d', `M${T(0, 0)}L${T(.8 * len, 0)}`).attr('fill', 'none').attr('stroke', '#14532d').attr('stroke-width', 0.45).attr('stroke-opacity', 0.65);
     }
 
     // =====================================================================
@@ -8797,10 +8688,21 @@
         { id: 'menjuntai', name: 'Sulur Menjuntai',  desc: 'Tali-tali tanaman bergantung dari tepi atas kartu' },
         { id: 'sirih',     name: 'Daun Sirih',       desc: 'Daun berbentuk hati merambat mengitari kartu' },
         { id: 'bunga',     name: 'Bunga Rambat',     desc: 'Tanaman rambat berbunga merah muda & putih' },
-        { id: 'campur',    name: 'Campur Acak',      desc: 'Setiap kartu mendapat model tanaman yang berbeda' }
+        { id: 'anggur',    name: 'Anggur Rambat',    desc: 'Daun bergerigi besar dengan sulur keriting' },
+        { id: 'pakis',     name: 'Pakis Hijau',      desc: 'Daun pakis berbaris rapi sepanjang batang' },
+        { id: 'melati',    name: 'Melati',           desc: 'Bunga melati putih berbentuk bintang, daun bulat kecil' },
+        { id: 'mawar',     name: 'Mawar Rambat',     desc: 'Mawar merah, merah muda & kuning dengan daun hijau tua' },
+        { id: 'kamboja',   name: 'Kamboja',          desc: 'Bunga kamboja berkelopak lebar, daun panjang' },
+        { id: 'aster',     name: 'Aster / Daisy',    desc: 'Bunga daisy putih, ungu, kuning & biru, daun ramping' },
+        { id: 'bugenvil',  name: 'Bugenvil',         desc: 'Bunga bugenvil magenta, oranye & merah muda' },
+        { id: 'hibiskus',  name: 'Kembang Sepatu',   desc: 'Kembang sepatu merah/oranye dengan benang sari' },
+        { id: 'lonceng',   name: 'Bunga Lonceng',    desc: 'Bunga lonceng biru & ungu menggantung di ujung sulur' },
+        { id: 'bambu',     name: 'Bambu',            desc: 'Batang bambu beruas dengan daun ramping' },
+        { id: 'taman',     name: 'Taman Campur',     desc: 'Aneka bunga & aneka bentuk daun dalam satu batang' },
+        { id: 'campur',    name: 'Acak Semua Model', desc: 'Setiap kartu mendapat model pohon, bunga & daun yang berbeda' }
     ];
     const ORN_KEY = 'bm-orn-theme';
-    let ORN_THEME = 'polos';
+    let ORN_THEME = 'campur';
     try {
         const t = localStorage.getItem(ORN_KEY);
         if (t && ORN_THEMES.some(x => x.id === t)) ORN_THEME = t;
@@ -8864,35 +8766,87 @@
     }
     const ornStemD = pts => 'M' + pts.map(p => f1(p.x) + ',' + f1(p.y)).join('L');
 
-    function ornLeaf(P, x, y, ang, len, wid, heart, alt) {
+    function ornT(x, y, ang) {
         const c = Math.cos(ang), s = Math.sin(ang);
-        const T = (u, v) => f1(x + u * c - v * s) + ',' + f1(y + u * s + v * c);
-        let d;
-        if (heart) {
+        return (u, v) => f1(x + u * c - v * s) + ',' + f1(y + u * s + v * c);
+    }
+    function ornLens(T, u0, len, wid) {
+        return `M${T(u0, 0)}C${T(u0 + .25 * len, -wid)} ${T(u0 + .7 * len, -.9 * wid)} ${T(u0 + len, 0)}` +
+               `C${T(u0 + .7 * len, .9 * wid)} ${T(u0 + .25 * len, wid)} ${T(u0, 0)}Z`;
+    }
+    const ornCirc = (cx, cy, cr) => `M${f1(cx - cr)},${f1(cy)}a${f1(cr)},${f1(cr)} 0 1,0 ${f1(2 * cr)},0a${f1(cr)},${f1(cr)} 0 1,0 ${f1(-2 * cr)},0Z`;
+    const ornPut = (P, key, d) => { P[key] = (P[key] || '') + d; };
+
+    // warna daun (indeks 0..4) & warna kelopak bunga (kode -> [isi, garis tepi])
+    const ORN_LEAF_COLS = [
+        { fill: '#22c55e', stroke: '#14532d' },   // 0 hijau
+        { fill: '#86efac', stroke: '#14532d' },   // 1 hijau muda
+        { fill: '#15803d', stroke: '#052e16' },   // 2 hijau tua
+        { fill: '#a3e635', stroke: '#3f6212' },   // 3 hijau kekuningan
+        { fill: '#5eead4', stroke: '#115e59' }    // 4 hijau kebiruan
+    ];
+    const ORN_PETAL = {
+        pk: ['#f9a8d4', '#be185d'], wh: ['#ffffff', '#9ca3af'], rd: ['#ef4444', '#7f1d1d'], yl: ['#fde047', '#a16207'],
+        pu: ['#c4b5fd', '#6d28d9'], or: ['#fdba74', '#c2410c'], bl: ['#93c5fd', '#1d4ed8'], mg: ['#e879f9', '#86198f']
+    };
+
+    // ---- DAUN: oval, lonjong/bambu, hati (sirih), bulat (eukaliptus), bergerigi (anggur) ----
+    function ornLeaf(P, x, y, ang, len, wid, kind, ci) {
+        const T = ornT(x, y, ang);
+        let d, vein = `M${T(0, 0)}L${T(.8 * len, 0)}`;
+        if (kind === 'heart') {
             d = `M${T(len, 0)}C${T(.7 * len, -wid)} ${T(.2 * len, -1.25 * wid)} ${T(.04 * len, -.55 * wid)}` +
                 `C${T(-.04 * len, -.2 * wid)} ${T(.1 * len, -.02 * wid)} ${T(.14 * len, 0)}` +
                 `C${T(.1 * len, .02 * wid)} ${T(-.04 * len, .2 * wid)} ${T(.04 * len, .55 * wid)}` +
                 `C${T(.2 * len, 1.25 * wid)} ${T(.7 * len, wid)} ${T(len, 0)}Z`;
-        } else {
-            d = `M${T(0, 0)}C${T(.25 * len, -wid)} ${T(.7 * len, -wid * .9)} ${T(len, 0)}` +
-                `C${T(.7 * len, wid * .9)} ${T(.25 * len, wid)} ${T(0, 0)}Z`;
+            vein = `M${T(.14 * len, 0)}L${T(.8 * len, 0)}`;
+        } else if (kind === 'round') {
+            d = `M${T(0, 0)}C${T(0, -.55 * wid)} ${T(.225 * len, -wid)} ${T(.5 * len, -wid)}` +
+                `C${T(.775 * len, -wid)} ${T(len, -.55 * wid)} ${T(len, 0)}` +
+                `C${T(len, .55 * wid)} ${T(.775 * len, wid)} ${T(.5 * len, wid)}` +
+                `C${T(.225 * len, wid)} ${T(0, .55 * wid)} ${T(0, 0)}Z`;
+        } else if (kind === 'lobed') {
+            const up = [[.18, -.3], [.2, -.95], [.42, -.5], [.56, -1.0], [.72, -.45]];
+            d = `M${T(0, 0)}`;
+            up.forEach(q => { d += `L${T(q[0] * len, q[1] * wid)}`; });
+            d += `L${T(len, 0)}`;
+            up.slice().reverse().forEach(q => { d += `L${T(q[0] * len, -q[1] * wid)}`; });
+            d += 'Z';
+        } else { // 'oval' & 'narrow'
+            d = ornLens(T, 0, len, wid);
         }
-        if (alt) P.leafB += d; else P.leafA += d;
-        P.vein += `M${T(heart ? .14 * len : 0, 0)}L${T(.8 * len, 0)}`;
+        ornPut(P, 'leaf' + (ci || 0), d);
+        ornPut(P, 'vein', vein);
     }
+    // daun pakis: tulang tengah + anak daun berpasangan
+    function ornFrond(P, x, y, ang, len, ci) {
+        const T = ornT(x, y, ang), n = 6;
+        let d = '';
+        for (let i = 0; i < n; i++) {
+            const t = (i + .6) / (n + .4), u = len * t, ll = len * .34 * (1 - t * .65) + 1.2, ww = ll * .28;
+            [-1, 1].forEach(sg => { d += ornLens(ornT(x + Math.cos(ang) * u, y + Math.sin(ang) * u, ang + sg * 1.05), 0, ll, ww); });
+        }
+        d += ornLens(T, len * .86, len * .16, len * .05);
+        ornPut(P, 'leaf' + (ci || 0), d);
+        ornPut(P, 'vein', `M${T(0, 0)}L${T(len * .95, 0)}`);
+    }
+    const ornSmallKind = k => (k === 'frond' || k === 'lobed') ? 'oval' : k;
+
     // daun-daun bergantian kiri/kanan sepanjang batang
     function ornLeaves(P, pts, rnd, o) {
         let last = -1e9, side = rnd() < .5 ? 1 : -1;
         for (let i = 1; i < pts.length - 1; i++) {
             const p = pts[i];
             if (p.s - last < o.gap * (0.8 + rnd() * 0.5)) continue;
-            last = p.s;
             const base = Math.atan2(p.ty, p.tx);
             const len = o.len[0] + rnd() * (o.len[1] - o.len[0]);
             const ang = base + side * (o.spread[0] + rnd() * (o.spread[1] - o.spread[0]));
             side = -side;
             if (!o.ok(p.x + Math.cos(ang) * len, p.y + Math.sin(ang) * len)) continue;
-            ornLeaf(P, p.x, p.y, ang, len, len * o.ratio, o.heart, rnd() < .45);
+            last = p.s;
+            const kind = o.k[Math.floor(rnd() * o.k.length)], ci = o.c[Math.floor(rnd() * o.c.length)];
+            if (kind === 'frond') ornFrond(P, p.x, p.y, ang, len, ci);
+            else ornLeaf(P, p.x, p.y, ang, len, len * o.ratio, kind, ci);
         }
     }
     // sulur keriting (spiral)
@@ -8903,58 +8857,155 @@
             const a = k / 18 * Math.PI * 2.7, r = r0 * (1 - k / 18 * 0.82);
             d += (k ? 'L' : 'M') + f1(cx + r * Math.cos(ph + sgn * a)) + ',' + f1(cy + r * Math.sin(ph + sgn * a));
         }
-        P.tendD += d;
+        ornPut(P, 'tendD', d);
     }
     function ornCurls(P, pts, rnd, gap, ok, r0) {
         let last = -1e9, side = rnd() < .5 ? 1 : -1;
         for (let i = 2; i < pts.length - 1; i++) {
             const p = pts[i];
-            if (p.s - last < gap * (0.8 + rnd() * 0.5)) continue;
+            if (p.s - last < gap * (0.8 + rnd() * 0.4)) continue;
             const ang = Math.atan2(p.ty, p.tx) + side * (1.1 + rnd() * 0.4);
             const r = r0 * (0.8 + rnd() * 0.4);
             if (!ok(p.x + Math.cos(ang) * r * 2, p.y + Math.sin(ang) * r * 2)) continue;
             last = p.s; ornCurl(P, p.x, p.y, ang, side, r); side = -side;
         }
     }
-    function ornFlower(P, x, y, r, white) {
-        const rot = x * 1.7;
-        for (let k = 0; k < 5; k++) {
-            const a = rot + k * 2 * Math.PI / 5, px = x + Math.cos(a) * r * 1.05, py = y + Math.sin(a) * r * 1.05, pr = r * 0.8;
-            const d = `M${f1(px - pr)},${f1(py)}a${f1(pr)},${f1(pr)} 0 1,0 ${f1(2 * pr)},0a${f1(pr)},${f1(pr)} 0 1,0 ${f1(-2 * pr)},0Z`;
-            if (white) P.petalW += d; else P.petalP += d;
+
+    // ---- BUNGA: bulat-5, aster/daisy, melati (bintang), kembang sepatu, kamboja, mawar, bugenvil, lonceng ----
+    function ornFlower(P, x, y, r, kind, col, ang) {
+        const rot = (x * 1.7) % 6.283;
+        const yel = (cx, cy, cr) => ornPut(P, 'centerD', ornCirc(cx, cy, cr));
+        if (kind === 'daisy') {
+            const n = 9;
+            for (let k = 0; k < n; k++) ornPut(P, col, ornLens(ornT(x, y, rot + k * 2 * Math.PI / n), r * .3, r * 1.5, r * .27));
+            yel(x, y, r * .52);
+        } else if (kind === 'star') {
+            for (let k = 0; k < 5; k++) ornPut(P, col, ornLens(ornT(x, y, rot + k * 2 * Math.PI / 5), r * .15, r * 1.45, r * .46));
+            yel(x, y, r * .3);
+        } else if (kind === 'hibiscus') {
+            for (let k = 0; k < 5; k++) ornPut(P, col, ornLens(ornT(x, y, rot + k * 2 * Math.PI / 5), 0, r * 1.45, r * .72));
+            const sx = x + Math.cos(rot) * r * 1.5, sy = y + Math.sin(rot) * r * 1.5;
+            ornPut(P, 'stamen', `M${f1(x)},${f1(y)}L${f1(sx)},${f1(sy)}`);
+            yel(sx, sy, r * .28); yel(x, y, r * .22);
+        } else if (kind === 'kamboja') {
+            for (let k = 0; k < 5; k++) ornPut(P, col, ornLens(ornT(x, y, rot + k * 2 * Math.PI / 5 + .35), 0, r * 1.55, r * .62));
+            yel(x, y, r * .42);
+        } else if (kind === 'rose') {
+            ornPut(P, col, ornCirc(x, y, r * 1.1));
+            let d = '';
+            for (let k = 0; k <= 16; k++) {
+                const a = rot + k / 16 * Math.PI * 3.4, rr = r * (.85 - k / 16 * .7);
+                d += (k ? 'L' : 'M') + f1(x + rr * Math.cos(a)) + ',' + f1(y + rr * Math.sin(a));
+            }
+            ornPut(P, 'swirl', d);
+        } else if (kind === 'bougen') {
+            for (let k = 0; k < 3; k++) ornPut(P, col, ornLens(ornT(x, y, rot + k * 2.094), r * .1, r * 1.4, r * .72));
+            ornPut(P, 'wh', ornCirc(x, y, r * .26));
+        } else if (kind === 'bell') {
+            const a0 = ang == null ? Math.PI / 2 : ang;
+            [-.5, 0, .5].forEach(o => ornPut(P, col, ornLens(ornT(x, y, a0 + o), 0, r * 1.7, r * .5)));
+            ornPut(P, 'wh', ornCirc(x, y, r * .22));
+        } else { // 'round5' - 5 kelopak bulat (asli)
+            for (let k = 0; k < 5; k++) {
+                const a = rot + k * 2 * Math.PI / 5;
+                ornPut(P, col, ornCirc(x + Math.cos(a) * r * 1.05, y + Math.sin(a) * r * 1.05, r * 0.8));
+            }
+            yel(x, y, r * .52);
         }
-        const cr = r * 0.52;
-        P.centerD += `M${f1(x - cr)},${f1(y)}a${f1(cr)},${f1(cr)} 0 1,0 ${f1(2 * cr)},0a${f1(cr)},${f1(cr)} 0 1,0 ${f1(-2 * cr)},0Z`;
     }
-    // tali tanaman menjuntai ke bawah dengan daun kecil berpasangan
-    function ornStrand(P, rnd, x0, y0, len, ok) {
+    function ornFlowersAlong(P, pts, rnd, F, ok) {
+        let last = -1e9, side = 1, n = 0;
+        pts.forEach(p => {
+            if (p.s - last < F.gap + rnd() * 6) return;
+            const r = F.r[0] + rnd() * (F.r[1] - F.r[0]);
+            const off = r * 1.3 + rnd() * 2, fx = p.x - p.ty * off * side, fy = p.y + p.tx * off * side;
+            if (!ok(fx, fy)) return;
+            last = p.s;
+            const kind = F.k[n % F.k.length], col = F.c[Math.floor(rnd() * F.c.length)];
+            ornFlower(P, fx, fy, r, kind, col, Math.PI / 2 + (rnd() - .5) * .6);
+            side = -side; n++;
+        });
+    }
+    // tali tanaman menjuntai ke bawah, daun kecil berpasangan, ujungnya daun atau bunga
+    function ornStrand(P, rnd, x0, y0, len, ok, lf, ef) {
         const j = () => (rnd() - .5) * 6;
         const pts = ornRoute([[x0, y0], [x0 + j(), y0 + len * .5], [x0 + j(), y0 + len]], { step: 3, amp: 1.3, wl: 11, ph: rnd() * 6, r: 6 });
-        P.tendD += ornStemD(pts);
+        ornPut(P, 'tendD', ornStemD(pts));
         let last = -1e9, side = rnd() < .5 ? 1 : -1;
         pts.forEach((p, i) => {
             if (i < 1 || p.s - last < 5.5) return;
             last = p.s;
             const ang = Math.atan2(p.ty, p.tx) + side * (0.7 + rnd() * 0.5), l = 4.2 + rnd() * 2.2;
             side = -side;
-            if (ok(p.x + Math.cos(ang) * l, p.y + Math.sin(ang) * l)) ornLeaf(P, p.x, p.y, ang, l, l * .42, false, rnd() < .5);
+            if (ok(p.x + Math.cos(ang) * l, p.y + Math.sin(ang) * l))
+                ornLeaf(P, p.x, p.y, ang, l, l * .42, ornSmallKind(lf.k[Math.floor(rnd() * lf.k.length)]), lf.c[Math.floor(rnd() * lf.c.length)]);
         });
-        const e = pts[pts.length - 1];  // daun ujung
-        ornLeaf(P, e.x, e.y, Math.atan2(e.ty, e.tx), 5.5, 2.4, false, rnd() < .5);
+        const e = pts[pts.length - 1];
+        if (ef) ornFlower(P, e.x, e.y, ef.r[0] + rnd() * (ef.r[1] - ef.r[0]), ef.k[0], ef.c[Math.floor(rnd() * ef.c.length)], Math.PI / 2);
+        else ornLeaf(P, e.x, e.y, Math.atan2(e.ty, e.tx), 5.5, 2.4, 'oval', lf.c[0]);
     }
 
     function ornRender(g, P) {
         const add = (d, a) => { if (!d) return; const p = g.append('path').attr('d', d); Object.keys(a).forEach(k => p.attr(k, a[k])); };
-        const rnd = { 'stroke-linecap': 'round', 'stroke-linejoin': 'round' };
-        add(P.stemD, Object.assign({ fill: 'none', stroke: '#14532d', 'stroke-width': 3.1 }, rnd));
-        add(P.stemD, Object.assign({ fill: 'none', stroke: '#16a34a', 'stroke-width': 1.8 }, rnd));
-        add(P.tendD, Object.assign({ fill: 'none', stroke: '#166534', 'stroke-width': 1.1 }, rnd));
-        add(P.leafA, { fill: '#22c55e', stroke: '#14532d', 'stroke-width': 0.6, 'stroke-linejoin': 'round' });
-        add(P.leafB, { fill: '#86efac', stroke: '#14532d', 'stroke-width': 0.6, 'stroke-linejoin': 'round' });
-        add(P.vein, Object.assign({ fill: 'none', stroke: '#14532d', 'stroke-width': 0.45, 'stroke-opacity': 0.65 }, rnd));
-        add(P.petalP, { fill: '#f9a8d4', stroke: '#be185d', 'stroke-width': 0.5 });
-        add(P.petalW, { fill: '#ffffff', stroke: '#9ca3af', 'stroke-width': 0.5 });
+        const rd = { 'stroke-linecap': 'round', 'stroke-linejoin': 'round' };
+        const sc = P.stemCols, sw = P.stemW || 3.1;
+        add(P.stemD, Object.assign({ fill: 'none', stroke: sc[0], 'stroke-width': sw }, rd));
+        add(P.stemD, Object.assign({ fill: 'none', stroke: sc[1], 'stroke-width': sw - 1.3 }, rd));
+        add(P.node, Object.assign({ fill: 'none', stroke: '#365314', 'stroke-width': 1.1 }, rd));
+        add(P.tendD, Object.assign({ fill: 'none', stroke: '#166534', 'stroke-width': 1.1 }, rd));
+        ORN_LEAF_COLS.forEach((c, i) => add(P['leaf' + i], { fill: c.fill, stroke: c.stroke, 'stroke-width': 0.6, 'stroke-linejoin': 'round' }));
+        add(P.vein, Object.assign({ fill: 'none', stroke: '#14532d', 'stroke-width': 0.45, 'stroke-opacity': 0.65 }, rd));
+        Object.keys(ORN_PETAL).forEach(k => add(P[k], { fill: ORN_PETAL[k][0], stroke: ORN_PETAL[k][1], 'stroke-width': 0.5, 'stroke-linejoin': 'round' }));
+        add(P.swirl, Object.assign({ fill: 'none', stroke: '#7f1d1d', 'stroke-width': 0.5, 'stroke-opacity': 0.7 }, rd));
+        add(P.stamen, Object.assign({ fill: 'none', stroke: '#b91c1c', 'stroke-width': 0.8 }, rd));
         add(P.centerD, { fill: '#facc15', stroke: '#a16207', 'stroke-width': 0.3 });
+    }
+
+    // ---- MODEL TANAMAN (jalur batang + jenis daun + jenis bunga) ----
+    const ORN_MODELS = {
+        sulur:     { route: 'sulur', second: true, leaf: { k: ['oval'], c: [0, 1], len: [8, 11], ratio: .36, gap: 14, sp: [.7, 1.15] }, curl: [26, 4.6] },
+        rimbun:    { route: 'rimbun', dense: true, leaf: { k: ['oval', 'round'], c: [0, 1, 2], len: [8, 12], ratio: .5, gap: 6, sp: [.5, 1.3] }, strands: [2, 3] },
+        menjuntai: { route: 'menjuntai', leaf: { k: ['oval'], c: [0, 1], len: [5, 7.5], ratio: .4, gap: 11, sp: [.6, 1] }, strands: [5, 7] },
+        sirih:     { route: 'sirih', leaf: { k: ['heart'], c: [0, 1], len: [9, 12], ratio: .42, gap: 12, sp: [.9, 1.25] } },
+        bunga:     { route: 'sulur', leaf: { k: ['oval'], c: [0, 1], len: [5.5, 7.5], ratio: .4, gap: 12, sp: [.7, 1.1] }, curl: [34, 3.6],
+                     flowers: { k: ['round5'], c: ['pk', 'wh'], gap: 19, r: [2.6, 3.4] } },
+        anggur:    { route: 'sulur', second: true, stem: ['#3f6212', '#65a30d'], leaf: { k: ['lobed'], c: [0, 3], len: [9, 12], ratio: .6, gap: 15, sp: [.8, 1.2] }, curl: [22, 5] },
+        pakis:     { route: 'rimbun', second: false, leaf: { k: ['frond'], c: [0, 2], len: [9, 13], ratio: .3, gap: 9, sp: [.6, 1.2] } },
+        melati:    { route: 'sulur', leaf: { k: ['round', 'oval'], c: [0, 2], len: [5, 7], ratio: .5, gap: 9, sp: [.8, 1.2] },
+                     flowers: { k: ['star'], c: ['wh'], gap: 11, r: [2.2, 2.9] } },
+        mawar:     { route: 'sulur', stem: ['#14532d', '#65a30d'], leaf: { k: ['oval'], c: [2, 0], len: [6, 8.5], ratio: .5, gap: 11, sp: [.7, 1.1] },
+                     flowers: { k: ['rose'], c: ['rd', 'pk', 'yl'], gap: 23, r: [3.6, 4.4] } },
+        kamboja:   { route: 'rimbun', leaf: { k: ['oval'], c: [0, 2], len: [10, 13], ratio: .34, gap: 12, sp: [.6, 1.1] },
+                     flowers: { k: ['kamboja'], c: ['wh', 'pk', 'yl'], gap: 22, r: [3.2, 4] } },
+        aster:     { route: 'sulur', second: true, leaf: { k: ['oval'], c: [0, 3], len: [6, 9], ratio: .2, gap: 9, sp: [.5, 1.1] },
+                     flowers: { k: ['daisy'], c: ['wh', 'pu', 'yl', 'bl'], gap: 15, r: [2.6, 3.4] } },
+        bugenvil:  { route: 'sulur', leaf: { k: ['oval'], c: [0, 3], len: [5, 7], ratio: .42, gap: 10, sp: [.7, 1.1] },
+                     flowers: { k: ['bougen'], c: ['mg', 'or', 'pk'], gap: 13, r: [2.6, 3.4] } },
+        hibiskus:  { route: 'rimbun', leaf: { k: ['oval'], c: [2, 0], len: [8, 11], ratio: .45, gap: 10, sp: [.6, 1.2] },
+                     flowers: { k: ['hibiscus'], c: ['rd', 'or', 'pk', 'yl'], gap: 20, r: [3, 3.8] } },
+        lonceng:   { route: 'menjuntai', leaf: { k: ['round'], c: [0, 4], len: [5, 7], ratio: .5, gap: 11, sp: [.6, 1] }, strands: [4, 6],
+                     strandFlower: { k: ['bell'], c: ['bl', 'pu', 'pk'], r: [3.4, 4.2] } },
+        bambu:     { route: 'bambu', bamboo: true, stem: ['#4d7c0f', '#bef264'], leaf: { k: ['oval'], c: [3], len: [9, 12], ratio: .2, gap: 15, sp: [.5, 1] } },
+        taman:     { route: 'sulur', second: true, leaf: { k: ['oval', 'heart', 'round', 'lobed'], c: [0, 1, 2, 3, 4], len: [7, 10], ratio: .45, gap: 11, sp: [.6, 1.2] }, curl: [30, 4],
+                     flowers: { k: ['round5', 'daisy', 'star', 'hibiscus', 'bougen', 'rose'], c: ['pk', 'wh', 'rd', 'yl', 'pu', 'or', 'bl', 'mg'], gap: 15, r: [2.6, 3.6] } }
+    };
+    // jalur batang: semua batang dijulurkan sampai ke ujung kanan kartu (x = xr)
+    function ornRoutes(M, rnd, w, h, xr, top, bot) {
+        const ph = () => rnd() * 6, R = [];
+        if (M.route === 'sulur') {
+            R.push(ornRoute([[4, bot + 5], [2, top - 1], [xr, top - 1]], { amp: 3, wl: 27, ph: ph(), r: 10 }));
+            if (M.second) R.push(ornRoute([[9, bot + 1], [xr, bot + 1]], { amp: 2, wl: 22, ph: ph() }));
+        } else if (M.route === 'rimbun') {
+            R.push(ornRoute([[3, bot - 3], [3, top + 2], [xr, top + 1]], { amp: 2, wl: 20, ph: ph(), r: 9 }));
+        } else if (M.route === 'menjuntai') {
+            R.push(ornRoute([[0, top + 1], [xr, top + 1]], { amp: 1.6, wl: 24, ph: ph() }));
+        } else if (M.route === 'sirih') {
+            R.push(ornRoute([[xr, bot - 1], [3, bot - 1], [3, top + 1], [xr, top + 1]], { amp: 1.6, wl: 22, ph: ph(), r: 9 }));
+        } else if (M.route === 'bambu') {
+            R.push(ornRoute([[0, top + 2], [xr, top + 2]], { amp: .5, wl: 40, ph: ph() }));
+            R.push(ornRoute([[0, bot - 2], [xr, bot - 2]], { amp: .5, wl: 40, ph: ph() }));
+        }
+        return R;
     }
 
     // Gambar satu ornamen ke dalam grup g untuk kartu berukuran w x h (titik 0,0 = tengah-kiri kartu)
@@ -8963,59 +9014,45 @@
         if (id === 'polos' || !w || !h) return;
         const rnd = ornRng(String(seedKey || 'x') + '|' + w + '|' + h);
         let model = id;
-        if (id === 'campur') { const pool = ['sulur', 'rimbun', 'menjuntai', 'sirih', 'bunga']; model = pool[Math.floor(rnd() * pool.length)]; }
-        const P = { stemD: '', tendD: '', leafA: '', leafB: '', vein: '', petalP: '', petalW: '', centerD: '' };
-        const top = -h / 2, bot = h / 2, xr = Math.max(60, w - 36);   // sisi kanan disisakan untuk tali pengikat
+        if (id === 'campur') { const pool = ORN_THEMES.map(t => t.id).filter(k => ORN_MODELS[k]); model = pool[Math.floor(rnd() * pool.length)]; }
+        const M = ORN_MODELS[model] || ORN_MODELS.sulur;
+        const P = { stemCols: M.stem || ['#14532d', '#16a34a'] };
+        const top = -h / 2, bot = h / 2, xr = w - 4;   // batang menjulur sampai ujung kanan kartu
         const mk = (maxDepth) => (x, y) => {
-            if (x < -9 || x > xr + 6 || y < top - 8 || y > bot + 8) return false;
+            if (x < -9 || x > w + 1 || y < top - 8 || y > bot + 8) return false;
             if (x > 0 && x < w && y > top && y < bot && Math.min(x, y - top, bot - y) > maxDepth) return false; // jangan terlalu masuk ke area teks
             return true;
         };
         const ok = mk(12);
-        const L = (pts, o) => ornLeaves(P, pts, rnd, Object.assign({ ok: ok, step: 4 }, o));
-
-        if (model === 'sulur') {
-            const a = ornRoute([[4, bot + 5], [2, top - 1], [xr * 0.66, top - 1]], { amp: 3, wl: 27, ph: rnd() * 6, r: 10 });
-            P.stemD += ornStemD(a);
-            L(a, { gap: 14, len: [8, 11], ratio: .36, spread: [.7, 1.15] });
-            ornCurls(P, a, rnd, 26, ok, 4.6);
-            const b = ornRoute([[9, bot + 1], [xr * 0.42, bot + 1]], { amp: 2, wl: 22, ph: rnd() * 6 });
-            P.stemD += ornStemD(b);
-            L(b, { gap: 15, len: [6, 8], ratio: .36, spread: [.7, 1.1] });
-            ornCurls(P, b, rnd, 30, ok, 4);
-        } else if (model === 'rimbun') {
-            const a = ornRoute([[3, bot - 3], [3, top + 2], [xr, top + 1]], { amp: 2, wl: 20, ph: rnd() * 6, r: 9 });
-            P.stemD += ornStemD(a);
-            L(a, { gap: 6, len: [8, 12], ratio: .5, spread: [.5, 1.3] });
-            L(a, { gap: 10, len: [7, 10], ratio: .5, spread: [.3, 1.5] });
-            const n = 2 + Math.floor(rnd() * 2);
-            for (let i = 0; i < n; i++) ornStrand(P, rnd, w * 0.22 + rnd() * (xr - w * 0.22 - 12), top + 1, 12 + rnd() * 8, mk(20));
-        } else if (model === 'menjuntai') {
-            const a = ornRoute([[0, top + 1], [xr, top + 1]], { amp: 1.6, wl: 24, ph: rnd() * 6 });
-            P.stemD += ornStemD(a);
-            L(a, { gap: 11, len: [5, 7.5], ratio: .4, spread: [.6, 1.0] });
-            const n = 5 + Math.floor(rnd() * 3), maxLen = Math.min(h * 0.46, 25);
+        ornRoutes(M, rnd, w, h, xr, top, bot).forEach((pts, ri) => {
+            P.stemD = (P.stemD || '') + ornStemD(pts);
+            const lf = M.leaf, sc = ri ? 0.78 : 1;
+            if (M.bamboo) {
+                let last = -1e9;
+                pts.forEach((p, i) => {
+                    if (i < 1 || p.s - last < 15) return;
+                    last = p.s;
+                    const nx = -p.ty, ny = p.tx, base = Math.atan2(p.ty, p.tx);
+                    ornPut(P, 'node', `M${f1(p.x - nx * 2.4)},${f1(p.y - ny * 2.4)}L${f1(p.x + nx * 2.4)},${f1(p.y + ny * 2.4)}`);
+                    [-1, 1].forEach(sg => {
+                        const ang = base + sg * (.5 + rnd() * .5), len = (9 + rnd() * 3) * sc;
+                        if (ok(p.x + Math.cos(ang) * len, p.y + Math.sin(ang) * len)) ornLeaf(P, p.x, p.y, ang, len, len * lf.ratio, 'narrow', 3);
+                    });
+                });
+            } else {
+                const o = { k: lf.k, c: lf.c, gap: lf.gap * (ri ? 1.15 : 1), len: [lf.len[0] * sc, lf.len[1] * sc], ratio: lf.ratio, spread: lf.sp, ok: ok };
+                ornLeaves(P, pts, rnd, o);
+                if (M.dense && !ri) ornLeaves(P, pts, rnd, Object.assign({}, o, { gap: lf.gap * 2.2, len: [lf.len[0] * .8, lf.len[1] * .8], spread: [.3, 1.5] }));
+            }
+            if (M.curl) ornCurls(P, pts, rnd, M.curl[0] * (ri ? 1.15 : 1), ok, M.curl[1] * (ri ? .88 : 1));
+            if (M.flowers) ornFlowersAlong(P, pts, rnd, Object.assign({}, M.flowers, { gap: M.flowers.gap * (ri ? 1.4 : 1) }), ok);
+        });
+        if (M.strands) {
+            const n = M.strands[0] + Math.floor(rnd() * (M.strands[1] - M.strands[0] + 1)), maxLen = Math.min(h * 0.46, 25), okS = mk(24);
             for (let i = 0; i < n; i++) {
                 const x0 = 12 + (xr - 22) * (i + rnd() * 0.7) / n;
-                ornStrand(P, rnd, x0, top + 1, 8 + rnd() * (maxLen - 8), mk(28));
+                ornStrand(P, rnd, x0, top + 1, 8 + rnd() * (maxLen - 8), okS, M.leaf, M.strandFlower);
             }
-            ornStrand(P, rnd, 7, bot - 1, 7 + rnd() * 3, mk(24));
-        } else if (model === 'sirih') {
-            const a = ornRoute([[xr * 0.42, bot - 1], [3, bot - 1], [3, top + 1], [xr * 0.5, top + 1]], { amp: 1.6, wl: 22, ph: rnd() * 6, r: 9 });
-            P.stemD += ornStemD(a);
-            L(a, { gap: 12, len: [9, 12], ratio: .42, spread: [.9, 1.25], heart: true });
-        } else { // 'bunga'
-            const a = ornRoute([[4, bot + 5], [2, top - 1], [xr * 0.7, top - 1]], { amp: 2.6, wl: 25, ph: rnd() * 6, r: 10 });
-            P.stemD += ornStemD(a);
-            L(a, { gap: 12, len: [5.5, 7.5], ratio: .4, spread: [.7, 1.1] });
-            ornCurls(P, a, rnd, 34, ok, 3.6);
-            let last = -1e9, side = 1, n = 0;
-            a.forEach(p => {
-                if (p.s - last < 19 + rnd() * 6) return;
-                const off = 3.6 + rnd() * 2, fx = p.x - p.ty * off * side, fy = p.y + p.tx * off * side;
-                if (!ok(fx, fy)) return;
-                last = p.s; ornFlower(P, fx, fy, 2.6 + rnd() * 0.8, n % 2 === 1); side = -side; n++;
-            });
         }
         ornRender(g, P);
     }
