@@ -104,7 +104,57 @@
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
+            align-items: flex-start;
         }
+        .ctrl-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 6px;
+        }
+        .controls .theme-icon-btn {
+            background: #16a34a;
+            padding: 3px 0 !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .controls .theme-icon-btn:hover { background: #15803d; }
+        #theme-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 2147483100;
+            background: rgba(15, 23, 42, 0.5);
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+        }
+        #theme-overlay.open { display: flex; }
+        #theme-panel {
+            background: #ffffff;
+            width: min(100%, 560px);
+            max-height: 88vh;
+            overflow-y: auto;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+        }
+        .tp-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+        .tp-title { font-size: 0.95rem; font-weight: 800; color: #14532d; letter-spacing: 0.03em; }
+        .tp-sub { font-size: 0.72rem; color: #64748b; margin-top: 2px; }
+        .tp-close { border: none; background: #e2e8f0; color: #334155; width: 30px; height: 30px; border-radius: 50%; font-size: 0.9rem; cursor: pointer; flex: none; }
+        #theme-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .theme-opt {
+            border: 2px solid #e2e8f0; background: #f8fafc; border-radius: 12px; padding: 8px;
+            text-align: left; cursor: pointer; font-family: inherit; transition: 0.15s;
+        }
+        .theme-opt:hover { border-color: #86efac; }
+        .theme-opt.active { border-color: #16a34a; background: #f0fdf4; box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2); }
+        .theme-thumb { width: 100%; height: auto; display: block; background: #fdf8f0; border-radius: 8px; }
+        .theme-name { font-size: 0.78rem; font-weight: 700; color: #0f172a; margin-top: 6px; }
+        .theme-desc { font-size: 0.64rem; color: #64748b; margin-top: 2px; line-height: 1.3; }
+        .tp-foot { font-size: 0.64rem; color: #94a3b8; text-align: center; margin-top: 12px; }
         .btn {
             background: #3b82f6;
             color: white;
@@ -1471,10 +1521,35 @@
             <button class="btn" id="wali9-btn" onclick="window.location.href='https://ayamkurin000-dot.github.io/Maulana-Ishaq/'">WALI 9</button>
         </div>
         <div class="controls">
-            <button class="btn" onclick="resetZoom()">RESET</button>
+            <div class="ctrl-stack">
+                <button class="btn" onclick="resetZoom()">RESET</button>
+                <button class="btn theme-icon-btn" id="theme-btn" onclick="openThemePanel()" title="Pengaturan tema" aria-label="Pengaturan tema ornamen kartu">
+                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M5 21C5 14 8 9 13 6"/>
+                        <path d="M13 6c4-1 7 0 8 3-3 2-6 2-8-1" fill="#fff" fill-opacity=".9"/>
+                        <path d="M8 14c-3 0-5-2-5-4 3-1 5 0 6 2" fill="#fff" fill-opacity=".9"/>
+                        <path d="M9 18c3 1 6-.5 7-3" />
+                        <circle cx="18.5" cy="17.5" r="2.2"/>
+                    </svg>
+                </button>
+            </div>
             <button class="btn" onclick="showFeatureDisabledNotice()">BUKA SEMUA</button>
             <button class="btn" onclick="showFeatureDisabledNotice()">TUTUP SEMUA</button>
             <button class="btn" id="lock-expand-btn" onclick="toggleLockExpand()" style="background:#64748b;">🔓 KUNCI: OFF</button>
+        </div>
+    </div>
+
+    <div id="theme-overlay" onclick="if(event.target===this)closeThemePanel()">
+        <div id="theme-panel" role="dialog" aria-label="Pengaturan tema">
+            <div class="tp-head">
+                <div>
+                    <div class="tp-title">PENGATURAN TEMA</div>
+                    <div class="tp-sub">Ornamen tanaman yang merambat pada kartu</div>
+                </div>
+                <button type="button" class="tp-close" onclick="closeThemePanel()" aria-label="Tutup">✕</button>
+            </div>
+            <div id="theme-grid"></div>
+            <div class="tp-foot">Pilihan otomatis tersimpan di browser ini.</div>
         </div>
     </div>
 
@@ -8459,7 +8534,7 @@
     // gradasi, tapi lewat <clipPath> terpisah. Ini menghindari bug di sebagian
     // GPU Android: rect bergradasi + rx bisa gagal render di bagian datarnya.
     let __clipSeq = 0;
-    function drawRealisticBattery(g, w, h, type, hasBracelet) {
+    function drawRealisticBattery(g, w, h, type, hasBracelet, seedKey) {
         if (!w || !h) return;
         const r = capsuleRadius(w, h);
         const cid = 'clip-caps-' + (__clipSeq++);
@@ -8522,6 +8597,14 @@
             .attr('x', gInset).attr('y', gy).attr('width', gw).attr('height', gh)
             .attr('fill', gradUrl('capsule-gloss')).attr('pointer-events', 'none')
             .attr('clip-path', roundedClip(gInset, gy, gw, gh, gh / 2));
+
+        // ORNAMEN TANAMAN MERAMBAT (tema dipilih lewat tombol 🌿 di bawah RESET).
+        // Diletakkan di grup sendiri supaya bisa digambar ulang saat tema diganti.
+        {
+            const orn = g.append('g').attr('class', 'orn-layer').attr('pointer-events', 'none')
+                .attr('data-w', w).attr('data-h', h).attr('data-seed', seedKey || '');
+            drawOrnament(orn, w, h, seedKey);
+        }
 
         // TALI PENGIKAT di ujung kanan kartu, menonjol keluar dari badan (atas & bawah):
         //  - tali melilit kartu sebanyak 2 LILITAN (dua tali tegak berdampingan, agak miring)
@@ -8674,6 +8757,288 @@
             }
         }
     }
+
+    // =====================================================================
+    // TEMA ORNAMEN KARTU - tanaman merambat pada kartu (bisa dipilih di tombol 🌿 bawah RESET)
+    // Semua ornamen hanya <path> berisi warna polos (ringan & aman di HP).
+    // Tiap kartu punya "benih acak" dari nama orang -> bentuknya tetap sama tiap dibuka.
+    // =====================================================================
+    const ORN_THEMES = [
+        { id: 'polos',     name: 'Polos',            desc: 'Tanpa ornamen (tampilan asli)' },
+        { id: 'sulur',     name: 'Sulur Melingkar',  desc: 'Batang merambat dengan sulur keriting & daun runcing' },
+        { id: 'rimbun',    name: 'Daun Rimbun',      desc: 'Daun lebat di sisi atas & kiri, ada sulur menjuntai' },
+        { id: 'menjuntai', name: 'Sulur Menjuntai',  desc: 'Tali-tali tanaman bergantung dari tepi atas kartu' },
+        { id: 'sirih',     name: 'Daun Sirih',       desc: 'Daun berbentuk hati merambat mengitari kartu' },
+        { id: 'bunga',     name: 'Bunga Rambat',     desc: 'Tanaman rambat berbunga merah muda & putih' },
+        { id: 'campur',    name: 'Campur Acak',      desc: 'Setiap kartu mendapat model tanaman yang berbeda' }
+    ];
+    const ORN_KEY = 'bm-orn-theme';
+    let ORN_THEME = 'polos';
+    try {
+        const t = localStorage.getItem(ORN_KEY);
+        if (t && ORN_THEMES.some(x => x.id === t)) ORN_THEME = t;
+    } catch (e) {}
+
+    const f1 = n => +n.toFixed(1);
+
+    function ornRng(str) {
+        let h = 1779033703 ^ str.length;
+        for (let i = 0; i < str.length; i++) { h = Math.imul(h ^ str.charCodeAt(i), 3432918353); h = (h << 13) | (h >>> 19); }
+        let a = h >>> 0;
+        return function () {
+            a |= 0; a = (a + 0x6D2B79F5) | 0;
+            let t = Math.imul(a ^ (a >>> 15), 1 | a);
+            t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+    }
+
+    // jalur titik-titik dengan sudut membulat
+    function ornBase(wps, r) {
+        const out = [{ x: wps[0][0], y: wps[0][1] }];
+        for (let i = 1; i < wps.length; i++) {
+            const a = wps[i - 1], b = wps[i], c = wps[i + 1];
+            if (c) {
+                const d1 = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, d2 = Math.hypot(c[0] - b[0], c[1] - b[1]) || 1;
+                const rr = Math.min(r, d1 / 2, d2 / 2);
+                const p1 = [b[0] + (a[0] - b[0]) * rr / d1, b[1] + (a[1] - b[1]) * rr / d1];
+                const p2 = [b[0] + (c[0] - b[0]) * rr / d2, b[1] + (c[1] - b[1]) * rr / d2];
+                out.push({ x: p1[0], y: p1[1] });
+                for (let k = 1; k <= 6; k++) {
+                    const t = k / 6, u = 1 - t;
+                    out.push({ x: u * u * p1[0] + 2 * u * t * b[0] + t * t * p2[0], y: u * u * p1[1] + 2 * u * t * b[1] + t * t * p2[1] });
+                }
+            } else out.push({ x: b[0], y: b[1] });
+        }
+        return out;
+    }
+    // ambil titik tiap `step` px sepanjang jalur (lengkap dengan arah singgung)
+    function ornResample(pts, step) {
+        const cum = [0];
+        for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y));
+        const total = cum[cum.length - 1], res = [];
+        let j = 0;
+        for (let s = 0; s <= total + 0.01; s += step) {
+            while (j < cum.length - 2 && cum[j + 1] < s) j++;
+            const seg = (cum[j + 1] - cum[j]) || 1, t = Math.min(1, (s - cum[j]) / seg);
+            const dx = pts[j + 1].x - pts[j].x, dy = pts[j + 1].y - pts[j].y, L = Math.hypot(dx, dy) || 1;
+            res.push({ x: pts[j].x + dx * t, y: pts[j].y + dy * t, tx: dx / L, ty: dy / L, s: s });
+        }
+        return res;
+    }
+    // jalur batang bergelombang (melata)
+    function ornRoute(wps, o) {
+        const pts = ornResample(ornBase(wps, o.r == null ? 8 : o.r), o.step || 4);
+        pts.forEach(p => {
+            const off = (o.amp || 0) * Math.sin(2 * Math.PI * p.s / (o.wl || 30) + (o.ph || 0));
+            p.x += -p.ty * off; p.y += p.tx * off;
+        });
+        return pts;
+    }
+    const ornStemD = pts => 'M' + pts.map(p => f1(p.x) + ',' + f1(p.y)).join('L');
+
+    function ornLeaf(P, x, y, ang, len, wid, heart, alt) {
+        const c = Math.cos(ang), s = Math.sin(ang);
+        const T = (u, v) => f1(x + u * c - v * s) + ',' + f1(y + u * s + v * c);
+        let d;
+        if (heart) {
+            d = `M${T(len, 0)}C${T(.7 * len, -wid)} ${T(.2 * len, -1.25 * wid)} ${T(.04 * len, -.55 * wid)}` +
+                `C${T(-.04 * len, -.2 * wid)} ${T(.1 * len, -.02 * wid)} ${T(.14 * len, 0)}` +
+                `C${T(.1 * len, .02 * wid)} ${T(-.04 * len, .2 * wid)} ${T(.04 * len, .55 * wid)}` +
+                `C${T(.2 * len, 1.25 * wid)} ${T(.7 * len, wid)} ${T(len, 0)}Z`;
+        } else {
+            d = `M${T(0, 0)}C${T(.25 * len, -wid)} ${T(.7 * len, -wid * .9)} ${T(len, 0)}` +
+                `C${T(.7 * len, wid * .9)} ${T(.25 * len, wid)} ${T(0, 0)}Z`;
+        }
+        if (alt) P.leafB += d; else P.leafA += d;
+        P.vein += `M${T(heart ? .14 * len : 0, 0)}L${T(.8 * len, 0)}`;
+    }
+    // daun-daun bergantian kiri/kanan sepanjang batang
+    function ornLeaves(P, pts, rnd, o) {
+        let last = -1e9, side = rnd() < .5 ? 1 : -1;
+        for (let i = 1; i < pts.length - 1; i++) {
+            const p = pts[i];
+            if (p.s - last < o.gap * (0.8 + rnd() * 0.5)) continue;
+            last = p.s;
+            const base = Math.atan2(p.ty, p.tx);
+            const len = o.len[0] + rnd() * (o.len[1] - o.len[0]);
+            const ang = base + side * (o.spread[0] + rnd() * (o.spread[1] - o.spread[0]));
+            side = -side;
+            if (!o.ok(p.x + Math.cos(ang) * len, p.y + Math.sin(ang) * len)) continue;
+            ornLeaf(P, p.x, p.y, ang, len, len * o.ratio, o.heart, rnd() < .45);
+        }
+    }
+    // sulur keriting (spiral)
+    function ornCurl(P, x, y, ang, sgn, r0) {
+        const cx = x + Math.cos(ang) * r0, cy = y + Math.sin(ang) * r0, ph = ang + Math.PI;
+        let d = '';
+        for (let k = 0; k <= 18; k++) {
+            const a = k / 18 * Math.PI * 2.7, r = r0 * (1 - k / 18 * 0.82);
+            d += (k ? 'L' : 'M') + f1(cx + r * Math.cos(ph + sgn * a)) + ',' + f1(cy + r * Math.sin(ph + sgn * a));
+        }
+        P.tendD += d;
+    }
+    function ornCurls(P, pts, rnd, gap, ok, r0) {
+        let last = -1e9, side = rnd() < .5 ? 1 : -1;
+        for (let i = 2; i < pts.length - 1; i++) {
+            const p = pts[i];
+            if (p.s - last < gap * (0.8 + rnd() * 0.5)) continue;
+            const ang = Math.atan2(p.ty, p.tx) + side * (1.1 + rnd() * 0.4);
+            const r = r0 * (0.8 + rnd() * 0.4);
+            if (!ok(p.x + Math.cos(ang) * r * 2, p.y + Math.sin(ang) * r * 2)) continue;
+            last = p.s; ornCurl(P, p.x, p.y, ang, side, r); side = -side;
+        }
+    }
+    function ornFlower(P, x, y, r, white) {
+        const rot = x * 1.7;
+        for (let k = 0; k < 5; k++) {
+            const a = rot + k * 2 * Math.PI / 5, px = x + Math.cos(a) * r * 1.05, py = y + Math.sin(a) * r * 1.05, pr = r * 0.8;
+            const d = `M${f1(px - pr)},${f1(py)}a${f1(pr)},${f1(pr)} 0 1,0 ${f1(2 * pr)},0a${f1(pr)},${f1(pr)} 0 1,0 ${f1(-2 * pr)},0Z`;
+            if (white) P.petalW += d; else P.petalP += d;
+        }
+        const cr = r * 0.52;
+        P.centerD += `M${f1(x - cr)},${f1(y)}a${f1(cr)},${f1(cr)} 0 1,0 ${f1(2 * cr)},0a${f1(cr)},${f1(cr)} 0 1,0 ${f1(-2 * cr)},0Z`;
+    }
+    // tali tanaman menjuntai ke bawah dengan daun kecil berpasangan
+    function ornStrand(P, rnd, x0, y0, len, ok) {
+        const j = () => (rnd() - .5) * 6;
+        const pts = ornRoute([[x0, y0], [x0 + j(), y0 + len * .5], [x0 + j(), y0 + len]], { step: 3, amp: 1.3, wl: 11, ph: rnd() * 6, r: 6 });
+        P.tendD += ornStemD(pts);
+        let last = -1e9, side = rnd() < .5 ? 1 : -1;
+        pts.forEach((p, i) => {
+            if (i < 1 || p.s - last < 5.5) return;
+            last = p.s;
+            const ang = Math.atan2(p.ty, p.tx) + side * (0.7 + rnd() * 0.5), l = 4.2 + rnd() * 2.2;
+            side = -side;
+            if (ok(p.x + Math.cos(ang) * l, p.y + Math.sin(ang) * l)) ornLeaf(P, p.x, p.y, ang, l, l * .42, false, rnd() < .5);
+        });
+        const e = pts[pts.length - 1];  // daun ujung
+        ornLeaf(P, e.x, e.y, Math.atan2(e.ty, e.tx), 5.5, 2.4, false, rnd() < .5);
+    }
+
+    function ornRender(g, P) {
+        const add = (d, a) => { if (!d) return; const p = g.append('path').attr('d', d); Object.keys(a).forEach(k => p.attr(k, a[k])); };
+        const rnd = { 'stroke-linecap': 'round', 'stroke-linejoin': 'round' };
+        add(P.stemD, Object.assign({ fill: 'none', stroke: '#14532d', 'stroke-width': 3.1 }, rnd));
+        add(P.stemD, Object.assign({ fill: 'none', stroke: '#16a34a', 'stroke-width': 1.8 }, rnd));
+        add(P.tendD, Object.assign({ fill: 'none', stroke: '#166534', 'stroke-width': 1.1 }, rnd));
+        add(P.leafA, { fill: '#22c55e', stroke: '#14532d', 'stroke-width': 0.6, 'stroke-linejoin': 'round' });
+        add(P.leafB, { fill: '#86efac', stroke: '#14532d', 'stroke-width': 0.6, 'stroke-linejoin': 'round' });
+        add(P.vein, Object.assign({ fill: 'none', stroke: '#14532d', 'stroke-width': 0.45, 'stroke-opacity': 0.65 }, rnd));
+        add(P.petalP, { fill: '#f9a8d4', stroke: '#be185d', 'stroke-width': 0.5 });
+        add(P.petalW, { fill: '#ffffff', stroke: '#9ca3af', 'stroke-width': 0.5 });
+        add(P.centerD, { fill: '#facc15', stroke: '#a16207', 'stroke-width': 0.3 });
+    }
+
+    // Gambar satu ornamen ke dalam grup g untuk kartu berukuran w x h (titik 0,0 = tengah-kiri kartu)
+    function drawOrnament(g, w, h, seedKey, themeId) {
+        const id = themeId || ORN_THEME;
+        if (id === 'polos' || !w || !h) return;
+        const rnd = ornRng(String(seedKey || 'x') + '|' + w + '|' + h);
+        let model = id;
+        if (id === 'campur') { const pool = ['sulur', 'rimbun', 'menjuntai', 'sirih', 'bunga']; model = pool[Math.floor(rnd() * pool.length)]; }
+        const P = { stemD: '', tendD: '', leafA: '', leafB: '', vein: '', petalP: '', petalW: '', centerD: '' };
+        const top = -h / 2, bot = h / 2, xr = Math.max(60, w - 36);   // sisi kanan disisakan untuk tali pengikat
+        const mk = (maxDepth) => (x, y) => {
+            if (x < -9 || x > xr + 6 || y < top - 8 || y > bot + 8) return false;
+            if (x > 0 && x < w && y > top && y < bot && Math.min(x, y - top, bot - y) > maxDepth) return false; // jangan terlalu masuk ke area teks
+            return true;
+        };
+        const ok = mk(12);
+        const L = (pts, o) => ornLeaves(P, pts, rnd, Object.assign({ ok: ok, step: 4 }, o));
+
+        if (model === 'sulur') {
+            const a = ornRoute([[4, bot + 5], [2, top - 1], [xr * 0.66, top - 1]], { amp: 3, wl: 27, ph: rnd() * 6, r: 10 });
+            P.stemD += ornStemD(a);
+            L(a, { gap: 14, len: [8, 11], ratio: .36, spread: [.7, 1.15] });
+            ornCurls(P, a, rnd, 26, ok, 4.6);
+            const b = ornRoute([[9, bot + 1], [xr * 0.42, bot + 1]], { amp: 2, wl: 22, ph: rnd() * 6 });
+            P.stemD += ornStemD(b);
+            L(b, { gap: 15, len: [6, 8], ratio: .36, spread: [.7, 1.1] });
+            ornCurls(P, b, rnd, 30, ok, 4);
+        } else if (model === 'rimbun') {
+            const a = ornRoute([[3, bot - 3], [3, top + 2], [xr, top + 1]], { amp: 2, wl: 20, ph: rnd() * 6, r: 9 });
+            P.stemD += ornStemD(a);
+            L(a, { gap: 6, len: [8, 12], ratio: .5, spread: [.5, 1.3] });
+            L(a, { gap: 10, len: [7, 10], ratio: .5, spread: [.3, 1.5] });
+            const n = 2 + Math.floor(rnd() * 2);
+            for (let i = 0; i < n; i++) ornStrand(P, rnd, w * 0.22 + rnd() * (xr - w * 0.22 - 12), top + 1, 12 + rnd() * 8, mk(20));
+        } else if (model === 'menjuntai') {
+            const a = ornRoute([[0, top + 1], [xr, top + 1]], { amp: 1.6, wl: 24, ph: rnd() * 6 });
+            P.stemD += ornStemD(a);
+            L(a, { gap: 11, len: [5, 7.5], ratio: .4, spread: [.6, 1.0] });
+            const n = 5 + Math.floor(rnd() * 3), maxLen = Math.min(h * 0.46, 25);
+            for (let i = 0; i < n; i++) {
+                const x0 = 12 + (xr - 22) * (i + rnd() * 0.7) / n;
+                ornStrand(P, rnd, x0, top + 1, 8 + rnd() * (maxLen - 8), mk(28));
+            }
+            ornStrand(P, rnd, 7, bot - 1, 7 + rnd() * 3, mk(24));
+        } else if (model === 'sirih') {
+            const a = ornRoute([[xr * 0.42, bot - 1], [3, bot - 1], [3, top + 1], [xr * 0.5, top + 1]], { amp: 1.6, wl: 22, ph: rnd() * 6, r: 9 });
+            P.stemD += ornStemD(a);
+            L(a, { gap: 12, len: [9, 12], ratio: .42, spread: [.9, 1.25], heart: true });
+        } else { // 'bunga'
+            const a = ornRoute([[4, bot + 5], [2, top - 1], [xr * 0.7, top - 1]], { amp: 2.6, wl: 25, ph: rnd() * 6, r: 10 });
+            P.stemD += ornStemD(a);
+            L(a, { gap: 12, len: [5.5, 7.5], ratio: .4, spread: [.7, 1.1] });
+            ornCurls(P, a, rnd, 34, ok, 3.6);
+            let last = -1e9, side = 1, n = 0;
+            a.forEach(p => {
+                if (p.s - last < 19 + rnd() * 6) return;
+                const off = 3.6 + rnd() * 2, fx = p.x - p.ty * off * side, fy = p.y + p.tx * off * side;
+                if (!ok(fx, fy)) return;
+                last = p.s; ornFlower(P, fx, fy, 2.6 + rnd() * 0.8, n % 2 === 1); side = -side; n++;
+            });
+        }
+        ornRender(g, P);
+    }
+
+    function redrawAllOrnaments() {
+        gContainer.selectAll('g.orn-layer').each(function () {
+            const el = d3.select(this);
+            el.selectAll('*').remove();
+            drawOrnament(el, +this.getAttribute('data-w'), +this.getAttribute('data-h'), this.getAttribute('data-seed'));
+        });
+    }
+    function setOrnTheme(id) {
+        if (!ORN_THEMES.some(x => x.id === id)) return;
+        ORN_THEME = id;
+        try { localStorage.setItem(ORN_KEY, id); } catch (e) {}
+        redrawAllOrnaments();
+        buildThemeGrid();
+    }
+    // ===== panel pengaturan tema =====
+    function buildThemeGrid() {
+        const grid = document.getElementById('theme-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        ORN_THEMES.forEach(t => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'theme-opt' + (t.id === ORN_THEME ? ' active' : '');
+            btn.onclick = () => setOrnTheme(t.id);
+            const sv = d3.create('svg').attr('viewBox', '-12 -34 168 68').attr('class', 'theme-thumb');
+            sv.append('rect').attr('x', 0).attr('y', -22).attr('width', 144).attr('height', 44).attr('rx', 7)
+                .attr('fill', '#93c5fd').attr('stroke', '#1e293b').attr('stroke-opacity', 0.3);
+            sv.append('rect').attr('x', 16).attr('y', -9).attr('width', 68).attr('height', 5).attr('rx', 2.5).attr('fill', '#1e293b').attr('fill-opacity', 0.6);
+            sv.append('rect').attr('x', 16).attr('y', 2).attr('width', 44).attr('height', 4).attr('rx', 2).attr('fill', '#1e293b').attr('fill-opacity', 0.35);
+            const og = sv.append('g');
+            drawOrnament(og, 144, 44, 'preview-' + t.id, t.id);
+            btn.appendChild(sv.node());
+            const nm = document.createElement('div'); nm.className = 'theme-name'; nm.textContent = t.name + (t.id === ORN_THEME ? '  ✓' : '');
+            const ds = document.createElement('div'); ds.className = 'theme-desc'; ds.textContent = t.desc;
+            btn.appendChild(nm); btn.appendChild(ds);
+            grid.appendChild(btn);
+        });
+    }
+    function openThemePanel() {
+        buildThemeGrid();
+        document.getElementById('theme-overlay').classList.add('open');
+    }
+    function closeThemePanel() {
+        document.getElementById('theme-overlay').classList.remove('open');
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeThemePanel(); });
 
     // Shape polos (farath / plain white) - tanpa gradasi, tetap flat putih
     function drawPlainShape(g, w, h) {
@@ -9316,14 +9681,14 @@
 
                 const isFarath = /farath/i.test(d.data.name || '');
                 if (isFarath) {
-                    drawRealisticBattery(d3.select(this), w, h, 'soft', !!(d.children || d._children));
+                    drawRealisticBattery(d3.select(this), w, h, 'soft', !!(d.children || d._children), d.data.name);
                     return;
                 }
                 let type = d.data.type || 'gen3';
                 if (d.data.name === 'H. ABDUL MUKTI') type = 'founder';
                 else if (d.data.name === 'MOH. SATHORI') type = 'root';
                 else if (!Object.prototype.hasOwnProperty.call(GEN_REAL_BASE, type)) type = 'gen3';
-                drawRealisticBattery(d3.select(this), w, h, type, !!(d.children || d._children));
+                drawRealisticBattery(d3.select(this), w, h, type, !!(d.children || d._children), d.data.name);
             });
 
         // ===== NOMOR URUT ANAK: badge kecil di pojok kiri atas setiap kartu anak =====
