@@ -102,19 +102,22 @@
         }
         .controls {
             display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            align-items: flex-start;
+            gap: 6px;
+            flex-wrap: nowrap;          /* semua tombol selalu 1 baris */
+            align-items: stretch;
         }
         .ctrl-stack {
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-            gap: 6px;
+            display: contents;          /* RESET + tema ikut sebaris dengan tombol lain */
+        }
+        .controls .btn {
+            white-space: nowrap;
+            flex: 0 1 auto;
+            min-width: 0;
         }
         .controls .theme-icon-btn {
+            order: 99;                  /* tombol tema di paling tepi (kanan) */
             background: #16a34a;
-            padding: 3px 0 !important;
+            padding: 3px 8px !important;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -311,9 +314,22 @@
                 font-size: 0.68rem;
                 padding: 5px 10px;
             }
+            .controls {
+                width: 100%;
+                gap: 4px;
+            }
             .controls .btn {
-                font-size: 0.6rem;
-                padding: 4px 7px;
+                font-size: 0.58rem;
+                padding: 4px 5px;
+                flex: 1 1 auto;
+            }
+            .controls .theme-icon-btn {
+                flex: 0 0 auto;
+                padding: 3px 6px !important;
+            }
+            .controls .theme-icon-btn svg {
+                width: 15px;
+                height: 15px;
             }
             #search-input {
                 font-size: 0.6rem;
@@ -8627,7 +8643,7 @@
             .attr('fill', gradUrl('capsule-gloss')).attr('pointer-events', 'none')
             .attr('clip-path', roundedClip(gInset, gy, gw, gh, gh / 2));
 
-        // ORNAMEN TANAMAN MERAMBAT (tema dipilih lewat tombol 🌿 di bawah RESET).
+        // ORNAMEN TANAMAN MERAMBAT (tema dipilih lewat tombol 🌿 di samping RESET).
         // Diletakkan di grup sendiri supaya bisa digambar ulang saat tema diganti.
         {
             const orn = g.append('g').attr('class', 'orn-layer').attr('pointer-events', 'none')
@@ -8689,7 +8705,7 @@
     }
 
     // =====================================================================
-    // TEMA ORNAMEN KARTU - tanaman merambat pada kartu (bisa dipilih di tombol 🌿 bawah RESET)
+    // TEMA ORNAMEN KARTU - tanaman merambat pada kartu (bisa dipilih di tombol 🌿 samping RESET)
     // Semua ornamen hanya <path> berisi warna polos (ringan & aman di HP).
     // Tiap kartu punya "benih acak" dari nama orang -> bentuknya tetap sama tiap dibuka.
     // =====================================================================
